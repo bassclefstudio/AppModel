@@ -18,7 +18,7 @@ namespace BassClefStudio.Mvvm.Lifecycle
         #region Services
 
         /// <summary>
-        /// The Autofac DI container used for resolving services in the <see cref="App"/>.
+        /// The Autofac services container used for resolving services in the <see cref="App"/>.
         /// </summary>
         public IContainer Services { get; private set; }
 
@@ -63,7 +63,7 @@ namespace BassClefStudio.Mvvm.Lifecycle
             }
             else
             {
-                throw new LifecycleException("Could not initialize the MVVM application because no INavigaionService was registered in the DI container.");
+                throw new LifecycleException("Could not initialize the MVVM application because no INavigaionService was registered in the services container.");
             }
         }
 
@@ -90,17 +90,46 @@ namespace BassClefStudio.Mvvm.Lifecycle
         /// Starts the <see cref="App"/>, activating the needed services and the UI/view-models.
         /// </summary>
         /// <param name="args"></param>
-        public void Start(IActivatedEventArgs args)
+        public void Activate(IActivatedEventArgs args)
         {
             var handlers = Services.Resolve<IEnumerable<IActivationHandler>>();
             var myHandler = handlers.Where(h => h.Enabled).FirstOrDefault(h => h.CanHandle(args));
             if(myHandler != null)
             {
-                myHandler.Activated(this, args);
+                myHandler.Activate(this, args);
             }
             else
             {
                 throw new LifecycleException($"No activation service could be found to handle the {args?.GetType().Name} IActivatedEventArgs.");
+            }
+        }
+
+        /// <summary>
+        /// Finishes any tasks to save data and ensure a graceful close of the application (or move to a background process).
+        /// </summary>
+        public void Suspend()
+        {
+            var handlers = Services.Resolve<IEnumerable<ISuspendingHandler>>();
+            foreach (var h in handlers.Where(s => s.Enabled))
+            {
+                h.Suspend(this);
+            }
+        }
+
+        /// <summary>
+        /// Initiates a request to return to the last saved state of the application (i.e. a back button was pressed or gesture detected).
+        /// </summary>
+        public void GoBack()
+        {
+            var handlers = Services.Resolve<IEnumerable<IBackHandler>>();
+            var myHandler = handlers.Where(h => h.Enabled).FirstOrDefault();
+            if (myHandler != null)
+            {
+                myHandler.GoBack(this);
+            }
+            else
+            {
+                throw new LifecycleException($"No enabled IBackHandlers could be found in the services container for the App.");
             }
         }
 

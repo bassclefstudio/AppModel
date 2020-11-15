@@ -11,7 +11,7 @@ namespace BassClefStudio.Mvvm.Lifecycle
     public interface IAppPlatform
     {
         /// <summary>
-        /// Registers the platform-specific implementations of the MVVM services to the DI container.
+        /// Registers the platform-specific implementations of the MVVM services to the services container.
         /// </summary>
         /// <param name="builder">The <see cref="ContainerBuilder"/> for the dependency injection container.</param>
         void ConfigureServices(ContainerBuilder builder);

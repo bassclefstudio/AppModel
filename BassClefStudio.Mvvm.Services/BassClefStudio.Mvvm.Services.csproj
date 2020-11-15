@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Authors>BassClefStudio</Authors>
+    <Version>0.0.1</Version>
+    <Description>Provides interfaces for many platform-specific services that can be consumed in .NET Standard and be run on any platform using an IAppPlatform.</Description>
+    <PackageProjectUrl>https://github.com/bassclefstudio/Mvvm-Libraries</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/bassclefstudio/Mvvm-Libraries.git</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BassClefStudio.Mvvm\BassClefStudio.Mvvm.csproj" />
+  </ItemGroup>
+
+</Project>
