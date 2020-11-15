@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Authors>BassClefStudio</Authors>
-    <Version>0.0.6</Version>
+    <Version>0.0.7</Version>
     <Description>Provides interfaces for many platform-specific services that can be consumed in .NET Standard and be run on any platform using an IAppPlatform.</Description>
     <PackageProjectUrl>https://github.com/bassclefstudio/Mvvm-Libraries</PackageProjectUrl>
     <RepositoryUrl>https://github.com/bassclefstudio/Mvvm-Libraries.git</RepositoryUrl>
