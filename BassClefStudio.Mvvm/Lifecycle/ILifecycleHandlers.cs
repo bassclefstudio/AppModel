@@ -28,7 +28,7 @@ namespace BassClefStudio.Mvvm.Lifecycle
         /// </summary>
         /// <param name="app">The app's <see cref="App"/> object.</param>
         /// <returns>A <see cref="bool"/> value indicating whether any action was performed successfully.</returns>
-        bool BackRequested(App app);
+        bool GoBack(App app);
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ namespace BassClefStudio.Mvvm.Lifecycle
         /// </summary>
         /// <param name="app">The app's <see cref="App"/> object.</param>
         /// <returns>A <see cref="bool"/> value indicating whether any action was performed successfully.</returns>
-        bool OnSuspending(App app);
+        bool Suspend(App app);
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ namespace BassClefStudio.Mvvm.Lifecycle
         /// <param name="app">The app's <see cref="App"/> object.</param>
         /// <param name="args">Represents the </param>
         ///<returns>A <see cref="bool"/> value indicating whether any action was performed successfully.</returns>
-        bool Activated(App app, IActivatedEventArgs args);
+        bool Activate(App app, IActivatedEventArgs args);
     }
 
     /// <summary>
