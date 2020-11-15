@@ -32,13 +32,15 @@ namespace BassClefStudio.Mvvm.Lifecycle
         /// Initializes the DI <see cref="Services"/> container.
         /// </summary>
         /// <param name="platform">The app platform that this <see cref="App"/> will use for native services.</param>
-        public void Initialize(IAppPlatform platform)
+        /// <param name="assemblies">The assemblies for this platform that contain any <see cref="IView"/>s that the <see cref="App"/> requires.</param>
+        public void Initialize(IAppPlatform platform, params Assembly[] assemblies)
         {
             var builder = new ContainerBuilder();
             platform.ConfigureServices(builder);
             this.ConfigureServices(builder);
             //// Resister this app instance to all view-models, etc.
             builder.RegisterInstance<App>(this);
+            builder.RegisterViews(assemblies);
 
             Services = builder.Build();
 
@@ -157,5 +159,16 @@ namespace BassClefStudio.Mvvm.Lifecycle
     /// </summary>
     public static class DIExtensions
     {
+        /// <summary>
+        /// Registers the <see cref="IView"/>s in the given <see cref="Assembly"/> instances.
+        /// </summary>
+        /// <param name="builder">The <see cref="ContainerBuilder"/> to add services to.</param>
+        /// <param name="assemblies">The <see cref="Assembly"/> objects to find the <see cref="App"/>'s <see cref="IView"/>s.</param>
+        public static void RegisterViews(this ContainerBuilder builder, params Assembly[] assemblies)
+        {
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<IView>()
+                .AsImplementedInterfaces();
+        }
     }
 }
