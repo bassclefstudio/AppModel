@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.Mvvm.Services.Files
+namespace BassClefStudio.Mvvm.Services.Storage
 {
     /// <summary>
     /// A reference to a file on the filesystem of a platform.

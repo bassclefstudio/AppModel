@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BassClefStudio.Mvvm.Services.Files
+namespace BassClefStudio.Mvvm.Services.Storage
 {
     //// C# 9 record?
     /// <summary>
