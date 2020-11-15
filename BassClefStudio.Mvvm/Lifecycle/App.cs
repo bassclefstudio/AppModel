@@ -65,8 +65,11 @@ namespace BassClefStudio.Mvvm.Lifecycle
         /// <param name="args"></param>
         public void Activate(IActivatedEventArgs args)
         {
-            var handlers = Services.Resolve<IEnumerable<IActivationHandler>>();
-            var activateViewModel = handlers.Where(h => h.Enabled).FirstOrDefault(h => h.CanHandle(args));
+            var navService = Services.Resolve<INavigationService>();
+            navService.InitializeNavigation();
+
+            var activationHandlers = Services.Resolve<IEnumerable<IActivationHandler>>();
+            var activateViewModel = activationHandlers.Where(h => h.Enabled).FirstOrDefault(h => h.CanHandle(args));
             if(activateViewModel != null)
             {
                 activateViewModel.Activate(args);
