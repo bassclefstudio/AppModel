@@ -69,10 +69,13 @@ namespace BassClefStudio.Mvvm.Lifecycle
 
         private void ViewChanged(object sender, NavigatedEventArgs e)
         {
-            Services.InjectProperties(e.NavigatedPage);
-            SynchronousTask initTask = new SynchronousTask(
-                e.NavigatedPage.InitializeAsync);
-            initTask.RunTask();
+            if (e.NavigatedPage != null)
+            {
+                Services.InjectProperties(e.NavigatedPage);
+                SynchronousTask initTask = new SynchronousTask(
+                    e.NavigatedPage.InitializeAsync);
+                initTask.RunTask();
+            }
         }
 
         #endregion
@@ -168,6 +171,11 @@ namespace BassClefStudio.Mvvm.Lifecycle
             builder.RegisterAssemblyTypes(assemblies)
                 .AssignableTo<ILifecycleHandler>()
                 .AsImplementedInterfaces();
+
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<INavigationService>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
         }
     }
 }

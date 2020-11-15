@@ -9,7 +9,7 @@ namespace BassClefStudio.Mvvm.Services.Files
     /// <summary>
     /// An <see cref="IActivatedEventArgs"/> provided when the <see cref="App"/> was started to handle/open a file or folder.
     /// </summary>
-    public class FileActivatedEventArgs : IActivatedEventArgs
+    public class StorageActivatedEventArgs : IActivatedEventArgs
     {
         /// <summary>
         /// The <see cref="IStorageItem"/> reference to the activated file or folder.
@@ -17,10 +17,10 @@ namespace BassClefStudio.Mvvm.Services.Files
         public IStorageItem AttachedItem { get; }
 
         /// <summary>
-        /// Creates a new <see cref="FileActivatedEventArgs"/>.
+        /// Creates a new <see cref="StorageActivatedEventArgs"/>.
         /// </summary>
         /// <param name="attachedItem">The <see cref="IStorageItem"/> reference to the activated file or folder.</param>
-        public FileActivatedEventArgs(IStorageItem attachedItem)
+        public StorageActivatedEventArgs(IStorageItem attachedItem)
         {
             AttachedItem = attachedItem;
         }

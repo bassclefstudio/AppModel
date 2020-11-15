@@ -26,7 +26,7 @@ namespace BassClefStudio.Mvvm.Lifecycle
         /// Creates a new <see cref="LaunchActivatedEventArgs"/>.
         /// </summary>
         /// <param name="args">Optional <see cref="string"/> arguments passed to the <see cref="App"/> when it was launched.</param>
-        public LaunchActivatedEventArgs(string[] args = null)
+        public LaunchActivatedEventArgs(params string[] args)
         {
             Args = args;
         }
