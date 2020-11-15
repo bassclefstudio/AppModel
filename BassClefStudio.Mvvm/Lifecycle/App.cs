@@ -75,7 +75,7 @@ namespace BassClefStudio.Mvvm.Lifecycle
             if(activateViewModel != null)
             {
                 activateViewModel.Activate(args);
-                Navigate(activateViewModel);
+                NavigateReflection(activateViewModel);
             }
             else
             {
@@ -104,7 +104,23 @@ namespace BassClefStudio.Mvvm.Lifecycle
             var navService = Services.Resolve<INavigationService>();
             navService.Navigate(view);
             view.ViewModel = viewModel;
-            SynchronousTask initTask = 
+            SynchronousTask initTask =
+                new SynchronousTask(viewModel.InitializeAsync);
+            initTask.RunTask();
+        }
+
+        /// <summary>
+        /// Resolves the given <see cref="IViewModel"/>'s view dependencies for the platform and navigates to a new view. Uses reflection to find the <see cref="IView"/> and <see cref="IViewModel"/> types.
+        /// </summary>
+        /// <param name="viewModel">An instance of the <see cref="IViewModel"/> to set as the <see cref="IView"/>'s context.</param>
+        internal void NavigateReflection(IViewModel viewModel)
+        {
+            var viewType = typeof(IView<>).MakeGenericType(viewModel.GetType());
+            var view = (IView)Services.Resolve(viewType);
+            var navService = Services.Resolve<INavigationService>();
+            navService.Navigate(view);
+            viewType.GetProperty("ViewModel").SetValue(view, viewModel);
+            SynchronousTask initTask =
                 new SynchronousTask(viewModel.InitializeAsync);
             initTask.RunTask();
         }
