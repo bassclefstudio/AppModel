@@ -5,7 +5,7 @@ using System.Text;
 namespace BassClefStudio.Mvvm.Services.Files
 {
     /// <summary>
-    /// Represents a file or directory on the filesystem of a platform.
+    /// A file or directory on the filesystem of a platform.
     /// </summary>
     public interface IStorageItem
     {

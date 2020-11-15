@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace BassClefStudio.Mvvm.Services.Files
 {
     /// <summary>
-    /// Represents a reference to a directory on the filesystem of a platform.
+    /// A reference to a directory on the filesystem of a platform.
     /// </summary>
     public interface IFolder : IStorageItem
     {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace BassClefStudio.Mvvm.Services.Files
 {
     /// <summary>
-    /// Represents a service that can query and abstract over the platform's filesystem.
+    /// A service that can query and abstract over the platform's filesystem.
     /// </summary>
     public interface IFileSystemService
     {
@@ -34,7 +34,7 @@ namespace BassClefStudio.Mvvm.Services.Files
     
     //// NOTE: In C# 9, this could be a record type.
     /// <summary>
-    /// Represents a set of settings describing how a file dialog should behave.
+    /// A set of settings describing how a file dialog should behave.
     /// </summary>
     public class StorageDialogSettings
     {

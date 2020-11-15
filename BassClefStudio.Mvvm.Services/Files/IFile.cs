@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace BassClefStudio.Mvvm.Services.Files
 {
     /// <summary>
-    /// Represents a reference to a file on the filesystem of a platform.
+    /// A reference to a file on the filesystem of a platform.
     /// </summary>
-    public interface IFileReference : IStorageItem
+    public interface IFile : IStorageItem
     {
         /// <summary>
         /// The type of the file, as a file extension (e.g. 'cs').
@@ -17,17 +17,17 @@ namespace BassClefStudio.Mvvm.Services.Files
         string FileType { get; }
 
         /// <summary>
-        /// Opens the file attached to this <see cref="IFileReference"/> and returns the <see cref="IFile"/> content.
+        /// Opens the file attached to this <see cref="IFile"/> and returns the <see cref="IFileContent"/> content.
         /// </summary>
         /// <exception cref="FileAccessException">An error occurred accessing when attempting to open the file - either it does not exist, or it could not be opened.</exception>
-        /// <exception cref="FilePermissionException">The <see cref="IFile"/> does not have access to this file's <see cref="IFile"/>.</exception>
+        /// <exception cref="FilePermissionException">The <see cref="IFile"/> does not have access to this file's <see cref="IFileContent"/>.</exception>
         /// <param name="mode">The <see cref="FileOpenMode"/> describing read and write abilities.</param>
-        /// <returns>An <see cref="IFile"/> which maps over a stream or native file object and provides methods for reading and writing data.</returns>
-        Task<IFile> OpenFileAsync(FileOpenMode mode = FileOpenMode.Read);
+        /// <returns>An <see cref="IFileContent"/> which maps over a stream or native file object and provides methods for reading and writing data.</returns>
+        Task<IFileContent> OpenFileAsync(FileOpenMode mode = FileOpenMode.Read);
     }
 
     /// <summary>
-    /// An enum describing how an <see cref="IFileReference"/> should be opened.
+    /// An enum describing how an <see cref="IFile"/> should be opened.
     /// </summary>
     public enum FileOpenMode
     {
@@ -43,9 +43,9 @@ namespace BassClefStudio.Mvvm.Services.Files
     }
 
     /// <summary>
-    /// Represents the content of an opened file, serving as a wrapper around <see cref="System.IO.Stream"/> or another native file object.
+    /// The content of an opened file, serving as a wrapper around <see cref="System.IO.Stream"/> or another native file object.
     /// </summary>
-    public interface IFile : IDisposable
+    public interface IFileContent : IDisposable
     {
         /// <summary>
         /// Reads the text from this file asynchronously.
