@@ -8,10 +8,15 @@ using System.Text;
 namespace BassClefStudio.Mvvm.Navigation
 {
     /// <summary>
-    /// Represents a service that can navigate between <see cref="IView{T}"/>s.
+    /// Represents a service that can navigate between <see cref="IView{T}"/>s in a platform-specific way.
     /// </summary>
     public interface INavigationService
     {
+        /// <summary>
+        /// Called when the app has been activated with UI, this method should enable the UI, build windows, and start this <see cref="INavigationService"/>'s navigation context.
+        /// </summary>
+        void InitializeNavigation();
+
         /// <summary>
         /// Navigates to the given <see cref="IView"/> view, displaying its content to the user.
         /// </summary>
