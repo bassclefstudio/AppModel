@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.Mvvm.Services.Files
+namespace BassClefStudio.Mvvm.Services.Storage
 {
     /// <summary>
     /// A service that can query and abstract over the platform's filesystem.
@@ -16,20 +16,28 @@ namespace BassClefStudio.Mvvm.Services.Files
         IFolder AppDataFolder { get; }
 
         /// <summary>
-        /// Prompts the user to select a file from their local filesystem, and returns an <see cref="IFile"/> reference to that file.
+        /// Prompts the user to open a file from their local filesystem, and returns an <see cref="IFile"/> reference to that file.
         /// </summary>
         /// <param name="settings">A <see cref="StorageDialogSettings"/> describing the appearance and filters of the storage dialog.</param>
-        /// <param name="openMode">A <see cref="FileOpenMode"/> value describing how the file should be opened. If <see cref="FileOpenMode.Read"/>, the method prompts with an 'open' dialog; <see cref="FileOpenMode.ReadWrite"/>, a 'save' dialog.</param>
         /// <exception cref="StorageAccessException">Accessing the selected file failed, or the prompt threw an exception while browsing the filesystem.</exception>
         /// <returns>An <see cref="IFile"/> object if the operation succeeded, and null if the operation is canceled gracefully by the user. If any other error occurs opening the file, a <see cref="StorageAccessException"/> is thrown.</returns>
-        Task<IFile> RequestFileAsync(StorageDialogSettings settings, FileOpenMode openMode = FileOpenMode.Read);
+        Task<IFile> RequestFileOpenAsync(StorageDialogSettings settings);
+
+        /// <summary>
+        /// Prompts the user to save a file to their local filesystem, and returns an <see cref="IFile"/> reference to that file.
+        /// </summary>
+        /// <param name="settings">A <see cref="StorageDialogSettings"/> describing the appearance and filters of the storage dialog.</param>
+        /// <exception cref="StorageAccessException">Accessing the selected file failed, or the prompt threw an exception while browsing the filesystem.</exception>
+        /// <returns>An <see cref="IFile"/> object if the operation succeeded, and null if the operation is canceled gracefully by the user. If any other error occurs opening the file, a <see cref="StorageAccessException"/> is thrown.</returns>
+        Task<IFile> RequestFileSaveAsync(StorageDialogSettings settings);
 
         /// <summary>
         /// Prompts the user to select a folder/directory from their local filesystem, and returns an <see cref="IFolder"/> reference to that folder.
         /// </summary>
+        /// <param name="settings">A <see cref="StorageDialogSettings"/> describing the appearance and filters of the storage dialog.</param>
         /// <exception cref="StorageAccessException">Accessing the selected folder failed, or the prompt threw an exception while browsing the filesystem.</exception>
         /// <returns>An <see cref="IFile"/> object if the operation succeeded, and null if the operation is canceled gracefully by the user. If any other error occurs opening the file, a <see cref="StorageAccessException"/> is thrown.</returns>
-        Task<IFolder> RequestFolderAsync();
+        Task<IFolder> RequestFolderAsync(StorageDialogSettings settings);
     }
 
     //// C# 9 record
