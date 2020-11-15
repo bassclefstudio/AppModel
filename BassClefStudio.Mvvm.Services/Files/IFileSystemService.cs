@@ -31,8 +31,8 @@ namespace BassClefStudio.Mvvm.Services.Files
         /// <returns>An <see cref="IFile"/> object if the operation succeeded, and null if the operation is canceled gracefully by the user. If any other error occurs opening the file, a <see cref="FileAccessException"/> is thrown.</returns>
         Task<IFolder> RequestFolderAsync();
     }
-    
-    //// NOTE: In C# 9, this could be a record type.
+
+    //// C# 9 record
     /// <summary>
     /// A set of settings describing how a file dialog should behave.
     /// </summary>
