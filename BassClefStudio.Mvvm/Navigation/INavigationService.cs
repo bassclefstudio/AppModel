@@ -13,35 +13,15 @@ namespace BassClefStudio.Mvvm.Navigation
     public interface INavigationService
     {
         /// <summary>
-        /// Navigates to the given <typeparamref name="T"/> view and initializes the view-model.
+        /// Navigates to the given <see cref="IView"/> view, displaying its content to the user.
         /// </summary>
-        /// <typeparam name="T">The type of the <see cref="IView"/> to initialize and navigate to.</typeparam>
-        /// <param name="parameter">An <see cref="object"/> parameter that can be passed to the view on initialization.</param>
-        void Navigate<T>(object parameter = null) where T : IView;
+        /// <param name="view">The instance of the <see cref="IView"/> to navigate to.</param>
+        /// <param name="parameter">An <see cref="object"/> parameter that can be passed to the view on navigation.</param>
+        void Navigate(IView view, object parameter = null);
 
         /// <summary>
         /// An event fired when the <see cref="INavigationService"/> completes successful navigation to a new <see cref="IView"/>.
         /// </summary>
-        event EventHandler<NavigatedEventArgs> Navigated;
-    }
-
-    /// <summary>
-    /// An <see cref="EventArgs"/> passed by the <see cref="INavigationService"/> on successful navigation.
-    /// </summary>
-    public class NavigatedEventArgs : EventArgs
-    {
-        /// <summary>
-        /// The content of the currently-navigated view.
-        /// </summary>
-        public IView NavigatedPage { get; }
-
-        /// <summary>
-        /// Creates a new <see cref="NavigatedEventArgs"/>.
-        /// </summary>
-        /// <param name="navigatedPage">The <see cref="IView"/> that the <see cref="INavigationService"/> just completed navigation to.</param>
-        public NavigatedEventArgs(IView navigatedPage)
-        {
-            NavigatedPage = navigatedPage;
-        }
+        event EventHandler Navigated;
     }
 }

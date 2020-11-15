@@ -10,5 +10,9 @@ namespace BassClefStudio.Mvvm.Navigation
     /// </summary>
     public interface IViewModel
     {
+        /// <summary>
+        /// Called asynchnously after all dependencies that this <see cref="IViewModel"/> requires have been resolved through dependency injection.
+        /// </summary>
+        Task InitializeAsync();
     }
 }

@@ -37,10 +37,11 @@ namespace BassClefStudio.Mvvm.Lifecycle
             var builder = new ContainerBuilder();
             platform.ConfigureServices(builder);
             this.ConfigureServices(builder);
+            //// Resister this app instance to all view-models, etc.
+            builder.RegisterInstance<App>(this);
+
             Services = builder.Build();
 
-            //// Initialize navigation DI.
-            InitializeNavigation();
             //// Run any IInitializationHandlers.
             var inits = Services.Resolve<IEnumerable<IInitializationHandler>>();
             foreach (var i in inits.Where(s => s.Enabled))
@@ -48,37 +49,6 @@ namespace BassClefStudio.Mvvm.Lifecycle
                 i.Initialize(this);
             }
         }
-
-        #region Navigation
-
-        /// <summary>
-        /// Starts the navigation stack.
-        /// </summary>
-        private void InitializeNavigation()
-        {
-            INavigationService navigationService = Services.Resolve<INavigationService>();
-            if (navigationService != null)
-            {
-                navigationService.Navigated += ViewChanged;
-            }
-            else
-            {
-                throw new LifecycleException("Could not initialize the MVVM application because no INavigaionService was registered in the services container.");
-            }
-        }
-
-        private void ViewChanged(object sender, NavigatedEventArgs e)
-        {
-            if (e.NavigatedPage != null)
-            {
-                Services.InjectProperties(e.NavigatedPage);
-                SynchronousTask initTask = new SynchronousTask(
-                    e.NavigatedPage.InitializeAsync);
-                initTask.RunTask();
-            }
-        }
-
-        #endregion
 
         /// <inheritdoc/>
         public void Dispose()
@@ -96,15 +66,42 @@ namespace BassClefStudio.Mvvm.Lifecycle
         public void Activate(IActivatedEventArgs args)
         {
             var handlers = Services.Resolve<IEnumerable<IActivationHandler>>();
-            var myHandler = handlers.Where(h => h.Enabled).FirstOrDefault(h => h.CanHandle(args));
-            if(myHandler != null)
+            var activateViewModel = handlers.Where(h => h.Enabled).FirstOrDefault(h => h.CanHandle(args));
+            if(activateViewModel != null)
             {
-                myHandler.Activate(this, args);
+                activateViewModel.Activate(args);
+                Navigate(activateViewModel);
             }
             else
             {
                 throw new LifecycleException($"No activation service could be found to handle the {args?.GetType().Name} IActivatedEventArgs.");
             }
+        }
+
+        /// <summary>
+        /// Resolves the given <see cref="IViewModel"/>'s view dependencies for the platform and navigates to a new view.
+        /// </summary>
+        /// <typeparam name="T">The type of <see cref="IViewModel"/> context to navigate to.</typeparam>
+        public void Navigate<T>() where T : IViewModel
+        {
+            var viewModel = Services.Resolve<T>();
+            Navigate(viewModel);
+        }
+
+        /// <summary>
+        /// Resolves the given <see cref="IViewModel"/>'s view dependencies for the platform and navigates to a new view.
+        /// </summary>
+        /// <typeparam name="T">The type of <see cref="IViewModel"/> context to navigate to.</typeparam>
+        /// <param name="viewModel">A <typeparamref name="T"/> instance of the <see cref="IViewModel"/> to set as the <see cref="IView"/>'s context.</param>
+        public void Navigate<T>(T viewModel) where T : IViewModel
+        {
+            var view = Services.Resolve<IView<T>>();
+            var navService = Services.Resolve<INavigationService>();
+            navService.Navigate(view);
+            view.ViewModel = viewModel;
+            SynchronousTask initTask = 
+                new SynchronousTask(viewModel.InitializeAsync);
+            initTask.RunTask();
         }
 
         /// <summary>
@@ -157,25 +154,5 @@ namespace BassClefStudio.Mvvm.Lifecycle
     /// </summary>
     public static class DIExtensions
     {
-        /// <summary>
-        /// Adds all <see cref="IViewModel"/>s and <see cref="ILifecycleHandler"/>s in the provided assemblies to the given Autofac <see cref="ContainerBuilder"/> so they can be accessed and resolved by the running <see cref="App"/>.
-        /// </summary>
-        /// <param name="builder">The <see cref="ContainerBuilder"/> registering services for the <see cref="App"/>.</param>
-        /// <param name="assemblies">The <see cref="Assembly"/> instances where to look for <see cref="IViewModel"/>s.</param>
-        public static void AddMvvm(this ContainerBuilder builder, params Assembly[] assemblies)
-        {
-            builder.RegisterAssemblyTypes(assemblies)
-                .AssignableTo<IViewModel>()
-                .AsImplementedInterfaces();
-
-            builder.RegisterAssemblyTypes(assemblies)
-                .AssignableTo<ILifecycleHandler>()
-                .AsImplementedInterfaces();
-
-            builder.RegisterAssemblyTypes(assemblies)
-                .AssignableTo<INavigationService>()
-                .AsImplementedInterfaces()
-                .SingleInstance();
-        }
     }
 }
