@@ -21,21 +21,45 @@ namespace BassClefStudio.Mvvm.Services.Storage
         /// </summary>
         /// <param name="relativePath">The <see cref="string"/> path to the item, relative to this <see cref="IFolder"/>.</param>
         /// <returns>the child <see cref="IStorageItem"/> at the given path.</returns>
-        Task<IStorageItem> GetItem(string relativePath);
+        Task<IStorageItem> GetItemAsync(string relativePath);
 
         /// <summary>
         /// Creates a new <see cref="IFile"/> in the folder.
         /// </summary>
         /// <param name="name">The name of the new file, including its file extension.</param>
-        /// <param name="overwrite">A <see cref="bool"/> indicating whether the file contents should be overwritten if the file exists. If 'false', opens the existing <see cref="IFile"/>.</param>
+        /// <param name="options">A <see cref="CollisionOptions"/> value indicating the action to take if the file exists.</param>
         /// <returns>The newly created file.</returns>
-        Task<IFile> CreateFile(string name, bool overwrite = false);
+        Task<IFile> CreateFileAsync(string name, CollisionOptions options = CollisionOptions.OpenExisting);
 
         /// <summary>
         /// Creates a new <see cref="IFolder"/> in the folder.
         /// </summary>
         /// <param name="name">The name of the new folder.</param>
+        /// <param name="options">A <see cref="CollisionOptions"/> value indicating the action to take if the file exists.</param>
         /// <returns>The newly created folder.</returns>
-        Task<IFile> CreateFolder(string name);
+        Task<IFolder> CreateFolderAsync(string name, CollisionOptions options = CollisionOptions.OpenExisting);
+    }
+
+    /// <summary>
+    /// Represents options on how a <see cref="IStorageItem"/> creation operation can deal with duplicate files.
+    /// </summary>
+    public enum CollisionOptions
+    {
+        /// <summary>
+        /// Fail if an item exists with the same name.
+        /// </summary>
+        FailIfExists = 0,
+        /// <summary>
+        /// Create a new name ("MyFile_1") if an item already exists with the desired name.
+        /// </summary>
+        RenameIfExists = 1,
+        /// <summary>
+        /// Overwrite any existing item with the same name.
+        /// </summary>
+        Overwrite = 2,
+        /// <summary>
+        /// Open any existing item with the same name.
+        /// </summary>
+        OpenExisting = 3
     }
 }
