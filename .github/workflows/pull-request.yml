@@ -1,4 +1,4 @@
-name: .NET Core Build and Test
+name: .NET 5 Build and Test
 
 on:
   pull_request:
@@ -18,12 +18,14 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.x
+        dotnet-version: 5.0.x
     - name: Add GitHub Packages for Nuget
       run: dotnet nuget add source https://nuget.pkg.github.com/bassclefstudio/index.json --name "GPR" --username bassclefstudio --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
     - name: Install dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: |
+        dotnet build ./BassClefStudio.AppModel/BassClefStudio.AppModel.csproj --configuration Release --no-restore
+        dotnet build ./BassClefStudio.AppModel.Tests/BassClefStudio.AppModel.Tests.csproj --configuration Release --no-restore
     - name: Test
-      run: dotnet test --no-restore --verbosity normal
+      run: dotnet test ./BassClefStudio.AppModel.Tests/BassClefStudio.AppModel.Tests.csproj --no-restore --verbosity normal

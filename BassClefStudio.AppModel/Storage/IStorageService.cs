@@ -8,7 +8,7 @@ namespace BassClefStudio.AppModel.Storage
     /// <summary>
     /// A service that can query and abstract over the platform's filesystem.
     /// </summary>
-    public interface IFileSystemService
+    public interface IStorageService
     {
         /// <summary>
         /// A reference to the <see cref="IFolder"/> where an app can store app data in the form of files.
