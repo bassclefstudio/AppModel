@@ -1,11 +1,11 @@
 ﻿using Autofac;
-using BassClefStudio.Mvvm.Lifecycle;
+using BassClefStudio.AppModel.Lifecycle;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-namespace BassClefStudio.Mvvm.Navigation
+namespace BassClefStudio.AppModel.Navigation
 {
     /// <summary>
     /// Represents a service that can navigate between <see cref="IView{T}"/>s in a platform-specific way.

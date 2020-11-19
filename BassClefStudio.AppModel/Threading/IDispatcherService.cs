@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.Mvvm.Services.Threading
+namespace BassClefStudio.AppModel.Threading
 {
     /// <summary>
     /// A service that can send tasks to be run on different threads, including the UI thread (for non-UI projects or single-threaded apps, this service will not change code execution).

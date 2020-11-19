@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace BassClefStudio.Mvvm.Services.Settings
+namespace BassClefStudio.AppModel.Settings
 {
     /// <summary>
     /// A service that provides a storage location for key/value based local settings.

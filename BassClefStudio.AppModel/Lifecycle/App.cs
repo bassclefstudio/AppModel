@@ -1,5 +1,5 @@
 ﻿using Autofac;
-using BassClefStudio.Mvvm.Navigation;
+using BassClefStudio.AppModel.Navigation;
 using BassClefStudio.NET.Core;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Linq;
 using System.Diagnostics;
 
-namespace BassClefStudio.Mvvm.Lifecycle
+namespace BassClefStudio.AppModel.Lifecycle
 {
     /// <summary>
     /// Represents a platform-agnostic application that uses the native services provided by an <see cref="IAppPlatform"/> to create views and manage app lifecycle.

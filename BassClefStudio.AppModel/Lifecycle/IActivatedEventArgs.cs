@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BassClefStudio.Mvvm.Lifecycle
+namespace BassClefStudio.AppModel.Lifecycle
 {
     /// <summary>
     /// Information about the specific way in which an <see cref="App"/> was started.
