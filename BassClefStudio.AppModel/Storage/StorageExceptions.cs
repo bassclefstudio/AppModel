@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BassClefStudio.Mvvm.Services.Storage
+namespace BassClefStudio.AppModel.Storage
 {
     /// <summary>
     /// An <see cref="Exception"/> thrown when a file, folder, or file content exists, but the current context does not have the permission to access it.

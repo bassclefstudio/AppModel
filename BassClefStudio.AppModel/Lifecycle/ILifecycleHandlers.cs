@@ -1,10 +1,10 @@
-﻿using BassClefStudio.Mvvm.Navigation;
+﻿using BassClefStudio.AppModel.Navigation;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.Mvvm.Lifecycle
+namespace BassClefStudio.AppModel.Lifecycle
 {
     /// <summary>
     /// Represents a service that can initialize a particular service when the <see cref="App"/> initializes.

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BassClefStudio.Mvvm.Lifecycle
+namespace BassClefStudio.AppModel.Lifecycle
 {
     /// <summary>
     /// Represents a platform on which MVVM apps can be run, providing implementation of abstract services native to the platform.

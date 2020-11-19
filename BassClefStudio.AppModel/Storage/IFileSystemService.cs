@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.Mvvm.Services.Storage
+namespace BassClefStudio.AppModel.Storage
 {
     /// <summary>
     /// A service that can query and abstract over the platform's filesystem.

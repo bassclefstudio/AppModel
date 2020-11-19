@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.Mvvm.Navigation
+namespace BassClefStudio.AppModel.Navigation
 {
     /// <summary>
     /// Represents a view-model, providing data for a view, in the MVVM framework.

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BassClefStudio.Mvvm.Services.Storage
+namespace BassClefStudio.AppModel.Storage
 {
     /// <summary>
     /// A file or directory on the filesystem of a platform.

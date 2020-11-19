@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.Mvvm.Services.Storage
+namespace BassClefStudio.AppModel.Storage
 {
     /// <summary>
     /// A reference to a directory on the filesystem of a platform.

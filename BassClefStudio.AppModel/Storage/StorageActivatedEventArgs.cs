@@ -1,9 +1,9 @@
-﻿using BassClefStudio.Mvvm.Lifecycle;
+﻿using BassClefStudio.AppModel.Lifecycle;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BassClefStudio.Mvvm.Services.Storage
+namespace BassClefStudio.AppModel.Storage
 {
     //// C# 9 record?
     /// <summary>
