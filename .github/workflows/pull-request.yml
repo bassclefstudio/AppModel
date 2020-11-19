@@ -25,7 +25,7 @@ jobs:
       run: dotnet restore
     - name: Build
       run: |
-        dotnet build .\BassClefStudio.AppModel\BassClefStudio.AppModel.csproj --configuration Release --no-restore
-        dotnet build .\BassClefStudio.AppModel.Tests\BassClefStudio.AppModel.Tests.csproj --configuration Release --no-restore
+        dotnet build ./BassClefStudio.AppModel/BassClefStudio.AppModel.csproj --configuration Release --no-restore
+        dotnet build ./BassClefStudio.AppModel.Tests/BassClefStudio.AppModel.Tests.csproj --configuration Release --no-restore
     - name: Test
-      run: dotnet test .\BassClefStudio.AppModel.Tests\BassClefStudio.AppModel.Tests.csproj --no-restore --verbosity normal
+      run: dotnet test ./BassClefStudio.AppModel.Tests/BassClefStudio.AppModel.Tests.csproj --no-restore --verbosity normal
