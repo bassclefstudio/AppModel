@@ -7,21 +7,21 @@ using BassClefStudio.AppModel.Threading;
 namespace BassClefStudio.AppModel.Lifecycle
 {
     /// <summary>
-    /// Provides services and configuration for running <see cref="App"/>s on the UWP platform.
+    /// Provides services and configuration for running <see cref="App"/>s on .NET console apps.
     /// </summary>
-    public class UwpAppPlatform : IAppPlatform
+    public class ConsoleAppPlatform : IAppPlatform
     {
         /// <inheritdoc/>
         public void ConfigureServices(ContainerBuilder builder)
         {
-            builder.RegisterType<UwpNavigationService>()
+            builder.RegisterType<ConsoleNavigationService>()
                 .SingleInstance()
                 .AsImplementedInterfaces();
-            builder.RegisterType<UwpFileSystemService>()
+            builder.RegisterType<ConsoleStorageService>()
                 .AsImplementedInterfaces();
-            builder.RegisterType<UwpSettingsService>()
+            builder.RegisterType<ConsoleSettingsService>()
                 .AsImplementedInterfaces();
-            builder.RegisterType<UwpDispatcherService>()
+            builder.RegisterType<ConsoleDispatcherService>()
                 .AsImplementedInterfaces();
         }
     }

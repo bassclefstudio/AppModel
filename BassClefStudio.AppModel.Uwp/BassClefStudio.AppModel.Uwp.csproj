@@ -121,13 +121,13 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Lifecycle\Application.cs" />
+    <Compile Include="Lifecycle\UwpApplication.cs" />
     <Compile Include="Navigation\UwpNavigationService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Lifecycle\UwpAppPlatform.cs" />
     <Compile Include="Settings\UwpSettingsService.cs" />
     <Compile Include="Storage\UwpFile.cs" />
-    <Compile Include="Storage\UwpFileSystemService.cs" />
+    <Compile Include="Storage\UwpStorageService.cs" />
     <Compile Include="Storage\UwpFolder.cs" />
     <Compile Include="Storage\UwpStorageExtensions.cs" />
     <Compile Include="Threading\UwpDispatcherService.cs" />

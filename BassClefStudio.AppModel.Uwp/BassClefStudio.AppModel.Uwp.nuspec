@@ -2,12 +2,12 @@
 <package>
   <metadata>
     <id>BassClefStudio.AppModel.Uwp</id>
-    <version>1.0.1-beta</version>
+    <version>1.0.2-beta</version>
     <title>BassClefStudio.AppModel.Uwp</title>
     <authors>BassClefStudio</authors>
     <owners>BassClefStudio</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <repository type="git" url="https://github.com/bassclefstudio/AppModel-UWP"/>
+    <repository type="git" url="https://github.com/bassclefstudio/AppModel"/>
     <description>An implementation of BassClefStudio.AppModel, providing services and application classes for running cross-platform MVVM applications on the UWP platform.</description>
     <dependencies>
       <group targetFramework="uap10.0.17763">

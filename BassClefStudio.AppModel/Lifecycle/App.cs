@@ -186,5 +186,19 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .AssignableTo<IView>()
                 .AsImplementedInterfaces();
         }
+
+        /// <summary>
+        /// Registers the <see cref="IViewModel"/>s in the given <see cref="Assembly"/> instances.
+        /// </summary>
+        /// <param name="builder">The <see cref="ContainerBuilder"/> to add services to.</param>
+        /// <param name="assemblies">The <see cref="Assembly"/> objects to find the <see cref="App"/>'s <see cref="IViewModel"/>s.</param>
+        public static void RegisterViewModels(this ContainerBuilder builder, params Assembly[] assemblies)
+        {
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<IViewModel>();
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<IViewModel>()
+                .AsImplementedInterfaces();
+        }
     }
 }

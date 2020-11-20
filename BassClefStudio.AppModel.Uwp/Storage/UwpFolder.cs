@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 
-namespace BassClefStudio.AppModel.Storage.Uwp
+namespace BassClefStudio.AppModel.Storage
 {
     /// <summary>
     /// Represents an <see cref="IFolder"/> wrapper over <see cref="IStorageFolder"/>.

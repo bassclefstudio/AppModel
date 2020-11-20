@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BassClefStudio.AppModel.Settings
 {
@@ -15,13 +16,20 @@ namespace BassClefStudio.AppModel.Settings
         /// Gets the collection of keys of values currently contained in the settings store.
         /// </summary>
         /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="string"/> keys.</returns>
-        IEnumerable<string> GetKeys();
-        
+        Task<IEnumerable<string>> GetKeys();
+
         /// <summary>
-        /// Gets or sets the <see cref="string"/> value at the given <see cref="string"/> key.
+        /// Gets the <see cref="string"/> value at the given <see cref="string"/> key.
         /// </summary>
         /// <param name="key">The <see cref="string"/> key where the setting is found.</param>
-        string this[string key] { get; set; }
+        Task<string> GetValue(string key);
+
+        /// <summary>
+        /// Sets the <see cref="string"/> value at the given <see cref="string"/> key.
+        /// </summary>
+        /// <param name="key">The <see cref="string"/> key where the setting is found.</param>
+        /// <param name="value">The desired <see cref="string"/> value to store in the keyed location.</param>
+        Task SetValue(string key, string value);
     }
 
     /// <summary>
@@ -35,9 +43,9 @@ namespace BassClefStudio.AppModel.Settings
         /// <param name="settings">This <see cref="ISettingsService"/> providing the settings data.</param>
         /// <param name="key">The desired <see cref="string"/> key.</param>
         /// <returns></returns>
-        public static bool ContainsKey(this ISettingsService settings, string key)
+        public static async Task<bool> ContainsKey(this ISettingsService settings, string key)
         {
-            return settings.GetKeys().Contains(key);
+            return (await settings.GetKeys()).Contains(key);
         }
 
         /// <summary>
@@ -47,9 +55,9 @@ namespace BassClefStudio.AppModel.Settings
         /// <param name="settings">This <see cref="ISettingsService"/> providing the settings data.</param>
         /// <param name="key">The <see cref="string"/> key where the setting is found.</param>
         /// <returns>The <typeparamref name="T"/> value stored in settings.</returns>
-        public static T GetValue<T>(this ISettingsService settings, string key)
+        public static async Task<T> GetValue<T>(this ISettingsService settings, string key)
         {
-            return JsonConvert.DeserializeObject<T>(settings[key]);
+            return JsonConvert.DeserializeObject<T>(await settings.GetValue(key));
         }
 
         /// <summary>
@@ -58,9 +66,9 @@ namespace BassClefStudio.AppModel.Settings
         /// <param name="settings">This <see cref="ISettingsService"/> providing the settings data.</param>
         /// <param name="key">The <see cref="string"/> key where the setting is found.</param>
         /// <param name="value">The value to store in this location on the <see cref="ISettingsService"/>.</param>
-        public static void SetValue(this ISettingsService settings, string key, object value)
+        public static async Task SetValue(this ISettingsService settings, string key, object value)
         {
-            settings[key] = JsonConvert.SerializeObject(value);
+            await settings.SetValue(key, JsonConvert.SerializeObject(value));
         }
     }
 }

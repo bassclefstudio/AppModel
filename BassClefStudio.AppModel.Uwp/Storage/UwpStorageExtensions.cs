@@ -1,6 +1,6 @@
 ﻿using Windows.Storage;
 
-namespace BassClefStudio.AppModel.Storage.Uwp
+namespace BassClefStudio.AppModel.Storage
 {
     /// <summary>
     /// Provides extension methods for <see cref="IStorageItem"/> objects.
