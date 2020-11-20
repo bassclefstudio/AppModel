@@ -18,8 +18,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
     - name: Add GitHub Packages for Nuget
       run: |
-        nuget sources add -Source https://nuget.pkg.github.com/bassclefstudio/index.json -Name "GPR" -Username bassclefstudio
-        nuget setapikey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/bassclefstudio/index.json
+        nuget sources add -Source https://nuget.pkg.github.com/bassclefstudio/index.json -Name "GPR" -Username bassclefstudio -Password ${{ secrets.GITHUB_TOKEN }} -StorePasswordInClearText
     - name: MSBuild
       run: msbuild BassClefStudio.AppModel.sln -t:build -p:Configuration=Debug -p:Platform="Any CPU" -m -restore
     - name: Nuget Pack
