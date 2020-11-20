@@ -26,4 +26,6 @@ jobs:
         dotnet pack .\BassClefStudio.AppModel\BassClefStudio.AppModel.csproj --no-build
         nuget pack .\BassClefStudio.AppModel.Uwp\BassClefStudio.AppModel.Uwp.csproj
     - name: Nuget Push
-      run: nuget push "*.nupkg" -Source "GPR" -SkipDuplicate -NoSymbols
+      run: |
+        nuget push ".*.nupkg" -Source "GPR" -SkipDuplicate -NoSymbols
+        dotnet nuget push ".\BassClefStudio.AppModel\bin\Debug\*.nupkg" --source "GPR" --skip-duplicate --no-symbols true
