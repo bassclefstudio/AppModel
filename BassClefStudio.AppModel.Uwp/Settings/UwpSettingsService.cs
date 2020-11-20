@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Windows.Storage;
 
-namespace BassClefStudio.AppModel.Settings.Uwp
+namespace BassClefStudio.AppModel.Settings
 {
     public class UwpSettingsService : ISettingsService
     {
@@ -12,15 +13,22 @@ namespace BassClefStudio.AppModel.Settings.Uwp
             SettingsContainer = ApplicationData.Current.LocalSettings;
         }
 
-        public string this[string key] 
-        { 
-            get => SettingsContainer.Values[key].ToString();
-            set => SettingsContainer.Values[key] = value;
-        }
-
-        public IEnumerable<string> GetKeys()
+        /// <inheritdoc/>
+        public async Task<IEnumerable<string>> GetKeys()
         {
             return SettingsContainer.Values.Keys;
+        }
+
+        /// <inheritdoc/>
+        public async Task<string> GetValue(string key)
+        {
+            return SettingsContainer.Values[key].ToString();
+        }
+
+        /// <inheritdoc/>
+        public async Task SetValue(string key, string value)
+        {
+            SettingsContainer.Values[key] = value;
         }
     }
 }

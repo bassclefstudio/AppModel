@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>BassClefStudio.AppModel.Uwp</id>
-    <version>1.0.1-beta</version>
+    <version>1.0.2-beta</version>
     <title>BassClefStudio.AppModel.Uwp</title>
     <authors>BassClefStudio</authors>
     <owners>BassClefStudio</owners>

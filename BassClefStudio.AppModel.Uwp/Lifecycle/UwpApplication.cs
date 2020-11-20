@@ -1,24 +1,23 @@
 ﻿using BassClefStudio.AppModel.Storage;
-using BassClefStudio.AppModel.Storage.Uwp;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Core;
 
-namespace BassClefStudio.AppModel.Lifecycle.Uwp
+namespace BassClefStudio.AppModel.Lifecycle
 {
     /// <summary>
     /// A wrapper class over the <see cref="Windows.UI.Xaml.Application"/>, this class provides a UWP starting-point for running a cross-platform MVVM <see cref="App"/>.
     /// </summary>
-    public abstract class Application : Windows.UI.Xaml.Application
+    public abstract class UwpApplication : Windows.UI.Xaml.Application
     {
         #region Initialiation
 
         /// <summary>
-        /// Gets the <see cref="Application"/> object for the current application.
+        /// Gets the <see cref="UwpApplication"/> object for the current application.
         /// </summary>
-        public static new Application Current => (Application)Windows.UI.Xaml.Application.Current;
+        public static new UwpApplication Current => (UwpApplication)Windows.UI.Xaml.Application.Current;
 
         /// <summary>
         /// The currently attached MVVM <see cref="App"/>.
@@ -26,10 +25,10 @@ namespace BassClefStudio.AppModel.Lifecycle.Uwp
         public App CurrentApp { get; }
 
         /// <summary>
-        /// Creates a new <see cref="Application"/> object and initializes required resources.
+        /// Creates a new <see cref="UwpApplication"/> object and initializes required resources.
         /// </summary>
         /// <param name="app">The cross-platform app to run in this UWP project.</param>
-        public Application(App app, params Assembly[] viewAssemblies)
+        public UwpApplication(App app, params Assembly[] viewAssemblies)
         {
             ////Register system events
             this.Suspending += OnSuspending;

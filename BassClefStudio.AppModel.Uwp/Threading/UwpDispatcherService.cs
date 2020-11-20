@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Windows.UI.Core;
 
-namespace BassClefStudio.AppModel.Threading.Uwp
+namespace BassClefStudio.AppModel.Threading
 {
     /// <summary>
     /// An <see cref="IDispatcherService"/> wrapper for the <see cref="CoreDispatcher"/> to run syncronous/asyncronous code on the UI thread in a UWP application.

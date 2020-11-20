@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 
-namespace BassClefStudio.AppModel.Storage.Uwp
+namespace BassClefStudio.AppModel.Storage
 {
     public class UwpFileSystemService : IStorageService
     {

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Streams;
 
-namespace BassClefStudio.AppModel.Storage.Uwp
+namespace BassClefStudio.AppModel.Storage
 {
     /// <summary>
     /// Represents an <see cref="IFile"/> wrapper over <see cref="IStorageFile"/>.
@@ -92,13 +92,27 @@ namespace BassClefStudio.AppModel.Storage.Uwp
         /// <inheritdoc/>
         public async Task<string> ReadTextAsync()
         {
-            return await FileIO.ReadTextAsync(File);
+            if (OpenMode == FileOpenMode.Read || OpenMode == FileOpenMode.ReadWrite)
+            {
+                return await FileIO.ReadTextAsync(File);
+            }
+            else
+            {
+                throw new StoragePermissionException($"Creating a readable file stream requires read permission on the file. Permission: {OpenMode}");
+            }
         }
 
         /// <inheritdoc/>
         public async Task WriteTextAsync(string text)
         {
-            await FileIO.WriteTextAsync(File, text);
+            if (OpenMode == FileOpenMode.ReadWrite)
+            {
+                await FileIO.WriteTextAsync(File, text);
+            }
+            else
+            {
+                throw new StoragePermissionException($"Creating a writable file stream requires write permission on the file. Permission: {OpenMode}");
+            }
         }
 
         public void Dispose()
