@@ -6,12 +6,19 @@ using System.Threading.Tasks;
 
 namespace BassClefStudio.AppModel.Settings
 {
-    public class ConsoleSettingsService : ISettingsService
+    /// <summary>
+    /// An <see cref="ISettingsService"/> implementation that saves settings to the <see cref="IStorageService.AppDataFolder"/> as JSON files.
+    /// </summary>
+    public class BaseSettingsService : ISettingsService
     {
         private IStorageService StorageService { get; }
-        private List<ConsoleSetting> Settings { get; set; }
+        private List<BaseSetting> Settings { get; set; }
 
-        public ConsoleSettingsService(IStorageService storageService)
+        /// <summary>
+        /// Creates a <see cref="BaseSettingsService"/> for managing settings.
+        /// </summary>
+        /// <param name="storageService">The <see cref="IStorageService"/> to save and manage settings files.</param>
+        public BaseSettingsService(IStorageService storageService)
         {
             StorageService = storageService;
         }
@@ -23,7 +30,7 @@ namespace BassClefStudio.AppModel.Settings
                 var file = await StorageService.AppDataFolder.CreateFileAsync("Settings.json", CollisionOptions.OpenExisting);
                 using (var settingsContent = await file.OpenFileAsync(FileOpenMode.Read))
                 {
-                    Settings = JsonConvert.DeserializeObject<ConsoleSetting[]>(await settingsContent.ReadTextAsync()).ToList();
+                    Settings = JsonConvert.DeserializeObject<BaseSetting[]>(await settingsContent.ReadTextAsync()).ToList();
                 }
             }
         }
@@ -61,7 +68,7 @@ namespace BassClefStudio.AppModel.Settings
             var setting = Settings.FirstOrDefault(s => s.Key == key);
             if (setting == null)
             {
-                setting = new ConsoleSetting(key, value);
+                setting = new BaseSetting(key, value);
                 Settings.Add(setting);
             }
             else
@@ -72,13 +79,13 @@ namespace BassClefStudio.AppModel.Settings
         }
     }
 
-    internal class ConsoleSetting
+    internal class BaseSetting
     {
         public string Key { get; set; }
         public string Value { get; set; }
 
-        public ConsoleSetting() { }
-        public ConsoleSetting(string key, string value)
+        public BaseSetting() { }
+        public BaseSetting(string key, string value)
         {
             Key = key;
             Value = value;

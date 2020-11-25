@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace BassClefStudio.AppModel.Storage
 {
-    public class ConsoleFile : IFile
+    /// <summary>
+    /// An <see cref="IFile"/> implementation that uses the .NET <see cref="FileInfo"/> class for creating and managing a file.
+    /// </summary>
+    public class BaseFile : IFile
     {
         private FileInfo File { get; }
 
@@ -16,12 +19,16 @@ namespace BassClefStudio.AppModel.Storage
         /// <inheritdoc/>
         public string FileType => File.Extension;
 
-        internal ConsoleFile(FileInfo file)
+        /// <summary>
+        /// Creates a <see cref="BaseFile"/> from the given file.
+        /// </summary>
+        /// <param name="directory">The .NET <see cref="FileInfo"/> file.</param>
+        public BaseFile(FileInfo file)
         {
             File = file;
             if(!File.Exists)
             {
-                throw new StorageAccessException("Attempted to create a ConsoleFile object for a file that does not exist.");
+                throw new StorageAccessException("Attempted to create a BaseFile object for a file that does not exist.");
             }
         }
 
@@ -30,11 +37,11 @@ namespace BassClefStudio.AppModel.Storage
         {
             if(mode == FileOpenMode.ReadWrite)
             {
-                return new ConsoleFileContent(File, mode);
+                return new BaseFileContent(File, mode);
             }
             else
             {
-                return new ConsoleFileContent(File, mode);
+                return new BaseFileContent(File, mode);
             }
         }
     }
@@ -42,7 +49,7 @@ namespace BassClefStudio.AppModel.Storage
     /// <summary>
     /// Represents a basic <see cref="IFileContent"/> wrapper over the .NET <see cref="Stream"/> class.
     /// </summary>
-    public class ConsoleFileContent : IFileContent
+    public class BaseFileContent : IFileContent
     {
         /// <summary>
         /// The attached .NET <see cref="FileInfo"/> for the file.
@@ -52,11 +59,11 @@ namespace BassClefStudio.AppModel.Storage
         private FileOpenMode OpenMode { get; }
 
         /// <summary>
-        /// Creates a new <see cref="ConsoleFileContent"/>
+        /// Creates a new <see cref="BaseFileContent"/>
         /// </summary>
         /// <param name="file">The attached .NET <see cref="FileInfo"/> for the file.</param>
         /// <param name="openMode">The mode with which this file/stream was opened.</param>
-        public ConsoleFileContent(FileInfo file, FileOpenMode openMode)
+        public BaseFileContent(FileInfo file, FileOpenMode openMode)
         {
             OpenMode = openMode;
             File = file;

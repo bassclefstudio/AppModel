@@ -7,19 +7,26 @@ using System.Threading.Tasks;
 
 namespace BassClefStudio.AppModel.Storage
 {
-    public class ConsoleFolder : IFolder
+    /// <summary>
+    /// An <see cref="IFolder"/> implementation that uses the .NET <see cref="DirectoryInfo"/> class for creating and managing a folder.
+    /// </summary>
+    public class BaseFolder : IFolder
     {
         private DirectoryInfo Directory { get; }
 
         /// <inheritdoc/>
         public string Name => Directory.Name;
 
-        internal ConsoleFolder(DirectoryInfo directory)
+        /// <summary>
+        /// Creates a <see cref="BaseFolder"/> from the given directory.
+        /// </summary>
+        /// <param name="directory">The .NET <see cref="DirectoryInfo"/> directory.</param>
+        public BaseFolder(DirectoryInfo directory)
         {
             Directory = directory;
             if (!Directory.Exists)
             {
-                throw new StorageAccessException("Attempted to create a ConsoleFolder object for a directory that does not exist.");
+                throw new StorageAccessException("Attempted to create a BaseFolder object for a directory that does not exist.");
             }
         }
 
@@ -35,7 +42,7 @@ namespace BassClefStudio.AppModel.Storage
                 }
                 else if (options == CollisionOptions.OpenExisting)
                 {
-                    return new ConsoleFile(info);
+                    return new BaseFile(info);
                 }
                 else if (options == CollisionOptions.RenameIfExists)
                 {
@@ -45,11 +52,11 @@ namespace BassClefStudio.AppModel.Storage
                         info = new FileInfo(Path.Combine(Directory.FullName, $"{name}_{num}"));
                         num++;
                     }
-                    return new ConsoleFile(info);
+                    return new BaseFile(info);
                 }
                 else
                 {
-                    throw new StorageAccessException($"The given overwrite behavior {options} is not supported by ConsoleFolder.");
+                    throw new StorageAccessException($"The given overwrite behavior {options} is not supported by BaseFolder.");
                 }
             }
             else
@@ -59,7 +66,7 @@ namespace BassClefStudio.AppModel.Storage
                     await stream.WriteAsync(string.Empty);
                     await stream.FlushAsync();
                 }
-                return new ConsoleFile(info);
+                return new BaseFile(info);
             }
         }
 
@@ -75,7 +82,7 @@ namespace BassClefStudio.AppModel.Storage
                 }
                 else if (options == CollisionOptions.OpenExisting)
                 {
-                    return new ConsoleFolder(info);
+                    return new BaseFolder(info);
                 }
                 else if (options == CollisionOptions.RenameIfExists)
                 {
@@ -85,17 +92,17 @@ namespace BassClefStudio.AppModel.Storage
                         info = new DirectoryInfo(Path.Combine(Directory.FullName, $"{name}_{num}"));
                         num++;
                     }
-                    return new ConsoleFolder(info);
+                    return new BaseFolder(info);
                 }
                 else
                 {
-                    throw new StorageAccessException($"The given overwrite behavior {options} is not supported by ConsoleFolder.");
+                    throw new StorageAccessException($"The given overwrite behavior {options} is not supported by BaseFolder.");
                 }
             }
             else
             {
                 info.Create();
-                return new ConsoleFolder(info);
+                return new BaseFolder(info);
             }
         }
 
@@ -105,7 +112,7 @@ namespace BassClefStudio.AppModel.Storage
             var info = new FileInfo(Path.Combine(Directory.FullName, relativePath));
             if(info.Exists)
             {
-                return new ConsoleFile(info);
+                return new BaseFile(info);
             }
             else
             {
@@ -117,10 +124,10 @@ namespace BassClefStudio.AppModel.Storage
         public async Task<IEnumerable<IStorageItem>> GetItemsAsync()
         {
             return Directory.EnumerateFiles()
-                .Select<FileInfo, IStorageItem>(f => new ConsoleFile(f))
+                .Select<FileInfo, IStorageItem>(f => new BaseFile(f))
                 .Concat(
                 Directory.EnumerateDirectories()
-                    .Select<DirectoryInfo, IStorageItem>(d => new ConsoleFolder(d)));
+                    .Select<DirectoryInfo, IStorageItem>(d => new BaseFolder(d)));
         }
     }
 }
