@@ -117,8 +117,23 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// <summary>
         /// Resolves the given <see cref="IViewModel"/>'s view dependencies for the platform and navigates to a new view. Uses reflection to find the <see cref="IView"/> and <see cref="IViewModel"/> types.
         /// </summary>
+        /// <param name="viewModelType">The type of the <see cref="IViewModel"/> to set as the <see cref="IView"/>'s context.</param>
+        public void NavigateReflection(Type viewModelType)
+        {
+            var viewType = typeof(IView<>).MakeGenericType(viewModelType);
+            var viewModel = (IViewModel)Services.Resolve(viewModelType);
+            var view = (IView)Services.Resolve(viewType);
+            var navService = Services.Resolve<INavigationService>();
+            navService.Navigate(view);
+            viewType.GetProperty("ViewModel").SetValue(view, viewModel);
+            NavigatedInitialize(viewModel, view);
+        }
+
+        /// <summary>
+        /// Resolves the given <see cref="IViewModel"/>'s view dependencies for the platform and navigates to a new view. Uses reflection to find the <see cref="IView"/> and <see cref="IViewModel"/> types.
+        /// </summary>
         /// <param name="viewModel">An instance of the <see cref="IViewModel"/> to set as the <see cref="IView"/>'s context.</param>
-        internal void NavigateReflection(IViewModel viewModel)
+        public void NavigateReflection(IViewModel viewModel)
         {
             var viewType = typeof(IView<>).MakeGenericType(viewModel.GetType());
             var view = (IView)Services.Resolve(viewType);
