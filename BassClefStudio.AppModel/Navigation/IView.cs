@@ -9,7 +9,12 @@ namespace BassClefStudio.AppModel.Navigation
     /// Represents a view in the MVVM framework.
     /// </summary>
     public interface IView
-    { }
+    {
+        /// <summary>
+        /// A method called when this <see cref="IView"/> is navigated to. Here, you can setup any view-related tasks.
+        /// </summary>
+        void Initialize();
+    }
 
     /// <summary>
     /// Represents a view with an attached <see cref="IViewModel"/> in the MVVM framework.

@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>BassClefStudio.AppModel.Uwp</id>
-    <version>1.0.2-beta</version>
+    <version>1.0.3-beta</version>
     <title>BassClefStudio.AppModel.Uwp</title>
     <authors>BassClefStudio</authors>
     <owners>BassClefStudio</owners>
@@ -12,7 +12,7 @@
     <dependencies>
       <group targetFramework="uap10.0.17763">
         <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="6.2.10"/>
-        <dependency id="BassClefStudio.AppModel" version="1.0.1-beta"/>
+        <dependency id="BassClefStudio.AppModel" version="1.0.3-beta"/>
       </group>
     </dependencies>
   </metadata>

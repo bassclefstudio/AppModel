@@ -64,6 +64,12 @@ namespace BassClefStudio.AppModel.Lifecycle
     }
 
     /// <summary>
+    /// Represents a view-model that will be navigated to when the app is initialized, for it to provide additional navigation 'chrome'.
+    /// </summary>
+    public interface IShellHandler : ILifecycleHandler, IViewModel
+    { }
+
+    /// <summary>
     /// Represents a service that can handle lifecycle events for an <see cref="App"/>.
     /// </summary>
     public interface ILifecycleHandler
