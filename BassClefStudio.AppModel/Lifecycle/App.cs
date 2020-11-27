@@ -23,6 +23,11 @@ namespace BassClefStudio.AppModel.Lifecycle
         public IContainer Services { get; private set; }
 
         /// <summary>
+        /// An event fired when the <see cref="App"/> completes successful navigation to a new <see cref="IViewModel"/> and its associated <see cref="IView"/>.
+        /// </summary>
+        public event EventHandler<NavigatedEventArgs> Navigated;
+
+        /// <summary>
         /// Configures any app-specific services, such as registering of views, view-models, and app-specific behaviors and services.
         /// </summary>
         /// <param name="builder">The <see cref="ContainerBuilder"/> for the dependency injection container.</param>
@@ -64,7 +69,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// <summary>
         /// Starts the <see cref="App"/>, activating the needed services and the UI/view-models.
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">The <see cref="IActivatedEventArgs"/> describing how the <see cref="App"/> was started.</param>
         public void Activate(IActivatedEventArgs args)
         {
             var navService = Services.Resolve<INavigationService>();
@@ -149,6 +154,7 @@ namespace BassClefStudio.AppModel.Lifecycle
                 new SynchronousTask(viewModel.InitializeAsync);
             initViewModelTask.RunTask();
             view.Initialize();
+            Navigated?.Invoke(this, new NavigatedEventArgs(view, viewModel));
         }
 
         /// <summary>
@@ -225,6 +231,33 @@ namespace BassClefStudio.AppModel.Lifecycle
             builder.RegisterAssemblyTypes(assemblies)
                 .AssignableTo<IViewModel>()
                 .AsImplementedInterfaces();
+        }
+    }
+
+    /// <summary>
+    /// Event information showing the resolved <see cref="IViewModel"/> and <see cref="IView"/> of a successful navigation.
+    /// </summary>
+    public class NavigatedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// The navigated <see cref="IView"/> view.
+        /// </summary>
+        public IView NavigatedView { get; }
+
+        /// <summary>
+        /// The navigated <see cref="IViewModel"/> view-model.
+        /// </summary>
+        public IViewModel NavigatedViewModel { get; }
+
+        /// <summary>
+        /// Creates a new <see cref="NavigatedEventArgs"/>.
+        /// </summary>
+        /// <param name="view">The navigated <see cref="IView"/> view.</param>
+        /// <param name="viewModel">The navigated <see cref="IViewModel"/> view-model.</param>
+        public NavigatedEventArgs(IView view, IViewModel viewModel)
+        {
+            NavigatedView = view;
+            NavigatedViewModel = viewModel;
         }
     }
 }
