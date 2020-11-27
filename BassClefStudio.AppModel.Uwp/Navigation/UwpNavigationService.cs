@@ -35,9 +35,6 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        public event EventHandler Navigated;
-
-        /// <inheritdoc/>
         public void Navigate(IView view, object parameter = null)
         {
             if(!(view is UIElement))
@@ -46,7 +43,6 @@ namespace BassClefStudio.AppModel.Navigation
             }
 
             CurrentFrame.Content = view;
-            Navigated?.Invoke(this, new EventArgs());
         }
     }
 }
