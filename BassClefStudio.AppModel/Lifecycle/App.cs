@@ -70,6 +70,13 @@ namespace BassClefStudio.AppModel.Lifecycle
             var navService = Services.Resolve<INavigationService>();
             navService.InitializeNavigation();
 
+            var shellHandlers = Services.Resolve<IEnumerable<IShellHandler>>();
+            var shellHandler = shellHandlers.FirstOrDefault(h => h.Enabled);
+            if (shellHandler != null)
+            {
+                NavigateReflection(shellHandler);
+            }
+
             var activationHandlers = Services.Resolve<IEnumerable<IActivationHandler>>();
             var activateViewModel = activationHandlers.Where(h => h.Enabled).FirstOrDefault(h => h.CanHandle(args));
             if(activateViewModel != null)
@@ -104,9 +111,7 @@ namespace BassClefStudio.AppModel.Lifecycle
             var navService = Services.Resolve<INavigationService>();
             navService.Navigate(view);
             view.ViewModel = viewModel;
-            SynchronousTask initTask =
-                new SynchronousTask(viewModel.InitializeAsync);
-            initTask.RunTask();
+            NavigatedInitialize(viewModel, view);
         }
 
         /// <summary>
@@ -120,9 +125,15 @@ namespace BassClefStudio.AppModel.Lifecycle
             var navService = Services.Resolve<INavigationService>();
             navService.Navigate(view);
             viewType.GetProperty("ViewModel").SetValue(view, viewModel);
-            SynchronousTask initTask =
+            NavigatedInitialize(viewModel, view);
+        }
+
+        private void NavigatedInitialize(IViewModel viewModel, IView view)
+        {
+            SynchronousTask initViewModelTask =
                 new SynchronousTask(viewModel.InitializeAsync);
-            initTask.RunTask();
+            initViewModelTask.RunTask();
+            view.Initialize();
         }
 
         /// <summary>

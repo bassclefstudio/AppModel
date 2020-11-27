@@ -1,11 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>BassClefStudio.AppModel</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Authors>BassClefStudio</Authors>
-    <Version>1.0.2-beta</Version>
-    <Description>An implementation of BassClefStudio.AppModel, providing services and application classes for running cross-platform MVVM applications in .NET Core console apps.</Description>
+    <Version>1.0.3-beta</Version>
+    <Description>Services and classes for the BassClefStudio.AppModel library that provide basic features for cross-platform MVVM applications running on .NET Standard.</Description>
     <PackageProjectUrl>https://github.com/bassclefstudio/AppModel</PackageProjectUrl>
     <RepositoryUrl>https://github.com/bassclefstudio/AppModel.git</RepositoryUrl>
   </PropertyGroup>
