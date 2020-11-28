@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Text;
 using System.Linq;
 using System.Diagnostics;
+using BassClefStudio.AppModel.Background;
+using System.Threading.Tasks;
 
 namespace BassClefStudio.AppModel.Lifecycle
 {
@@ -65,12 +67,68 @@ namespace BassClefStudio.AppModel.Lifecycle
 
         #endregion
         #region Methods
+        #region Activation
 
         /// <summary>
         /// Starts the <see cref="App"/>, activating the needed services and the UI/view-models.
         /// </summary>
         /// <param name="args">The <see cref="IActivatedEventArgs"/> describing how the <see cref="App"/> was started.</param>
         public void Activate(IActivatedEventArgs args)
+        {
+            if(args is BackgroundActivatedEventArgs backgroundArgs)
+            {
+                ActivateBackground(backgroundArgs);
+            }
+            else
+            {
+                ActivateForeground(args);
+            }
+        }
+
+        #region Background
+
+        private void ActivateBackground(BackgroundActivatedEventArgs args)
+        {
+            var deferral = args.GetDeferral();
+            try
+            {
+                IEnumerable<IBackgroundTask> tasks = Services.Resolve<IEnumerable<IBackgroundTask>>();
+                IBackgroundTask myTask = tasks.FirstOrDefault(t => t.Id == args.TaskName);
+                if (myTask != null)
+                {
+                    RunBackgroundTask(myTask, deferral);
+                }
+                else
+                {
+                    Debug.WriteLine($"No background task found: {args.TaskName}");
+                }
+            }
+            finally
+            {
+                deferral.EndDeferral();
+            }
+        }
+
+        private async Task RunBackgroundTask(IBackgroundTask task, IDeferral deferral)
+        {
+            try
+            {
+                await task.RunAsync();
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine($"Background task {task.Id} failed: {ex}");
+            }
+            finally
+            {
+                deferral.EndDeferral();
+            }
+        }
+
+        #endregion
+        #region Foreground
+
+        private void ActivateForeground(IActivatedEventArgs args)
         {
             var navService = Services.Resolve<INavigationService>();
             navService.InitializeNavigation();
@@ -84,7 +142,7 @@ namespace BassClefStudio.AppModel.Lifecycle
 
             var activationHandlers = Services.Resolve<IEnumerable<IActivationHandler>>();
             var activateViewModel = activationHandlers.Where(h => h.Enabled).FirstOrDefault(h => h.CanHandle(args));
-            if(activateViewModel != null)
+            if (activateViewModel != null)
             {
                 activateViewModel.Activate(args);
                 NavigateReflection(activateViewModel);
@@ -94,6 +152,9 @@ namespace BassClefStudio.AppModel.Lifecycle
                 throw new LifecycleException($"No activation service could be found to handle the {args?.GetType().Name} IActivatedEventArgs.");
             }
         }
+
+        #endregion
+        #endregion
 
         /// <summary>
         /// Resolves the given <see cref="IViewModel"/>'s view dependencies for the platform and navigates to a new view.
