@@ -52,7 +52,9 @@ namespace BassClefStudio.AppModel.Navigation
 
             if (view is ContentDialog dialog)
             {
-                SynchronousTask showTask = new SynchronousTask(() => ShowDialogTask(dialog));
+                SynchronousTask showTask = new SynchronousTask(
+                    () => DispatcherService.RunOnUIThreadAsync(
+                        () => ShowDialogTask(dialog)));
                 showTask.RunTask();
             }
             else
@@ -63,7 +65,8 @@ namespace BassClefStudio.AppModel.Navigation
 
         private async Task<ContentDialogResult> ShowDialogTask(ContentDialog dialog)
         {
-            return await DispatcherService.RunOnUIThreadAsync(dialog.ShowAsync().AsTask);
+            return await dialog.ShowAsync();
         }
+
     }
 }
