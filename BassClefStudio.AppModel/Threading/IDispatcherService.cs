@@ -22,5 +22,18 @@ namespace BassClefStudio.AppModel.Threading
         /// <param name="execute">A <see cref="Func{TResult}"/> to execute on the UI thread.</param>
         /// <returns>The <typeparamref name="T"/> result of the <paramref name="execute"/> function.</returns>
         Task<T> RunOnUIThreadAsync<T>(Func<T> execute);
+
+        /// <summary>
+        /// Runs the given asynchrnous code on the UI thread.
+        /// </summary>
+        /// <param name="execute">A <see cref="Func{TResult}"/> providing a <see cref="Task"/> to execute on the UI thread.</param>
+        Task RunOnUIThreadAsync<T>(Func<Task> execute);
+
+        /// <summary>
+        /// Runs the given asynchrnous code on the UI thread.
+        /// </summary>
+        /// <param name="execute">A <see cref="Func{TResult}"/> providing a <see cref="Task"/> to execute on the UI thread.</param>
+        /// <returns>The <typeparamref name="T"/> result of the <paramref name="execute"/> function.</returns>
+        Task<T> RunOnUIThreadAsync<T>(Func<Task<T>> execute);
     }
 }
