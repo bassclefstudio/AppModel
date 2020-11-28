@@ -1,4 +1,5 @@
 ﻿using BassClefStudio.AppModel.Navigation;
+using BassClefStudio.NET.Core;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,7 +13,7 @@ namespace BassClefStudio.AppModel.Navigation
 {
     public class UwpNavigationService : INavigationService
     {
-        public Frame CurrentFrame { get; set; }
+        public ContentControl CurrentFrame { get; set; }
         
         /// <inheritdoc/>
         public void InitializeNavigation()
@@ -42,7 +43,20 @@ namespace BassClefStudio.AppModel.Navigation
                 Debug.Write($"UWP Navigation usually expects that the resolved IViews be UIElements. View type: {view?.GetType().Name}");
             }
 
-            CurrentFrame.Content = view;
+            if (view is ContentDialog dialog)
+            {
+                SynchronousTask showTask = new SynchronousTask(() => ShowDialogTask(dialog));
+                showTask.RunTask();
+            }
+            else
+            {
+                CurrentFrame.Content = view;
+            }
+        }
+
+        private async Task<ContentDialogResult> ShowDialogTask(ContentDialog dialog)
+        {
+            return await dialog.ShowAsync();
         }
     }
 }
