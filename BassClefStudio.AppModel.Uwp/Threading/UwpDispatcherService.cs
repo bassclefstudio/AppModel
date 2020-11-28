@@ -24,5 +24,19 @@ namespace BassClefStudio.AppModel.Threading
                 () => output = execute());
             return output;
         }
+
+        public async Task RunOnUIThreadAsync<T>(Func<Task> execute)
+        {
+            await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                async () => await execute());
+        }
+
+        public async Task<T> RunOnUIThreadAsync<T>(Func<Task<T>> execute)
+        {
+            T output = default(T);
+            await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                async () => output = await execute());
+            return output;
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using BassClefStudio.AppModel.Navigation;
+using BassClefStudio.AppModel.Threading;
 using BassClefStudio.NET.Core;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,12 @@ namespace BassClefStudio.AppModel.Navigation
     {
         public ContentControl CurrentFrame { get; set; }
         
+        internal IDispatcherService DispatcherService { get; }
+        public UwpNavigationService(IDispatcherService dispatcherService)
+        {
+            DispatcherService = dispatcherService;
+        }
+
         /// <inheritdoc/>
         public void InitializeNavigation()
         {
@@ -56,7 +63,7 @@ namespace BassClefStudio.AppModel.Navigation
 
         private async Task<ContentDialogResult> ShowDialogTask(ContentDialog dialog)
         {
-            return await dialog.ShowAsync();
+            return await DispatcherService.RunOnUIThreadAsync(dialog.ShowAsync().AsTask);
         }
     }
 }
