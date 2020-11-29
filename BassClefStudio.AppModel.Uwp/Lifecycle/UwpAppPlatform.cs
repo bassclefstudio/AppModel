@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using BassClefStudio.AppModel.Background;
 using BassClefStudio.AppModel.Navigation;
 using BassClefStudio.AppModel.Settings;
 using BassClefStudio.AppModel.Storage;
@@ -15,6 +16,9 @@ namespace BassClefStudio.AppModel.Lifecycle
         public void ConfigureServices(ContainerBuilder builder)
         {
             builder.RegisterType<UwpNavigationService>()
+                .SingleInstance()
+                .AsImplementedInterfaces();
+            builder.RegisterType<UwpBackgroundService>()
                 .SingleInstance()
                 .AsImplementedInterfaces();
             builder.RegisterType<UwpFileSystemService>()

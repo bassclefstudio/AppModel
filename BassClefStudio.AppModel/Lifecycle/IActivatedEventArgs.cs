@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BassClefStudio.AppModel.Background;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,7 +12,6 @@ namespace BassClefStudio.AppModel.Lifecycle
     {
     }
 
-    //// C# 9 record?
     /// <summary>
     /// The default <see cref="IActivatedEventArgs"/>, provided when the user normally started an <see cref="App"/>.
     /// </summary>
@@ -29,6 +29,31 @@ namespace BassClefStudio.AppModel.Lifecycle
         public LaunchActivatedEventArgs(params string[] args)
         {
             Args = args;
+        }
+    }
+
+    /// <summary>
+    /// The base <see cref="IActivatedEventArgs"/> for <see cref="App"/> activation that occurs in the background and does not trigger UI.
+    /// </summary>
+    public abstract class BackgroundActivatedEventArgs : IActivatedEventArgs
+    {
+        /// <summary>
+        /// The identifiable name of the background task that should be executed.
+        /// </summary>
+        public string TaskName { get; }
+
+        /// <summary>
+        /// Creates or retreieves the <see cref="IDeferral"/> that can be used for managing this background task.
+        /// </summary>
+        public abstract IDeferral GetDeferral();
+
+        /// <summary>
+        /// Creates a new <see cref="BackgroundActivatedEventArgs"/>.
+        /// </summary>
+        /// <param name="taskName">The identifiable name of the background task that should be executed.</param>
+        public BackgroundActivatedEventArgs(string taskName)
+        {
+            TaskName = taskName;
         }
     }
 }

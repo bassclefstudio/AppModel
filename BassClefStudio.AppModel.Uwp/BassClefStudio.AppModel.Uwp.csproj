@@ -121,6 +121,7 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Background\UwpBackgroundService.cs" />
     <Compile Include="Lifecycle\UwpApplication.cs" />
     <Compile Include="Navigation\UwpNavigationService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
