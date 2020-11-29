@@ -29,7 +29,7 @@ namespace BassClefStudio.AppModel.Notifications
         public async Task<string> ShowAlarmAsync(NotificationContent content, DateTimeOffset showTime)
         {
             var notification = new ScheduledToastNotification(content.GetXml(), showTime);
-            string tag = new Guid().ToString("N");
+            string tag = Guid.NewGuid().ToString();
             notification.Tag = tag;
             notification.Group = "Alarms";
             ToastNotifier.AddToSchedule(notification);
@@ -40,7 +40,7 @@ namespace BassClefStudio.AppModel.Notifications
         public async Task<string> ShowNotificationAsync(NotificationContent content)
         {
             var notification = new ToastNotification(content.GetXml());
-            string tag = new Guid().ToString("N");
+            string tag = Guid.NewGuid().ToString();
             notification.Tag = tag;
             notification.Group = "Toasts";
             ToastNotifier.Show(notification);
