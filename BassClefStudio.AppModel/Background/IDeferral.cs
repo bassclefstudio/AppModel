@@ -11,6 +11,11 @@ namespace BassClefStudio.AppModel.Background
     public interface IDeferral
     {
         /// <summary>
+        /// Starts the <see cref="IDeferral"/>, pausing the system code to allow for asynchronous or long-running app execution.
+        /// </summary>
+        void StartDeferral();
+
+        /// <summary>
         /// Stops the <see cref="IDeferral"/>, continuing the system code.
         /// </summary>
         void EndDeferral();

@@ -35,7 +35,7 @@ namespace BassClefStudio.AppModel.Lifecycle
     /// <summary>
     /// The base <see cref="IActivatedEventArgs"/> for <see cref="App"/> activation that occurs in the background and does not trigger UI.
     /// </summary>
-    public abstract class BackgroundActivatedEventArgs : IActivatedEventArgs
+    public class BackgroundActivatedEventArgs : IActivatedEventArgs
     {
         /// <summary>
         /// The identifiable name of the background task that should be executed.
@@ -43,17 +43,19 @@ namespace BassClefStudio.AppModel.Lifecycle
         public string TaskName { get; }
 
         /// <summary>
-        /// Creates or retreieves the <see cref="IDeferral"/> that can be used for managing this background task.
+        /// An <see cref="IDeferral"/> that can be used for managing this background task.
         /// </summary>
-        public abstract IDeferral GetDeferral();
+        public IDeferral Deferral { get; }
 
         /// <summary>
         /// Creates a new <see cref="BackgroundActivatedEventArgs"/>.
         /// </summary>
         /// <param name="taskName">The identifiable name of the background task that should be executed.</param>
-        public BackgroundActivatedEventArgs(string taskName)
+        /// <param name="deferral">An <see cref="IDeferral"/> that can be used for managing this background task.</param>
+        public BackgroundActivatedEventArgs(string taskName, IDeferral deferral)
         {
             TaskName = taskName;
+            Deferral = deferral;
         }
     }
 }

@@ -91,7 +91,8 @@ namespace BassClefStudio.AppModel.Lifecycle
 
         private void ActivateBackground(BackgroundActivatedEventArgs args)
         {
-            var deferral = args.GetDeferral();
+            var deferral = args.Deferral;
+            deferral.StartDeferral();
             try
             {
                 IEnumerable<IBackgroundTask> tasks = Services.Resolve<IEnumerable<IBackgroundTask>>();

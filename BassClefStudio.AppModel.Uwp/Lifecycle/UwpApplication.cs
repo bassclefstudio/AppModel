@@ -1,4 +1,5 @@
-﻿using BassClefStudio.AppModel.Storage;
+﻿using BassClefStudio.AppModel.Background;
+using BassClefStudio.AppModel.Storage;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -95,9 +96,13 @@ namespace BassClefStudio.AppModel.Lifecycle
         }
 
         /// <inheritdoc/>
-        protected override void OnBackgroundActivated(BackgroundActivatedEventArgs args)
+        protected override void OnBackgroundActivated(Windows.ApplicationModel.Activation.BackgroundActivatedEventArgs args)
         {
-            Debug.WriteLine($"Background activation currently unsupported.");
+            var task = args.TaskInstance;
+            CurrentApp.Activate(
+                new BackgroundActivatedEventArgs(
+                    task.Task.Name,
+                    new UwpBackgroundDeferral(() => task.GetDeferral())));
         }
 
         #endregion
