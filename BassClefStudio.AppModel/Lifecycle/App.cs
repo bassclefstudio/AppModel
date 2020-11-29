@@ -81,6 +81,8 @@ namespace BassClefStudio.AppModel.Lifecycle
             }
             else
             {
+                SynchronousTask registerTask = new SynchronousTask(RegisterBackgroundTasks);
+                registerTask.RunTask();
                 ActivateForeground(args);
             }
         }
@@ -96,6 +98,7 @@ namespace BassClefStudio.AppModel.Lifecycle
                 IBackgroundTask myTask = tasks.FirstOrDefault(t => t.Id == args.TaskName);
                 if (myTask != null)
                 {
+                    //// Intentionally started without SynchronousTask, in order for the try/catch/finally block can be used to ensure the deferral is executed.
                     RunBackgroundTask(myTask, deferral);
                 }
                 else
@@ -122,6 +125,21 @@ namespace BassClefStudio.AppModel.Lifecycle
             finally
             {
                 deferral.EndDeferral();
+            }
+        }
+
+        private async Task RegisterBackgroundTasks()
+        {
+            var service = Services.ResolveOptional<IBackgroundService>();
+            if (service != null)
+            {
+                IEnumerable<IBackgroundTask> tasks = Services.Resolve<IEnumerable<IBackgroundTask>>();
+                await service.RegisterCollectionAsync(tasks);
+                Debug.WriteLine($"Background tasks registered: {string.Join(",", service.CurrentlyRegistered)}.");
+            }
+            else
+            {
+                Debug.WriteLine("Background activation has not been set up for the given platform.");
             }
         }
 
