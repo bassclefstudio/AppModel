@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using BassClefStudio.AppModel.Background;
 using BassClefStudio.AppModel.Navigation;
+using BassClefStudio.AppModel.Notifications;
 using BassClefStudio.AppModel.Settings;
 using BassClefStudio.AppModel.Storage;
 using BassClefStudio.AppModel.Threading;
@@ -26,6 +27,8 @@ namespace BassClefStudio.AppModel.Lifecycle
             builder.RegisterType<UwpSettingsService>()
                 .AsImplementedInterfaces();
             builder.RegisterType<UwpDispatcherService>()
+                .AsImplementedInterfaces();
+            builder.RegisterType<UwpNotificationService>()
                 .AsImplementedInterfaces();
         }
     }
