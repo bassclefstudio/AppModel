@@ -1,6 +1,7 @@
 ﻿using BassClefStudio.AppModel.Lifecycle;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -49,10 +50,12 @@ namespace BassClefStudio.AppModel.Background
                 builder.Name = task.Id;
                 builder.SetTrigger(task.Trigger.GetTrigger());
                 Registrations.Add(builder.Register());
+                Debug.WriteLine($"Background task {task.Id} registered.");
                 return true;
             }
             else
             {
+                Debug.WriteLine($"Background activation of {task.Id} has been disabled by permission or power saving status.");
                 return false;
             }
         }
