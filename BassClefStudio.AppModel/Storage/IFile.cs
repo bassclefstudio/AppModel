@@ -67,7 +67,7 @@ namespace BassClefStudio.AppModel.Storage
         /// </summary>
         /// <exception cref="StorageAccessException">An error occurred accessing the backend data for the file.</exception>
         /// <returns>A <see cref="Stream"/> that can be used to read the file.</returns>
-        Stream GetReadStream();
+        Task<Stream> GetReadStream();
 
         /// <summary>
         /// Gets a reference to a .NET <see cref="Stream"/> that can be used to write to this file. Requires <see cref="FileOpenMode.ReadWrite"/> access.
@@ -75,6 +75,6 @@ namespace BassClefStudio.AppModel.Storage
         /// <exception cref="StorageAccessException">An error occurred accessing the backend data for the file.</exception>
         /// <exception cref="StoragePermissionException">The <see cref="IFile"/> does not have write access to the file.</exception>
         /// <returns>A <see cref="Stream"/> that can be used to write to the file.</returns>
-        Stream GetWriteStream();
+        Task<Stream> GetWriteStream();
     }
 }

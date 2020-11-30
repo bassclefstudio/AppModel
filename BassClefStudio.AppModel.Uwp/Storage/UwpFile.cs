@@ -27,8 +27,7 @@ namespace BassClefStudio.AppModel.Storage
         /// <inheritdoc/>
         public async Task<IFileContent> OpenFileAsync(FileOpenMode mode = FileOpenMode.Read)
         {
-            var stream = await File.OpenAsync(mode.ToUwp());
-            return new UwpFileContent(File, stream, mode);
+            return new UwpFileContent(File, mode);
         }
 
         public static bool operator ==(UwpFile a, UwpFile b) => a.File == b.File;
@@ -51,24 +50,19 @@ namespace BassClefStudio.AppModel.Storage
         private IStorageFile File { get; }
         private FileOpenMode OpenMode { get; }
 
-        public UwpFileContent(IStorageFile file, IRandomAccessStream stream, FileOpenMode openMode)
+        public UwpFileContent(IStorageFile file, FileOpenMode openMode)
         {
             File = file;
-            Stream = stream;
             OpenMode = openMode;
         }
 
-        /// <summary>
-        /// The <see cref="IRandomAccessStream"/> opened to manage read/write stream operations.
-        /// </summary>
-        public IRandomAccessStream Stream { get; set; }
-
         /// <inheritdoc/>
-        public Stream GetReadStream()
+        public async Task<Stream> GetReadStream()
         {
             if (OpenMode == FileOpenMode.Read || OpenMode == FileOpenMode.ReadWrite)
             {
-                return Stream.AsStreamForRead();
+                var uwpStream = await File.OpenAsync(FileAccessMode.ReadWrite);
+                return uwpStream.AsStreamForRead();
             }
             else
             {
@@ -77,11 +71,12 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public Stream GetWriteStream()
+        public async Task<Stream> GetWriteStream()
         {
             if (OpenMode == FileOpenMode.ReadWrite)
             {
-                return Stream.AsStreamForWrite();
+                var uwpStream = await File.OpenAsync(FileAccessMode.ReadWrite);
+                return uwpStream.AsStreamForWrite();
             }
             else
             {
@@ -117,7 +112,7 @@ namespace BassClefStudio.AppModel.Storage
 
         public void Dispose()
         {
-            Stream.Dispose();
+            //Stream.Dispose();
         }
     }
 }
