@@ -29,5 +29,5 @@ jobs:
     - name: Nuget Push
       run: |
         nuget push "*.nupkg" -Source "GPR" -SkipDuplicate -NoSymbols
-        dotnet nuget push ".\BassClefStudio.AppModel\bin\Debug\*.nupkg" --source "GPR" --skip-duplicate --no-symbols true
-        dotnet nuget push ".\BassClefStudio.AppModel.Base\bin\Debug\*.nupkg" --source "GPR" --skip-duplicate --no-symbols true
+        dotnet nuget push ".\BassClefStudio.AppModel\bin\Debug\*.nupkg" --source "GPR" --skip-duplicate --no-symbols true -k ${{ secrets.GITHUB_TOKEN }}
+        dotnet nuget push ".\BassClefStudio.AppModel.Base\bin\Debug\*.nupkg" --source "GPR" --skip-duplicate --no-symbols true -k ${{ secrets.GITHUB_TOKEN }}
