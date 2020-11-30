@@ -44,6 +44,37 @@ namespace BassClefStudio.AppModel.Storage
                 return new BaseFileContent(File, mode);
             }
         }
+
+        /// <inheritdoc/>
+        public async Task<string> ReadTextAsync()
+        {
+            using (var content = await OpenFileAsync(FileOpenMode.Read))
+            {
+                using (var stream = content.GetReadStream())
+                {
+                    using (var textReader = new StreamReader(stream))
+                    {
+                        return await textReader.ReadToEndAsync();
+                    }
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task WriteTextAsync(string text)
+        {
+            using (var content = await OpenFileAsync(FileOpenMode.ReadWrite))
+            {
+                using (var stream = content.GetWriteStream())
+                {
+                    using (var textWriter = new StreamWriter(stream))
+                    {
+                        await textWriter.WriteAsync(text);
+                        await textWriter.FlushAsync();
+                    }
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -70,7 +101,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<Stream> GetReadStream()
+        public Stream GetReadStream()
         {
             if (OpenMode == FileOpenMode.Read || OpenMode == FileOpenMode.ReadWrite)
             {
@@ -83,50 +114,11 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<Stream> GetWriteStream()
+        public Stream GetWriteStream()
         {
             if (OpenMode == FileOpenMode.ReadWrite)
             {
                 return File.OpenWrite();
-            }
-            else
-            {
-                throw new StoragePermissionException($"Creating a writable file stream requires write permission on the file. Permission: {OpenMode}");
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task<string> ReadTextAsync()
-        {
-            if (OpenMode == FileOpenMode.Read || OpenMode == FileOpenMode.ReadWrite)
-            {
-                using (var stream = await GetReadStream())
-                {
-                    using (var textReader = new StreamReader(stream))
-                    {
-                        return await textReader.ReadToEndAsync();
-                    }
-                }
-            }
-            else
-            {
-                throw new StoragePermissionException($"Creating a readable file stream requires read permission on the file. Permission: {OpenMode}");
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task WriteTextAsync(string text)
-        {
-            if (OpenMode == FileOpenMode.ReadWrite)
-            {
-                using (var stream = await GetWriteStream())
-                {
-                    using (var textWriter = new StreamWriter(stream))
-                    {
-                        await textWriter.WriteAsync(text);
-                        await textWriter.FlushAsync();
-                    }
-                }
             }
             else
             {

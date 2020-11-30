@@ -27,7 +27,19 @@ namespace BassClefStudio.AppModel.Storage
         /// <inheritdoc/>
         public async Task<IFileContent> OpenFileAsync(FileOpenMode mode = FileOpenMode.Read)
         {
-            return new UwpFileContent(File, mode);
+            return new UwpFileContent(await File.OpenAsync(mode.ToUwp()), mode);
+        }
+
+        /// <inheritdoc/>
+        public async Task<string> ReadTextAsync()
+        {
+            return await FileIO.ReadTextAsync(File);
+        }
+
+        /// <inheritdoc/>
+        public async Task WriteTextAsync(string text)
+        {
+            await FileIO.WriteTextAsync(File, text);
         }
 
         public static bool operator ==(UwpFile a, UwpFile b) => a.File == b.File;
@@ -47,22 +59,21 @@ namespace BassClefStudio.AppModel.Storage
 
     public class UwpFileContent : IFileContent
     {
-        private IStorageFile File { get; }
+        private IRandomAccessStream Stream { get; }
         private FileOpenMode OpenMode { get; }
 
-        public UwpFileContent(IStorageFile file, FileOpenMode openMode)
+        public UwpFileContent(IRandomAccessStream stream, FileOpenMode openMode)
         {
-            File = file;
+            Stream = stream;
             OpenMode = openMode;
         }
 
         /// <inheritdoc/>
-        public async Task<Stream> GetReadStream()
+        public Stream GetReadStream()
         {
             if (OpenMode == FileOpenMode.Read || OpenMode == FileOpenMode.ReadWrite)
             {
-                var uwpStream = await File.OpenAsync(FileAccessMode.ReadWrite);
-                return uwpStream.AsStreamForRead();
+                return Stream.AsStreamForRead();
             }
             else
             {
@@ -71,38 +82,11 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<Stream> GetWriteStream()
+        public Stream GetWriteStream()
         {
             if (OpenMode == FileOpenMode.ReadWrite)
             {
-                var uwpStream = await File.OpenAsync(FileAccessMode.ReadWrite);
-                return uwpStream.AsStreamForWrite();
-            }
-            else
-            {
-                throw new StoragePermissionException($"Creating a writable file stream requires write permission on the file. Permission: {OpenMode}");
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task<string> ReadTextAsync()
-        {
-            if (OpenMode == FileOpenMode.Read || OpenMode == FileOpenMode.ReadWrite)
-            {
-                return await FileIO.ReadTextAsync(File);
-            }
-            else
-            {
-                throw new StoragePermissionException($"Creating a readable file stream requires read permission on the file. Permission: {OpenMode}");
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task WriteTextAsync(string text)
-        {
-            if (OpenMode == FileOpenMode.ReadWrite)
-            {
-                await FileIO.WriteTextAsync(File, text);
+                return Stream.AsStreamForWrite();
             }
             else
             {
@@ -112,7 +96,7 @@ namespace BassClefStudio.AppModel.Storage
 
         public void Dispose()
         {
-            //Stream.Dispose();
+            Stream.Dispose();
         }
     }
 }
