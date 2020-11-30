@@ -100,7 +100,7 @@ namespace BassClefStudio.AppModel.Storage
         {
             if (OpenMode == FileOpenMode.Read || OpenMode == FileOpenMode.ReadWrite)
             {
-                using (var stream = GetReadStream())
+                using (var stream = await GetReadStream())
                 {
                     using (var textReader = new StreamReader(stream))
                     {
@@ -119,7 +119,7 @@ namespace BassClefStudio.AppModel.Storage
         {
             if (OpenMode == FileOpenMode.ReadWrite)
             {
-                using (var stream = GetWriteStream())
+                using (var stream = await GetWriteStream())
                 {
                     using (var textWriter = new StreamWriter(stream))
                     {
