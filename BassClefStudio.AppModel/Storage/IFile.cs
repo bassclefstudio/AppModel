@@ -24,6 +24,21 @@ namespace BassClefStudio.AppModel.Storage
         /// <param name="mode">The <see cref="FileOpenMode"/> describing read and write abilities.</param>
         /// <returns>An <see cref="IFileContent"/> which maps over a stream or native file object and provides methods for reading and writing data.</returns>
         Task<IFileContent> OpenFileAsync(FileOpenMode mode = FileOpenMode.Read);
+
+        /// <summary>
+        /// Reads the text from this file asynchronously.
+        /// </summary>
+        /// <exception cref="StorageAccessException">An error occurred accessing the backend data for the file.</exception>
+        /// <returns>The <see cref="string"/> contents of the file.</returns>
+        Task<string> ReadTextAsync();
+
+        /// <summary>
+        /// Writes a given <see cref="string"/> to this file asynchronously. Requires <see cref="FileOpenMode.ReadWrite"/> access.
+        /// </summary>
+        /// <exception cref="StorageAccessException">An error occurred accessing the backend data for the file.</exception>
+        /// <exception cref="StoragePermissionException">The <see cref="IFile"/> does not have write access to the file.</exception>
+        /// <param name="text">The <see cref="string"/> text to write to the file.</param>
+        Task WriteTextAsync(string text);
     }
 
     /// <summary>
@@ -48,26 +63,11 @@ namespace BassClefStudio.AppModel.Storage
     public interface IFileContent : IDisposable
     {
         /// <summary>
-        /// Reads the text from this file asynchronously.
-        /// </summary>
-        /// <exception cref="StorageAccessException">An error occurred accessing the backend data for the file.</exception>
-        /// <returns>The <see cref="string"/> contents of the file.</returns>
-        Task<string> ReadTextAsync();
-
-        /// <summary>
-        /// Writes a given <see cref="string"/> to this file asynchronously. Requires <see cref="FileOpenMode.ReadWrite"/> access.
-        /// </summary>
-        /// <exception cref="StorageAccessException">An error occurred accessing the backend data for the file.</exception>
-        /// <exception cref="StoragePermissionException">The <see cref="IFile"/> does not have write access to the file.</exception>
-        /// <param name="text">The <see cref="string"/> text to write to the file.</param>
-        Task WriteTextAsync(string text);
-
-        /// <summary>
         /// Gets a reference to a .NET <see cref="Stream"/> that can be used to read from this file.
         /// </summary>
         /// <exception cref="StorageAccessException">An error occurred accessing the backend data for the file.</exception>
         /// <returns>A <see cref="Stream"/> that can be used to read the file.</returns>
-        Task<Stream> GetReadStream();
+        Stream GetReadStream();
 
         /// <summary>
         /// Gets a reference to a .NET <see cref="Stream"/> that can be used to write to this file. Requires <see cref="FileOpenMode.ReadWrite"/> access.
@@ -75,6 +75,6 @@ namespace BassClefStudio.AppModel.Storage
         /// <exception cref="StorageAccessException">An error occurred accessing the backend data for the file.</exception>
         /// <exception cref="StoragePermissionException">The <see cref="IFile"/> does not have write access to the file.</exception>
         /// <returns>A <see cref="Stream"/> that can be used to write to the file.</returns>
-        Task<Stream> GetWriteStream();
+        Stream GetWriteStream();
     }
 }

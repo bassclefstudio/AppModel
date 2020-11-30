@@ -28,10 +28,7 @@ namespace BassClefStudio.AppModel.Settings
             if(Settings == null || refresh)
             {
                 var file = await StorageService.AppDataFolder.CreateFileAsync("Settings.json", CollisionOptions.OpenExisting);
-                using (var settingsContent = await file.OpenFileAsync(FileOpenMode.Read))
-                {
-                    Settings = JsonConvert.DeserializeObject<BaseSetting[]>(await settingsContent.ReadTextAsync()).ToList();
-                }
+                Settings = JsonConvert.DeserializeObject<BaseSetting[]>(await file.ReadTextAsync()).ToList();
             }
         }
 
@@ -40,10 +37,7 @@ namespace BassClefStudio.AppModel.Settings
             if (Settings != null)
             {
                 var file = await StorageService.AppDataFolder.CreateFileAsync("Settings.json", CollisionOptions.OpenExisting);
-                using (var settingsContent = await file.OpenFileAsync(FileOpenMode.ReadWrite))
-                {
-                    await settingsContent.WriteTextAsync(JsonConvert.SerializeObject(Settings));
-                }
+                await file.WriteTextAsync(JsonConvert.SerializeObject(Settings));
             }
         }
 
