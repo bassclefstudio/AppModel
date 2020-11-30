@@ -22,7 +22,7 @@ namespace BassClefStudio.AppModel.Storage
         /// <summary>
         /// Creates a <see cref="BaseFile"/> from the given file.
         /// </summary>
-        /// <param name="directory">The .NET <see cref="FileInfo"/> file.</param>
+        /// <param name="file">The .NET <see cref="FileInfo"/> file.</param>
         public BaseFile(FileInfo file)
         {
             File = file;
@@ -70,7 +70,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public Stream GetReadStream()
+        public async Task<Stream> GetReadStream()
         {
             if (OpenMode == FileOpenMode.Read || OpenMode == FileOpenMode.ReadWrite)
             {
@@ -83,7 +83,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public Stream GetWriteStream()
+        public async Task<Stream> GetWriteStream()
         {
             if (OpenMode == FileOpenMode.ReadWrite)
             {
