@@ -23,7 +23,7 @@ namespace BassClefStudio.AppModel.Navigation
         /// <inheritdoc/>
         public void InitializeNavigation()
         {
-            //// I don't think anything is actually needed here...
+            CurrentFrame = Application.Current.MainWindow;
         }
 
         /// <inheritdoc/>
@@ -34,7 +34,14 @@ namespace BassClefStudio.AppModel.Navigation
                 Debug.Write($"WPF Navigation usually expects that the resolved IViews be UIElements. View type: {view?.GetType().Name}");
             }
 
-            CurrentFrame.Content = view;
+            if (view is Window window)
+            {
+                window.Show();
+            }
+            else
+            {
+                CurrentFrame.Content = view;
+            }
         }
     }
 }

@@ -26,10 +26,10 @@ namespace BassClefStudio.AppModel.Storage
         public BaseFile(FileInfo file)
         {
             File = file;
-            if(!File.Exists)
-            {
-                throw new StorageAccessException("Attempted to create a BaseFile object for a file that does not exist.");
-            }
+            //if(!File.Exists)
+            //{
+            //    throw new StorageAccessException("Attempted to create a BaseFile object for a file that does not exist.");
+            //}
         }
 
         /// <inheritdoc/>

@@ -1,4 +1,5 @@
-﻿using BassClefStudio.NET.Core;
+﻿using BassClefStudio.AppModel.Threading;
+using BassClefStudio.NET.Core;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,6 +15,12 @@ namespace BassClefStudio.AppModel.Storage
     {
         /// <inheritdoc/>
         public IFolder AppDataFolder { get; } = new UwpFolder(ApplicationData.Current.LocalFolder);
+
+        internal IDispatcherService DispatcherService { get; }
+        public UwpStorageService(IDispatcherService dispatcherService)
+        {
+            DispatcherService = dispatcherService;
+        }
 
         /// <inheritdoc/>
         public async Task<IFile> RequestFileOpenAsync(StorageDialogSettings settings)
@@ -35,7 +42,6 @@ namespace BassClefStudio.AppModel.Storage
 
             var file = await dialog.PickSingleFileAsync();
             return new UwpFile(file);
-
         }
 
         /// <inheritdoc/>
