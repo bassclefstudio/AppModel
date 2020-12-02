@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,16 @@ namespace BassClefStudio.AppModel.Storage
     public class WpfStorageService : IStorageService
     {
         /// <inheritdoc/>
-        public IFolder AppDataFolder { get; } = new BaseFolder(new System.IO.DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)));
+        public IFolder AppDataFolder { get; }
+
+        public WpfStorageService(Lifecycle.App app)
+        {
+            AppDataFolder = new BaseFolder(
+                new System.IO.DirectoryInfo(
+                    Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        app.ApplicationName)));
+        }
 
         /// <inheritdoc/>
         public async Task<IFile> RequestFileOpenAsync(StorageDialogSettings settings)
