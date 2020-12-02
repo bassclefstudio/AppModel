@@ -19,7 +19,9 @@ jobs:
     - name: Add GitHub Packages for Nuget
       run: dotnet nuget add source https://nuget.pkg.github.com/bassclefstudio/index.json --name "GPR" --username bassclefstudio --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
     - name: Install dependencies
-      run: dotnet restore
+      run: |
+        dotnet restore ./BassClefStudio.AppModel/BassClefStudio.AppModel.csproj
+        dotnet restore ./BassClefStudio.AppModel.Tests/BassClefStudio.AppModel.Tests.csproj
     - name: Build
       run: |
         dotnet build ./BassClefStudio.AppModel/BassClefStudio.AppModel.csproj --configuration Release --no-restore
