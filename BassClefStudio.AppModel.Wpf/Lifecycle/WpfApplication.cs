@@ -26,12 +26,12 @@ namespace BassClefStudio.AppModel.Lifecycle
         {
             CurrentApp = app;
             CurrentApp.Initialize(new WpfAppPlatform(), viewAssemblies);
+            this.Startup += AppStarting;
         }
 
-        protected override void OnStartup(StartupEventArgs e)
+        private void AppStarting(object sender, StartupEventArgs e)
         {
-            CurrentApp.Activate(new LaunchActivatedEventArgs());
-            base.OnStartup(e);
+            CurrentApp.Activate(new LaunchActivatedEventArgs(e.Args));
         }
     }
 }

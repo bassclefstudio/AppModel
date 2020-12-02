@@ -23,7 +23,10 @@ namespace BassClefStudio.AppModel.Navigation
         /// <inheritdoc/>
         public void InitializeNavigation()
         {
-            CurrentFrame = Application.Current.MainWindow;
+            var myWindow = new Window();
+            Application.Current.MainWindow = myWindow;
+            CurrentFrame = myWindow;
+            myWindow.Show();
         }
 
         /// <inheritdoc/>
