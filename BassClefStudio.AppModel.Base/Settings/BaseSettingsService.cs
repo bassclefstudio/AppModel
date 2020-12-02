@@ -12,7 +12,7 @@ namespace BassClefStudio.AppModel.Settings
     public class BaseSettingsService : ISettingsService
     {
         private IStorageService StorageService { get; }
-        private List<BaseSetting> Settings { get; set; }
+        private List<BaseSetting> Settings { get; }
 
         /// <summary>
         /// Creates a <see cref="BaseSettingsService"/> for managing settings.
@@ -21,6 +21,7 @@ namespace BassClefStudio.AppModel.Settings
         public BaseSettingsService(IStorageService storageService)
         {
             StorageService = storageService;
+            Settings = new List<BaseSetting>();
         }
 
         private async Task ReadSettings(bool refresh = false)
@@ -28,7 +29,12 @@ namespace BassClefStudio.AppModel.Settings
             if(Settings == null || refresh)
             {
                 var file = await StorageService.AppDataFolder.CreateFileAsync("Settings.json", CollisionOptions.OpenExisting);
-                Settings = JsonConvert.DeserializeObject<BaseSetting[]>(await file.ReadTextAsync()).ToList();
+                var json = JsonConvert.DeserializeObject<BaseSetting[]>(await file.ReadTextAsync());
+                if(json != null)
+                {
+                    Settings.Clear();
+                    Settings.AddRange(json);
+                }
             }
         }
 
