@@ -1,4 +1,5 @@
-﻿using BassClefStudio.NET.Core;
+﻿using BassClefStudio.AppModel.Threading;
+using BassClefStudio.NET.Core;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,10 +8,21 @@ using Windows.Storage.Pickers;
 
 namespace BassClefStudio.AppModel.Storage
 {
-    public class UwpFileSystemService : IStorageService
+    /// <summary>
+    /// Provides UWP methods for file system access.
+    /// </summary>
+    public class UwpStorageService : IStorageService
     {
+        /// <inheritdoc/>
         public IFolder AppDataFolder { get; } = new UwpFolder(ApplicationData.Current.LocalFolder);
 
+        internal IDispatcherService DispatcherService { get; }
+        public UwpStorageService(IDispatcherService dispatcherService)
+        {
+            DispatcherService = dispatcherService;
+        }
+
+        /// <inheritdoc/>
         public async Task<IFile> RequestFileOpenAsync(StorageDialogSettings settings)
         {
             FileOpenPicker dialog = new FileOpenPicker();
@@ -30,9 +42,9 @@ namespace BassClefStudio.AppModel.Storage
 
             var file = await dialog.PickSingleFileAsync();
             return new UwpFile(file);
-
         }
 
+        /// <inheritdoc/>
         public async Task<IFile> RequestFileSaveAsync(StorageDialogSettings settings)
         {
             FileSavePicker dialog = new FileSavePicker();
@@ -56,6 +68,7 @@ namespace BassClefStudio.AppModel.Storage
             return new UwpFile(file);
         }
 
+        /// <inheritdoc/>
         public async Task<IFolder> RequestFolderAsync(StorageDialogSettings settings)
         {
             FolderPicker dialog = new FolderPicker();

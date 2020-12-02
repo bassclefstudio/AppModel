@@ -25,9 +25,11 @@ jobs:
       run: |
         dotnet pack .\BassClefStudio.AppModel\BassClefStudio.AppModel.csproj --no-build
         dotnet pack .\BassClefStudio.AppModel.Base\BassClefStudio.AppModel.Base.csproj --no-build
+        dotnet pack .\BassClefStudio.AppModel.Wpf\BassClefStudio.AppModel.Wpf.csproj --no-build
         nuget pack .\BassClefStudio.AppModel.Uwp\BassClefStudio.AppModel.Uwp.csproj
     - name: Nuget Push
       run: |
         nuget push "*.nupkg" -Source "GPR" -SkipDuplicate -NoSymbols
         dotnet nuget push ".\BassClefStudio.AppModel\bin\Debug\*.nupkg" --source "GPR" --skip-duplicate --no-symbols true -k ${{ secrets.GITHUB_TOKEN }}
         dotnet nuget push ".\BassClefStudio.AppModel.Base\bin\Debug\*.nupkg" --source "GPR" --skip-duplicate --no-symbols true -k ${{ secrets.GITHUB_TOKEN }}
+        dotnet nuget push ".\BassClefStudio.AppModel.Wpf\bin\Debug\*.nupkg" --source "GPR" --skip-duplicate --no-symbols true -k ${{ secrets.GITHUB_TOKEN }}

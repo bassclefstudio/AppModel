@@ -29,6 +29,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// Creates a new <see cref="UwpApplication"/> object and initializes required resources.
         /// </summary>
         /// <param name="app">The cross-platform app to run in this UWP project.</param>
+        /// <param name="viewAssemblies">An array of <see cref="Assembly"/> objects containing all of the <see cref="IView"/>s to register for this app.</param>
         public UwpApplication(App app, params Assembly[] viewAssemblies)
         {
             ////Register system events

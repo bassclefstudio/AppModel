@@ -22,7 +22,7 @@ namespace BassClefStudio.AppModel.Lifecycle
             builder.RegisterType<UwpBackgroundService>()
                 .SingleInstance()
                 .AsImplementedInterfaces();
-            builder.RegisterType<UwpFileSystemService>()
+            builder.RegisterType<UwpStorageService>()
                 .AsImplementedInterfaces();
             builder.RegisterType<UwpSettingsService>()
                 .AsImplementedInterfaces();
