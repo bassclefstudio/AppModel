@@ -12,7 +12,7 @@ namespace BassClefStudio.AppModel.Settings
     public class BaseSettingsService : ISettingsService
     {
         private IStorageService StorageService { get; }
-        private List<BaseSetting> Settings { get; set; }
+        private List<BaseSetting> Settings { get; }
 
         /// <summary>
         /// Creates a <see cref="BaseSettingsService"/> for managing settings.
