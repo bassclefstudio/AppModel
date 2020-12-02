@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace BassClefStudio.AppModel.Wpf
+namespace BassClefStudio.AppModel.Lifecycle
 {
     public class WpfApplication : Application
     {
