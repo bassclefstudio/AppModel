@@ -36,7 +36,7 @@ namespace BassClefStudio.AppModel.Storage
             }
             else
             {
-                Debug.WriteLine("File dialog closed or failed to find file.");
+                throw new StorageAccessException("File dialog closed or failed to find file.");
             }
         }
 
@@ -60,7 +60,7 @@ namespace BassClefStudio.AppModel.Storage
             }
             else
             {
-                Debug.WriteLine("File dialog closed or failed to find file.");
+                throw new StorageAccessException("File dialog closed or failed to find file.");
             }
         }
 
