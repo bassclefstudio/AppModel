@@ -312,6 +312,19 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .AssignableTo<IViewModel>()
                 .AsImplementedInterfaces();
         }
+
+        /// <summary>
+        /// Registers the <see cref="IBackgroundTask"/>s in the given <see cref="Assembly"/> instances.
+        /// </summary>
+        /// <param name="builder">The <see cref="ContainerBuilder"/> to add services to.</param>
+        /// <param name="assemblies">The <see cref="Assembly"/> objects to find the <see cref="App"/>'s <see cref="IBackgroundTask"/>s.</param>
+        public static void RegisterBackgroundTasks(this ContainerBuilder builder, params Assembly[] assemblies)
+        {
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<IBackgroundTask>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+        }
     }
 
     /// <summary>
