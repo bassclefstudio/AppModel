@@ -24,10 +24,10 @@ namespace BassClefStudio.AppModel.Storage
         public BaseFolder(DirectoryInfo directory)
         {
             Directory = directory;
-            //if (!Directory.Exists)
-            //{
-            //    throw new StorageAccessException("Attempted to create a BaseFolder object for a directory that does not exist.");
-            //}
+            if (!Directory.Exists)
+            {
+                Directory.Create();
+            }
         }
 
         /// <inheritdoc/>

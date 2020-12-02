@@ -24,9 +24,10 @@ namespace BassClefStudio.AppModel.Settings
             Settings = new List<BaseSetting>();
         }
 
+        private bool Initialized { get; set; }
         private async Task ReadSettings(bool refresh = false)
         {
-            if(Settings == null || refresh)
+            if(!Initialized || refresh)
             {
                 var file = await StorageService.AppDataFolder.CreateFileAsync("Settings.json", CollisionOptions.OpenExisting);
                 var json = JsonConvert.DeserializeObject<BaseSetting[]>(await file.ReadTextAsync());
@@ -35,6 +36,7 @@ namespace BassClefStudio.AppModel.Settings
                     Settings.Clear();
                     Settings.AddRange(json);
                 }
+                Initialized = true;
             }
         }
 

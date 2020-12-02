@@ -26,10 +26,10 @@ namespace BassClefStudio.AppModel.Storage
         public BaseFile(FileInfo file)
         {
             File = file;
-            //if(!File.Exists)
-            //{
-            //    throw new StorageAccessException("Attempted to create a BaseFile object for a file that does not exist.");
-            //}
+            if (!File.Exists)
+            {
+                File.Create().Dispose();
+            }
         }
 
         /// <inheritdoc/>
@@ -48,32 +48,13 @@ namespace BassClefStudio.AppModel.Storage
         /// <inheritdoc/>
         public async Task<string> ReadTextAsync()
         {
-            using (var content = await OpenFileAsync(FileOpenMode.Read))
-            {
-                using (var stream = content.GetReadStream())
-                {
-                    using (var textReader = new StreamReader(stream))
-                    {
-                        return await textReader.ReadToEndAsync();
-                    }
-                }
-            }
+            return System.IO.File.ReadAllText(File.FullName);
         }
 
         /// <inheritdoc/>
         public async Task WriteTextAsync(string text)
         {
-            using (var content = await OpenFileAsync(FileOpenMode.ReadWrite))
-            {
-                using (var stream = content.GetWriteStream())
-                {
-                    using (var textWriter = new StreamWriter(stream))
-                    {
-                        await textWriter.WriteAsync(text);
-                        await textWriter.FlushAsync();
-                    }
-                }
-            }
+            System.IO.File.WriteAllText(File.FullName, text);
         }
     }
 

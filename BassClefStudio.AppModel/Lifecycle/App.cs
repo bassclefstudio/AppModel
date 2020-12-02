@@ -36,6 +36,27 @@ namespace BassClefStudio.AppModel.Lifecycle
         protected abstract void ConfigureServices(ContainerBuilder builder);
 
         /// <summary>
+        /// The name of the <see cref="App"/>.
+        /// </summary>
+        public string ApplicationName { get; }
+
+        /// <summary>
+        /// Creates a new AppModel <see cref="App"/>.
+        /// </summary>
+        /// <param name="name">The name of this <see cref="App"/>.</param>
+        public App(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("An application name must be set.");
+            }
+            else
+            {
+                ApplicationName = name;
+            }
+        }
+
+        /// <summary>
         /// Initializes the DI <see cref="Services"/> container.
         /// </summary>
         /// <param name="platform">The app platform that this <see cref="App"/> will use for native services.</param>
