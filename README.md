@@ -18,7 +18,7 @@ Create a .NET Standard project (2.0 or higher), either using the `dotnet` templa
 
 First, you'll need to create your App class. This is a class that defines the services and features that this specific app will require, and provides a starting point for developing an `AppModel` app.
 
-App.cs
+**App.cs**
 ````C#
 using Autofac;
 using BassClefStudio.AppModel.Background;
@@ -26,6 +26,9 @@ using BassClefStudio.AppModel.Lifecycle;
 
 public class MyApp : App
 {
+    public MyApp() : base("MyAppName")
+    { }
+
     protected override void ConfigureServices(ContainerBuilder builder)
     {
         builder.RegisterViewModels(typeof(MyApp).Assembly);
@@ -45,6 +48,7 @@ The base `App` class exposes the `ConfigureServices()` method, which allows you 
 
 Now you can create a view-model in the .NET Standard project. Here's an example of what that might look like, at the bare minimum.
 
+**MainViewModel.cs**
 ````C#
 using BassClefStudio.AppModel.Lifecycle;
 public class MainViewModel : IViewModel
@@ -76,6 +80,8 @@ The `IActivationHandler` interface says that this `IViewModel` will support bein
 > **Note:** The `BackgroundActivatedEventArgs`, as a general rule, is handled by the base `App` class itself, and will not ask for any UI to be triggered. Creating an `IViewModel` that implements `IActivationHandler` will _not_ allow you to handle these activations.
 
 Create override methods in your `IActivationHandler`, as so:
+
+**MainViewModel.cs**
 ````C#
 using BassClefStudio.AppModel.Lifecycle;
 public class MainViewModel : IViewModel, IActivationHandler
@@ -101,6 +107,7 @@ Great! we've successfully created a .NET Standard project with a view-model that
 ## Services to the Rescue
 The answer is **services**! Services are interfaces that are implemented by the platform that you eventually run your app on. Take the `IStorageService` as an example. In `BassClefStudio.AppModel`, the interface is defined as a way to manage app data and file pickers, and various methods and properties are defined. Then, each platform creates its own implementation - `BassClefStudio.AppModel.Uwp` has a `UwpStorageService`, for example. Each platform head will tell your `MyApp` class to start and provide an `IAppPlatform` instance, which tells the DI container which concrete services that platform provides, and the base `App` code will register those types for your view-models to use and consume. Want to see some code?
 
+**MainViewModel.cs**
 ````C#
 using BassClefStudio.AppModel.Lifecycle;
 using BassClefStudio.AppModel.Storage;
@@ -138,7 +145,9 @@ Now that you have models/view-models written in .NET Standard, it's time to conn
 ## UWP (C#)
 Create a new C# UWP project, with a minimum version of Windows 10 v1709 or higher (to support .NET Standard 2.0). Add a reference to _your_ .NET Standard model/view-model project, as well as the `BassClefStudio.AppModel.Uwp` Nuget package (should be same/similar version to the `BassClefStudio.AppModel` package). Then, replace the code in App.xaml.cs with the following:
 
+**App.xaml.cs**
 ````C#
+using BassClefStudio.AppModel.Lifecycle;
 sealed partial class App : UwpApplication
 {
     public App() : base(new MyApp(), typeof(App).Assembly)
@@ -152,7 +161,9 @@ This `UwpApplication` class is provided by the `BassClefStudio.AppModel.Uwp` pac
 
 Now comes views (that's right, that's all you need for your app class!). Since `AppModel` libraries don't provide UI, you'll be creating your own UI in XAML/code-behind/etc. for UWP. In the code-behind for your view, include the following:
 
+**MainPage.xaml.cs**
 ````C#
+using BassClefStudio.AppModel.Navigation;
 public sealed partial class MainPage : Page, IView<MainViewModel>
 {
     public MainViewModel ViewModel { get; set; }
@@ -170,3 +181,45 @@ You've now told your app that you want this page `MainPage` to be connected with
 The `Initialize` method will be run after navigation is completed and the `ViewModel` property on the view is set, and can be used to call methods on the view-model if you really need to. Use this as your `OnNavigationCompleted` handler.
 
 At this point, your UWP application should launch and activate to your specified `MainPage` - services should work when called and navigation should bring up the desired connected UWP views. Notice a problem with the library or this tutorial? Submit an issue [here](https://github.com/bassclefstudio/AppModel/issues/new).
+
+## WPF (C#)
+Create a new C# WPF project targeting .NET (Core) 5 or higher (to support the `.Wpf` library). Add a reference to _your_ .NET Standard model/view-model project, as well as the `BassClefStudio.AppModel.Wpf` Nuget package (should be same/similar version to the `BassClefStudio.AppModel` package, and will bring in `BassClefStudio.AppModel.Base` as a dependency). Then, replace the code in App.xaml.cs with the following:
+
+**App.xaml.cs**
+````C#
+using BassClefStudio.AppModel.Lifecycle;
+sealed partial class App : WpfApplication
+{
+    public App() : base(new MyApp(), typeof(App).Assembly)
+    { }
+}
+````
+
+> **Note:** In order for this to compile in a XAML project, you'll need to go into the XAML and replace the root `<App>` with `<lifecycle:WpfApplication>` and including the namespace `xmlns:lifecycle="clr-namespace:BassClefStudio.AppModel.Lifecycle;assembly=BassClefStudio.AppModel.Wpf"`.
+
+This `WpfApplication` class is provided by the `BassClefStudio.AppModel.Wpf` package and handles the WPF system events by calling the correct methods on your `MyApp : BassClefStudio.AppModel.Lifecycle.App` class. The `typeof(App).Assembly` argument provides an assembly where the relevant views for your WPF project will be found (you can specify as many assemblies as needed).
+
+Now comes views (that's right, that's all you need for your app class!). Since `AppModel` libraries don't provide UI, you'll be creating your own UI in XAML/code-behind/etc. for WPF. In the code-behind for your view, include the following:
+
+**MainPage.xaml.cs**
+````C#
+using BassClefStudio.AppModel.Navigation;
+public sealed partial class MainPage : Page, IView<MainViewModel>
+{
+    public MainViewModel ViewModel { get; set; }
+
+    public void Initialize()
+    {
+        this.DataContext = ViewModel;
+    }
+}
+````
+> **Note:** If your view is a `Window`, navigation methods for WPF will automatically call the correct `Window.Show()` method instead of navigating the `Frame`/setting the content of the existing window, without you needing to do anything extra!
+
+You've now told your app that you want this page `MainPage` to be connected with your `MainViewModel` - this means that this page will be navigated to when you call `MyApp.Navigate<MainViewModel>()` or another equivalent navigation statement. It will also be navigated to on application launch if you've registered the `MainViewModel` as an `IActivationHandler`.
+
+> **Note:** Pages/'views' in `AppModel` apps can _also_ use the DI container - simply request a service in the constructor in exactly the same way. This is considered preferrable than dealing with the `Uwp*` services directly, since these may change over time (the services are all registered as interfaces anyway).
+
+The `Initialize` method will be run after navigation is completed and the `ViewModel` property on the view is set, and can be used to call methods on the view-model if you really need to. Use this as your `OnNavigationCompleted` handler.
+
+At this point, your WPF application should launch and activate to your specified `MainPage` - services should work when called and navigation should bring up the desired connected WPF views. Notice a problem with the library or this tutorial? Submit an issue [here](https://github.com/bassclefstudio/AppModel/issues/new).
