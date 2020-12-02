@@ -3,8 +3,6 @@
 
 A .NET Standard, platform-agnostic library for creating cross-platform view-models and applications for various .NET platforms. Go check out the sample project [here](https://github.com/bassclefstudio/RssReader) or read the tutorial, below, to get started with the BassClefStudio.AppModel libraries.
 
-
-
 # Get Started
 There are three packages that make up the BassClefStudio.AppModel project:
  - `BassClefStudio.AppModel`
