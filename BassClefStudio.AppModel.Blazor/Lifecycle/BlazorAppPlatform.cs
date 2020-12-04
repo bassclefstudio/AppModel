@@ -1,7 +1,6 @@
 ﻿using Autofac;
 using BassClefStudio.AppModel.Navigation;
 using BassClefStudio.AppModel.Settings;
-using BassClefStudio.AppModel.Storage;
 using BassClefStudio.AppModel.Threading;
 using System;
 using System.Collections.Generic;
@@ -12,26 +11,29 @@ using System.Threading.Tasks;
 namespace BassClefStudio.AppModel.Lifecycle
 {
     /// <summary>
-    /// The <see cref="IAppPlatform"/> for WPF apps.
+    /// The <see cref="IAppPlatform"/> for Blazor WebAssembly apps.
     /// </summary>
-    public class WpfAppPlatform : IAppPlatform
+    public class BlazorAppPlatform : IAppPlatform
     {
         /// <inheritdoc/>
         public void ConfigureServices(ContainerBuilder builder)
         {
-            builder.RegisterType<WpfNavigationService>()
+            builder.RegisterType<BlazorNavigationService>()
                 .SingleInstance()
                 .AsImplementedInterfaces();
-            //builder.RegisterType<WpfBackgroundService>()
+            builder.RegisterType<BlazorViewProvider>()
+                .SingleInstance()
+                .AsImplementedInterfaces();
+            //builder.RegisterType<BlazorBackgroundService>()
             //    .SingleInstance()
             //    .AsImplementedInterfaces();
-            builder.RegisterType<WpfStorageService>()
+            //builder.RegisterType<BlazorStorageService>()
+            //    .AsImplementedInterfaces();
+            builder.RegisterType<BlazorSettingsService>()
                 .AsImplementedInterfaces();
-            builder.RegisterType<BaseSettingsService>()
+            builder.RegisterType<BaseDispatcherService>()
                 .AsImplementedInterfaces();
-            builder.RegisterType<WpfDispatcherService>()
-                .AsImplementedInterfaces();
-            //builder.RegisterType<WpfNotificationService>()
+            //builder.RegisterType<BlazorNotificationService>()
             //    .AsImplementedInterfaces();
         }
     }

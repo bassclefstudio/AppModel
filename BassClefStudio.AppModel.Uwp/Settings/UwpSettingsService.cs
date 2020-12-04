@@ -1,34 +1,42 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Storage;
 
 namespace BassClefStudio.AppModel.Settings
 {
+    /// <summary>
+    /// An <see cref="ISettingsService"/> which uses the UWP native settings API.
+    /// </summary>
     public class UwpSettingsService : ISettingsService
     {
-        private ApplicationDataContainer SettingsContainer { get; }
-
+        internal ApplicationDataContainer SettingsContainer { get; }
+        /// <summary>
+        /// Creates a new <see cref="UwpSettingsService"/>.
+        /// </summary>
         public UwpSettingsService()
         {
             SettingsContainer = ApplicationData.Current.LocalSettings;
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<string>> GetKeys()
+        public async Task<bool> ContainsKeyAsync(string key)
         {
-            return SettingsContainer.Values.Keys;
+            return SettingsContainer.Values.ContainsKey(key);
         }
 
         /// <inheritdoc/>
-        public async Task<string> GetValue(string key)
+        public async Task<T> GetValueAsync<T>(string key)
         {
-            return SettingsContainer.Values[key].ToString();
+            var json = SettingsContainer.Values[key].ToString();
+            return JsonConvert.DeserializeObject<T>(json);
         }
 
         /// <inheritdoc/>
-        public async Task SetValue(string key, string value)
+        public async Task SetValueAsync(string key, object value)
         {
-            SettingsContainer.Values[key] = value;
+            var json = JsonConvert.SerializeObject(value); 
+            SettingsContainer.Values[key] = json;
         }
     }
 }

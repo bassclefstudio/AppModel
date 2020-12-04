@@ -17,6 +17,10 @@ namespace BassClefStudio.AppModel.Storage
         /// <inheritdoc/>
         public IFolder AppDataFolder { get; }
 
+        /// <summary>
+        /// Creates a new <see cref="WpfStorageService"/> from the current <see cref="Lifecycle.App"/>
+        /// </summary>
+        /// <param name="app">The <see cref="Lifecycle.App"/> and its name provides information used to determine the location of the local folder.</param>
         public WpfStorageService(Lifecycle.App app)
         {
             AppDataFolder = new BaseFolder(

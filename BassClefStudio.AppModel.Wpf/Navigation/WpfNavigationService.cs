@@ -10,11 +10,21 @@ using System.Windows.Controls;
 
 namespace BassClefStudio.AppModel.Navigation
 {
+    /// <summary>
+    /// An <see cref="INavigationService"/> built on the WPF's <see cref="ContentControl"/> and <see cref="Window"/> classes.
+    /// </summary>
     public class WpfNavigationService : INavigationService
     {
+        /// <summary>
+        /// The current frame for navigation content.
+        /// </summary>
         public ContentControl CurrentFrame { get; set; }
 
         internal IDispatcherService DispatcherService { get; }
+        /// <summary>
+        /// Creates a new <see cref="WpfNavigationService"/>.
+        /// </summary>
+        /// <param name="dispatcherService">The <see cref="IDispatcherService"/> for running UI code on the correct thread.</param>
         public WpfNavigationService(IDispatcherService dispatcherService)
         {
             DispatcherService = dispatcherService;
