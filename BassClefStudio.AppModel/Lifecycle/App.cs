@@ -22,7 +22,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// <summary>
         /// The Autofac services container used for resolving services in the <see cref="App"/>.
         /// </summary>
-        public IContainer Services { get; private set; }
+        public ILifetimeScope Services { get; set; }
 
         /// <summary>
         /// An event fired when the <see cref="App"/> completes successful navigation to a new <see cref="IViewModel"/> and its associated <see cref="IView"/>.
@@ -57,21 +57,38 @@ namespace BassClefStudio.AppModel.Lifecycle
         }
 
         /// <summary>
-        /// Initializes the DI <see cref="Services"/> container.
+        /// Initializes the default DI <see cref="Services"/> container and runs initialization methods. A shortcut around the <see cref="SetupContainer(ContainerBuilder, IAppPlatform, Assembly[])"/> and <see cref="RunInitMethods"/>.
         /// </summary>
         /// <param name="platform">The app platform that this <see cref="App"/> will use for native services.</param>
         /// <param name="assemblies">The assemblies for this platform that contain any <see cref="IView"/>s that the <see cref="App"/> requires.</param>
         public void Initialize(IAppPlatform platform, params Assembly[] assemblies)
         {
             var builder = new ContainerBuilder();
+            SetupContainer(builder, platform, assemblies);
+            Services = builder.Build();
+            RunInitMethods();
+        }
+
+        /// <summary>
+        /// Sets up an Autofac <see cref="ContainerBuilder"/> with all of the <see cref="App"/> dependencies. Called internally by <see cref="Initialize(IAppPlatform, Assembly[])"/>.
+        /// </summary>
+        /// <param name="builder">The Autofac <see cref="ContainerBuilder"/> to register services to.</param>
+        /// <param name="platform">The app platform that this <see cref="App"/> will use for native services.</param>
+        /// <param name="assemblies">The assemblies for this platform that contain any <see cref="IView"/>s that the <see cref="App"/> requires.</param>
+        public void SetupContainer(ContainerBuilder builder, IAppPlatform platform, params Assembly[] assemblies)
+        {
             platform.ConfigureServices(builder);
             this.ConfigureServices(builder);
             //// Resister this app instance to all view-models, etc.
             builder.RegisterInstance<App>(this);
             builder.RegisterViews(assemblies);
+        }
 
-            Services = builder.Build();
-
+        /// <summary>
+        /// Runs the default initialization methods 
+        /// </summary>
+        public void RunInitMethods()
+        {
             //// Run any IInitializationHandlers.
             var inits = Services.Resolve<IEnumerable<IInitializationHandler>>();
             foreach (var i in inits.Where(s => s.Enabled))
@@ -121,7 +138,7 @@ namespace BassClefStudio.AppModel.Lifecycle
                 if (myTask != null)
                 {
                     //// Intentionally started without SynchronousTask, in order for the try/catch/finally block can be used to ensure the deferral is executed.
-                    RunBackgroundTask(myTask, deferral);
+                    _ = RunBackgroundTask(myTask, deferral);
                 }
                 else
                 {
@@ -244,8 +261,8 @@ namespace BassClefStudio.AppModel.Lifecycle
             var viewType = typeof(IView<>).MakeGenericType(viewModel.GetType());
             var view = (IView)Services.Resolve(viewType);
             var navService = Services.Resolve<INavigationService>();
-            navService.Navigate(view);
             viewType.GetProperty("ViewModel").SetValue(view, viewModel);
+            navService.Navigate(view);
             NavigatedInitialize(viewModel, view);
         }
 

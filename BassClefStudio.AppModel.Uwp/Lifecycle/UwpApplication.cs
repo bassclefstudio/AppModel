@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Core;
+using BassClefStudio.AppModel.Navigation;
 
 namespace BassClefStudio.AppModel.Lifecycle
 {
