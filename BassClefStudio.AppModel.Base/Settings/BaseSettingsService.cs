@@ -1,5 +1,6 @@
 ﻿using BassClefStudio.AppModel.Storage;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,9 +12,8 @@ namespace BassClefStudio.AppModel.Settings
     /// </summary>
     public class BaseSettingsService : ISettingsService
     {
-        private IStorageService StorageService { get; }
-        private List<BaseSetting> Settings { get; }
-
+        internal IStorageService StorageService { get; }
+        private JObject Settings { get; set; }
         /// <summary>
         /// Creates a <see cref="BaseSettingsService"/> for managing settings.
         /// </summary>
@@ -21,7 +21,6 @@ namespace BassClefStudio.AppModel.Settings
         public BaseSettingsService(IStorageService storageService)
         {
             StorageService = storageService;
-            Settings = new List<BaseSetting>();
         }
 
         private bool Initialized { get; set; }
@@ -30,12 +29,7 @@ namespace BassClefStudio.AppModel.Settings
             if(!Initialized || refresh)
             {
                 var file = await StorageService.AppDataFolder.CreateFileAsync("Settings.json", CollisionOptions.OpenExisting);
-                var json = JsonConvert.DeserializeObject<BaseSetting[]>(await file.ReadTextAsync());
-                if(json != null)
-                {
-                    Settings.Clear();
-                    Settings.AddRange(json);
-                }
+                Settings = JObject.Parse(await file.ReadTextAsync());
                 Initialized = true;
             }
         }
@@ -45,52 +39,31 @@ namespace BassClefStudio.AppModel.Settings
             if (Settings != null)
             {
                 var file = await StorageService.AppDataFolder.CreateFileAsync("Settings.json", CollisionOptions.OpenExisting);
-                await file.WriteTextAsync(JsonConvert.SerializeObject(Settings));
+                var json = new JObject(Settings);
+                await file.WriteTextAsync(json.ToString());
             }
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<string>> GetKeys()
+        public async Task<bool> ContainsKeyAsync(string key)
         {
             await ReadSettings();
-            return Settings.Select(s => s.Key);
+            return Settings.ContainsKey(key);
         }
 
         /// <inheritdoc/>
-        public async Task<string> GetValue(string key)
+        public async Task<T> GetValueAsync<T>(string key)
         {
             await ReadSettings();
-            return Settings.First(s => s.Key == key).Value;
+            return Settings[key].ToObject<T>();
         }
 
         /// <inheritdoc/>
-        public async Task SetValue(string key, string value)
+        public async Task SetValueAsync(string key, object value)
         {
             await ReadSettings();
-            var setting = Settings.FirstOrDefault(s => s.Key == key);
-            if (setting == null)
-            {
-                setting = new BaseSetting(key, value);
-                Settings.Add(setting);
-            }
-            else
-            {
-                setting.Value = value;
-            }
+            Settings[key] = JToken.FromObject(value);
             await WriteSettings();
-        }
-    }
-
-    internal class BaseSetting
-    {
-        public string Key { get; set; }
-        public string Value { get; set; }
-
-        public BaseSetting() { }
-        public BaseSetting(string key, string value)
-        {
-            Key = key;
-            Value = value;
         }
     }
 }

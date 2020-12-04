@@ -23,6 +23,7 @@ namespace BassClefStudio.AppModel.Navigation
         public BlazorNavigationService(NavigationManager navigationManager, IBlazorViewProvider viewProvider)
         {
             NavigationManager = navigationManager;
+            ViewProvider = viewProvider;
         }
 
         /// <inheritdoc/>
@@ -32,6 +33,7 @@ namespace BassClefStudio.AppModel.Navigation
         /// <inheritdoc/>
         public void Navigate(IView view, object parameter = null)
         {
+            Console.WriteLine($"Navigate {view}.");
             if(view is BlazorView blazorView)
             {
                 ViewProvider.CurrentView = blazorView;

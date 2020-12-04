@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using BassClefStudio.AppModel.Navigation;
+using BassClefStudio.AppModel.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,8 +28,8 @@ namespace BassClefStudio.AppModel.Lifecycle
             //    .AsImplementedInterfaces();
             //builder.RegisterType<UwpStorageService>()
             //    .AsImplementedInterfaces();
-            //builder.RegisterType<UwpSettingsService>()
-            //    .AsImplementedInterfaces();
+            builder.RegisterType<BlazorSettingsService>()
+                .AsImplementedInterfaces();
             //builder.RegisterType<UwpDispatcherService>()
             //    .AsImplementedInterfaces();
             //builder.RegisterType<UwpNotificationService>()

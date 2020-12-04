@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http;
 using Autofac.Extensions.DependencyInjection;
+using Blazored.LocalStorage;
 
 namespace BassClefStudio.AppModel.Lifecycle
 {
@@ -46,6 +47,7 @@ namespace BassClefStudio.AppModel.Lifecycle
             builder.ConfigureContainer(new AutofacServiceProviderFactory(b => CurrentApp.SetupContainer(b, new BlazorAppPlatform(), ViewAssemblies)));
             builder.RootComponents.Add<TApp>("#app");
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddBlazoredLocalStorage();
             var app = builder.Build();
             CurrentApp.Services = app.Services.GetAutofacRoot();
             await app.RunAsync();
