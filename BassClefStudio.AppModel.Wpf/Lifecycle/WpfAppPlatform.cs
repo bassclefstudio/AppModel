@@ -11,8 +11,12 @@ using System.Threading.Tasks;
 
 namespace BassClefStudio.AppModel.Lifecycle
 {
+    /// <summary>
+    /// The <see cref="IAppPlatform"/> for WPF apps.
+    /// </summary>
     public class WpfAppPlatform : IAppPlatform
     {
+        /// <inheritdoc/>
         public void ConfigureServices(ContainerBuilder builder)
         {
             builder.RegisterType<WpfNavigationService>()

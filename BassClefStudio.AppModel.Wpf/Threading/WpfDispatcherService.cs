@@ -7,6 +7,9 @@ using System.Windows;
 
 namespace BassClefStudio.AppModel.Threading
 {
+    /// <summary>
+    /// An <see cref="IDispatcherService"/> that uses the <see cref="Application.Current"/>'s dispatcher to execute code on the UI thread.
+    /// </summary>
     public class WpfDispatcherService : IDispatcherService
     {
         /// <inheritdoc/>
