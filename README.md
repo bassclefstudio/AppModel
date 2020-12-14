@@ -8,8 +8,10 @@ There are three packages that make up the BassClefStudio.AppModel project:
  - `BassClefStudio.AppModel`
  - `BassClefStudio.AppModel.Base`
  - `BassClefStudio.AppModel.Uwp`
+ - `BassClefStudio.AppModel.Wpf`
+ - `BassClefStudio.AppModel.Blazor`
 
-In adddition, `.Wpf`, `.Blazor`, and Xamarin packages are on the roadmap, as well as a possible `.Console`/`.Gtk` package.
+In adddition, Xamarin packages are on the roadmap, as well as a possible `.Console`/`.Gtk` package.
 
 The main package, `BassClefStudio.AppModel`, is a .NET Standard library that contains interfaces and basic code defining how an app should run. It handles navigation, file system access, dependency injection, and the MVVM platform (among other things) and is the basis of the AppModel project.
 
@@ -223,3 +225,6 @@ You've now told your app that you want this page `MainPage` to be connected with
 The `Initialize` method will be run after navigation is completed and the `ViewModel` property on the view is set, and can be used to call methods on the view-model if you really need to. Use this as your `OnNavigationCompleted` handler.
 
 At this point, your WPF application should launch and activate to your specified `MainPage` - services should work when called and navigation should bring up the desired connected WPF views. Notice a problem with the library or this tutorial? Submit an issue [here](https://github.com/bassclefstudio/AppModel/issues/new).
+
+## Blazor (C#)
+_Coming soon!_
