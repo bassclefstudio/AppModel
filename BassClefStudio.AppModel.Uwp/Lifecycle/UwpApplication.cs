@@ -6,6 +6,8 @@ using System.Reflection;
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Core;
 using BassClefStudio.AppModel.Navigation;
+using Autofac;
+using BassClefStudio.AppModel.Threading;
 
 namespace BassClefStudio.AppModel.Lifecycle
 {
@@ -35,6 +37,8 @@ namespace BassClefStudio.AppModel.Lifecycle
         {
             ////Register system events
             this.Suspending += OnSuspending;
+            this.EnteredBackground += EnterBackground;
+            this.LeavingBackground += LeaveBackground;
 
             CurrentApp = app;
             CurrentApp.Initialize(new UwpAppPlatform(), viewAssemblies);
@@ -55,6 +59,24 @@ namespace BassClefStudio.AppModel.Lifecycle
 
         #endregion
         #region Events
+
+        private void LeaveBackground(object sender, Windows.ApplicationModel.LeavingBackgroundEventArgs e)
+        {
+            var dService = CurrentApp?.Services.Resolve<IDispatcherService>();
+            if (dService is UwpDispatcherService uwpDispatcherService)
+            {
+                uwpDispatcherService.Activated = true;
+            }
+        }
+
+        private void EnterBackground(object sender, Windows.ApplicationModel.EnteredBackgroundEventArgs e)
+        {
+            var dService = CurrentApp?.Services.Resolve<IDispatcherService>();
+            if (dService is UwpDispatcherService uwpDispatcherService)
+            {
+                uwpDispatcherService.Activated = false;
+            }
+        }
 
         private void BackRequested(object sender, BackRequestedEventArgs e)
         {
