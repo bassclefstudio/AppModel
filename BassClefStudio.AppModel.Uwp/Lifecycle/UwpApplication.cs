@@ -62,20 +62,12 @@ namespace BassClefStudio.AppModel.Lifecycle
 
         private void LeaveBackground(object sender, Windows.ApplicationModel.LeavingBackgroundEventArgs e)
         {
-            var dService = CurrentApp?.Services.Resolve<IDispatcherService>();
-            if (dService is UwpDispatcherService uwpDispatcherService)
-            {
-                uwpDispatcherService.Activated = true;
-            }
+            UwpDispatcherService.Activated = true;
         }
 
         private void EnterBackground(object sender, Windows.ApplicationModel.EnteredBackgroundEventArgs e)
         {
-            var dService = CurrentApp?.Services.Resolve<IDispatcherService>();
-            if (dService is UwpDispatcherService uwpDispatcherService)
-            {
-                uwpDispatcherService.Activated = false;
-            }
+            UwpDispatcherService.Activated = false;
         }
 
         private void BackRequested(object sender, BackRequestedEventArgs e)
