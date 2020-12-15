@@ -12,7 +12,7 @@ namespace BassClefStudio.AppModel.Threading
         /// <summary>
         /// A get/set-able <see cref="bool"/> indicating whether UI thread code needs to be sent through this <see cref="IDispatcherService"/>'s <see cref="CoreDispatcher"/> (i.e. if the app has a foreground UI).
         /// </summary>
-        public bool Activated { get; set; } = false;
+        public static bool Activated { get; set; } = false;
 
         /// <inheritdoc/>
         public async Task RunOnUIThreadAsync(Action execute)
