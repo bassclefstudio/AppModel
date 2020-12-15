@@ -10,6 +10,9 @@ using System.Windows;
 
 namespace BassClefStudio.AppModel.Lifecycle
 {
+    /// <summary>
+    /// A wrapper class over the <see cref="System.Windows.Application"/>, this class provides a WPF starting-point for running a cross-platform MVVM <see cref="App"/>.
+    /// </summary>
     public class WpfApplication : Application
     {
         /// <summary>
