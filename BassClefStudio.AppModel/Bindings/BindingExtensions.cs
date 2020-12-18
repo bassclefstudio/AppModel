@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BassClefStudio.AppModel.Navigation;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -49,6 +50,17 @@ namespace BassClefStudio.AppModel.Bindings
         public static IBindingExpression<T2> TransformCollection<T1, T2>(this IBindingExpression<T1> me, Func<T1, T2> transform, Action<NotifyCollectionChangedEventArgs> update) where T1 : INotifyCollectionChanged
         {
             return new CollectionTransformBindingExpression<T1, T2>(me, transform, update);
+        }
+
+        /// <summary>
+        /// Returns an <see cref="IBindingExpression{T}"/> to this <see cref="IView{T}"/>'s current <see cref="IView{T}.ViewModel"/>. Call this while or after <see cref="IView.Initialize"/> is called.
+        /// </summary>
+        /// <typeparam name="T">The type of the view-model to bind to.</typeparam>
+        /// <param name="view">The <see cref="IView{T}"/> where the view-model could be found.</param>
+        /// <returns>An <see cref="IBindingExpression{T}"/> binding to the constant value of the current view-model.</returns>
+        public static IBindingExpression<T> ViewModelBinding<T>(this IView<T> view) where T : IViewModel
+        {
+            return new ConstantBindingExpression<T>(view.ViewModel);
         }
     }
 }
