@@ -1,9 +1,11 @@
-﻿using BassClefStudio.NET.Core;
+﻿using BassClefStudio.AppModel.Threading;
+using BassClefStudio.NET.Core;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BassClefStudio.AppModel.Bindings
 {
@@ -22,6 +24,11 @@ namespace BassClefStudio.AppModel.Bindings
         /// An event fired when the <see cref="Value"/> property is updated.
         /// </summary>
         event EventHandler ValueChanged;
+
+        /// <summary>
+        /// The <see cref="IDispatcherService"/> that this <see cref="IBindingExpression{T}"/> uses to send and update change notifications.
+        /// </summary>
+        IDispatcherService DispatcherService { get; }
     }
 
     /// <summary>
@@ -32,10 +39,29 @@ namespace BassClefStudio.AppModel.Bindings
     {
         private T bindingValue;
         /// <inheritdoc/>
-        public T Value { get => bindingValue; protected set { Set(ref bindingValue, value); ValueChanged?.Invoke(this, new EventArgs()); } }
+        public T Value { get => bindingValue; protected set => NET.Core.TaskExtensions.RunSynchronously(() => SetValue(value)); }
 
         /// <inheritdoc/>
         public event EventHandler ValueChanged;
+
+        /// <inheritdoc/>
+        public IDispatcherService DispatcherService { get; }
+
+        /// <summary>
+        /// Creates a new <see cref="BaseBindingExpression{T}"/>.
+        /// </summary>
+        /// <param name="dispactcherService">The <see cref="IDispatcherService"/> used to send change notifications.</param>
+        protected BaseBindingExpression(IDispatcherService dispactcherService)
+        {
+            DispatcherService = dispactcherService;
+        }
+
+        private async Task SetValue(T val)
+        {
+            await DispatcherService.RunOnUIThreadAsync(() =>
+                Set(ref bindingValue, val));
+            ValueChanged?.Invoke(this, new EventArgs());
+        }
     }
 
     /// <summary>
@@ -48,7 +74,8 @@ namespace BassClefStudio.AppModel.Bindings
         /// Creates a new <see cref="ConstantBindingExpression{T}"/>.
         /// </summary>
         /// <param name="value">The <typeparamref name="T"/> value to store.</param>
-        public ConstantBindingExpression(T value)
+        /// <param name="dispactcherService">The <see cref="IDispatcherService"/> used to send change notifications.</param>
+        internal ConstantBindingExpression(IDispatcherService dispactcherService, T value) : base(dispactcherService)
         {
             Value = value;
         }
@@ -76,9 +103,10 @@ namespace BassClefStudio.AppModel.Bindings
         /// <summary>
         /// Creates a new <see cref="PropertyBindingExpression{T, TProp}"/>.
         /// </summary>
+        /// <param name="dispactcherService">The <see cref="IDispatcherService"/> used to send change notifications.</param>
         /// <param name="rootObject">An <see cref="IBindingExpression{T}"/> to the root <typeparamref name="T"/> object.</param>
         /// <param name="getPropertyFunc">A <see cref="Func{T, TResult}"/> that returns a <typeparamref name="TProp"/> value from a <typeparamref name="T"/> root object.</param>
-        public PropertyBindingExpression(IBindingExpression<T> rootObject, Func<T, TProp> getPropertyFunc)
+        internal PropertyBindingExpression(IDispatcherService dispactcherService, IBindingExpression<T> rootObject, Func<T, TProp> getPropertyFunc) : base(dispactcherService)
         {
             ObjectBinding = rootObject;
             GetProperty = getPropertyFunc;
@@ -136,9 +164,10 @@ namespace BassClefStudio.AppModel.Bindings
         /// <summary>
         /// Creates a new <see cref="TransformBindingExpression{T, TOut}"/>.
         /// </summary>
+        /// <param name="dispactcherService">The <see cref="IDispatcherService"/> used to send change notifications.</param>
         /// <param name="objectBinding">An <see cref="IBindingExpression{T}"/> referencing the root object of this <see cref="TransformBindingExpression{T, TOut}"/>.</param>
         /// <param name="transformFunc">A function applied when <see cref="ObjectBinding"/> is updated to convert an object of type <typeparamref name="T"/> to an object of type <typeparamref name="TOut"/>.</param>
-        public TransformBindingExpression(IBindingExpression<T> objectBinding, Func<T, TOut> transformFunc)
+        internal TransformBindingExpression(IDispatcherService dispactcherService, IBindingExpression<T> objectBinding, Func<T, TOut> transformFunc) : base(dispactcherService)
         {
             ObjectBinding = objectBinding;
             TransformFunc = transformFunc;
@@ -181,9 +210,11 @@ namespace BassClefStudio.AppModel.Bindings
         /// <summary>
         /// Creates a new <see cref="TransformBindingExpression{T, TOut}"/>.
         /// </summary>
+        /// <param name="dispactcherService">The <see cref="IDispatcherService"/> used to send change notifications.</param>
         /// <param name="objectBinding">An <see cref="IBindingExpression{T}"/> referencing the root object of this <see cref="TransformBindingExpression{T, TOut}"/>.</param>
         /// <param name="transformFunc">A function applied when <see cref="ObjectBinding"/> is updated to convert an object of type <typeparamref name="T"/> to an object of type <typeparamref name="TOut"/>.</param>
-        public CollectionTransformBindingExpression(IBindingExpression<T> objectBinding, Func<T, TOut> transformFunc, Action<NotifyCollectionChangedEventArgs> updateFunc)
+        /// <param name="updateFunc">Called whenever the collection <see cref="ObjectBinding"/> refers to is changed or cleared, allowing for the updating of the existing <typeparamref name="TOut"/> <see cref="BaseBindingExpression{T}.Value"/>.</param>
+        internal CollectionTransformBindingExpression(IDispatcherService dispactcherService, IBindingExpression<T> objectBinding, Func<T, TOut> transformFunc, Action<NotifyCollectionChangedEventArgs> updateFunc) : base(dispactcherService)
         {
             ObjectBinding = objectBinding;
             TransformFunc = transformFunc;
