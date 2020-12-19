@@ -58,9 +58,12 @@ namespace BassClefStudio.AppModel.Bindings
 
         private async Task SetValue(T val)
         {
-            await DispatcherService.RunOnUIThreadAsync(() =>
-                Set(ref bindingValue, val));
-            ValueChanged?.Invoke(this, new EventArgs());
+            if (!bindingValue.Equals(val))
+            {
+                await DispatcherService.RunOnUIThreadAsync(() =>
+                    Set(ref bindingValue, val));
+                ValueChanged?.Invoke(this, new EventArgs());
+            }
         }
     }
 
