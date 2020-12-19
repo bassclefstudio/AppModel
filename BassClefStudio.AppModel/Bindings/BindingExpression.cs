@@ -98,12 +98,21 @@ namespace BassClefStudio.AppModel.Bindings
             if (RootObject != null)
             {
                 RootObject.PropertyChanged += RootPropertyChanged;
+                RootPropertyChanged();
             }
         }
 
-        private void RootPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void RootPropertyChanged(object sender, PropertyChangedEventArgs e) => RootPropertyChanged();
+        private void RootPropertyChanged()
         {
-            Value = GetProperty(RootObject);
+            if (RootObject != null)
+            {
+                Value = GetProperty(RootObject);
+            }
+            else
+            {
+                Value = default(TProp);
+            }
         }
     }
 
