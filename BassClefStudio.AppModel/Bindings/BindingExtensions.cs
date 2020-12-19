@@ -1,4 +1,5 @@
 ﻿using BassClefStudio.AppModel.Navigation;
+using BassClefStudio.AppModel.Threading;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -22,7 +23,7 @@ namespace BassClefStudio.AppModel.Bindings
         /// <returns>A new <see cref="IBindingExpression{T}"/> for the property on the base object.</returns>
         public static IBindingExpression<T2> GetProperty<T1, T2>(this IBindingExpression<T1> me, Func<T1, T2> getProperty) where T1 : INotifyPropertyChanged
         {
-            return new PropertyBindingExpression<T1, T2>(me, getProperty);
+            return new PropertyBindingExpression<T1, T2>(me.DispatcherService, me, getProperty);
         }
 
         /// <summary>
@@ -35,7 +36,7 @@ namespace BassClefStudio.AppModel.Bindings
         /// <returns>A new <see cref="IBindingExpression{T}"/> for the transformed value of the base object.</returns>
         public static IBindingExpression<T2> Transform<T1, T2>(this IBindingExpression<T1> me, Func<T1, T2> transform)
         {
-            return new TransformBindingExpression<T1, T2>(me, transform);
+            return new TransformBindingExpression<T1, T2>(me.DispatcherService, me, transform);
         }
 
         /// <summary>
@@ -49,18 +50,19 @@ namespace BassClefStudio.AppModel.Bindings
         /// <returns>A new <see cref="IBindingExpression{T}"/> for the transformed collection.</returns>
         public static IBindingExpression<T2> TransformCollection<T1, T2>(this IBindingExpression<T1> me, Func<T1, T2> transform, Action<NotifyCollectionChangedEventArgs> update) where T1 : INotifyCollectionChanged
         {
-            return new CollectionTransformBindingExpression<T1, T2>(me, transform, update);
+            return new CollectionTransformBindingExpression<T1, T2>(me.DispatcherService, me, transform, update);
         }
 
         /// <summary>
         /// Returns an <see cref="IBindingExpression{T}"/> to this <see cref="IView{T}"/>'s current <see cref="IView{T}.ViewModel"/>. Call this while or after <see cref="IView.Initialize"/> is called.
         /// </summary>
         /// <typeparam name="T">The type of the view-model to bind to.</typeparam>
+        /// <param name="dispatcherService">The <see cref="IDispatcherService"/> used to send change notifications.</param>
         /// <param name="view">The <see cref="IView{T}"/> where the view-model could be found.</param>
         /// <returns>An <see cref="IBindingExpression{T}"/> binding to the constant value of the current view-model.</returns>
-        public static IBindingExpression<T> ViewModelBinding<T>(this IView<T> view) where T : IViewModel
+        public static IBindingExpression<T> ViewModelBinding<T>(this IView<T> view, IDispatcherService dispatcherService) where T : IViewModel
         {
-            return new ConstantBindingExpression<T>(view.ViewModel);
+            return new ConstantBindingExpression<T>(dispatcherService, view.ViewModel);
         }
     }
 }
