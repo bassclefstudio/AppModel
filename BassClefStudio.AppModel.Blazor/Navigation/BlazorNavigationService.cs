@@ -37,7 +37,7 @@ namespace BassClefStudio.AppModel.Navigation
             if(view is BlazorView blazorView)
             {
                 ViewProvider.CurrentView = blazorView;
-                NavigationManager.NavigateTo(blazorView.ViewPath);
+                NavigationManager.NavigateTo($"{NavigationManager.BaseUri}{blazorView.ViewPath}");
             }
             else
             {
