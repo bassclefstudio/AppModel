@@ -10,7 +10,7 @@ namespace BassClefStudio.AppModel.Bindings
     /// </summary>
     /// <typeparam name="TIn">The type of the <see cref="ParentObject"/>.</typeparam>
     /// <typeparam name="TOut">The type of the <see cref="IBinding{T}.StoredValue"/>.</typeparam>
-    public class PropertyBinding<TIn, TOut> : Binding<TOut> where TIn : INotifyPropertyChanged
+    public class PropertyBinding<TIn, TOut> : Binding<TOut>
     {
         /// <summary>
         /// An <see cref="IBinding{T}"/> to the parent object from which the property is retrieved.
@@ -42,9 +42,10 @@ namespace BassClefStudio.AppModel.Bindings
         /// </summary>
         /// <param name="parentObject">An <see cref="IBinding{T}"/> to the parent object from which the property is retrieved.</param>
         /// <param name="getProperty">A function that gets the <typeparamref name="TOut"/> property from a <typeparamref name="TIn"/> parent.</param>
+        /// <param name="propertyName">The name of the <typeparamref name="TOut"/> property, which can be used to selectively trigger <see cref="Binding{T}.UpdateBinding"/> only when a property of this name is changed on the <see cref="ParentObject"/>.</param>
         /// <param name="nullAllowed">A <see cref="bool"/> indicating whether this <see cref="PropertyBinding{TIn, TOut}"/> should continue to call <see cref="GetPropertyFunc"/> and <see cref="SetPropertyAction"/> if the <see cref="ParentObject"/> is known to currently represent a 'null' value.</param>
-        public PropertyBinding(IBinding<TIn> parentObject, Func<TIn, TOut> getProperty, bool nullAllowed = false)
-            : this(parentObject, getProperty, (i, o) => throw new BindingException("This is a get-only property binding. Setting the value of this property is not supported."), nullAllowed)
+        public PropertyBinding(IBinding<TIn> parentObject, Func<TIn, TOut> getProperty, string propertyName = null, bool nullAllowed = false)
+            : this(parentObject, getProperty, (i, o) => throw new BindingException("This is a get-only property binding. Setting the value of this property is not supported."), propertyName, nullAllowed)
         { }
 
         /// <summary>
@@ -53,60 +54,39 @@ namespace BassClefStudio.AppModel.Bindings
         /// <param name="parentObject">An <see cref="IBinding{T}"/> to the parent object from which the property is retrieved.</param>
         /// <param name="getProperty">A function that gets the <typeparamref name="TOut"/> property from a <typeparamref name="TIn"/> parent.</param>
         /// <param name="setProperty">A method that sets the <typeparamref name="TOut"/> property of a <typeparamref name="TIn"/> parent.</param>
+        /// <param name="propertyName">The name of the <typeparamref name="TOut"/> property, which can be used to selectively trigger <see cref="Binding{T}.UpdateBinding"/> only when a property of this name is changed on the <see cref="ParentObject"/>.</param>
         /// <param name="nullAllowed">A <see cref="bool"/> indicating whether this <see cref="PropertyBinding{TIn, TOut}"/> should continue to call <see cref="GetPropertyFunc"/> and <see cref="SetPropertyAction"/> if the <see cref="ParentObject"/> is known to currently represent a 'null' value.</param>
-        public PropertyBinding(IBinding<TIn> parentObject, Func<TIn, TOut> getProperty, Action<TIn, TOut> setProperty, bool nullAllowed = false)
+        public PropertyBinding(IBinding<TIn> parentObject, Func<TIn, TOut> getProperty, Action<TIn, TOut> setProperty, string propertyName = null, bool nullAllowed = false)
         {
             ParentObject = parentObject;
             GetPropertyFunc = getProperty;
             SetPropertyAction = setProperty;
+            PropertyName = propertyName;
             NullAllowed = nullAllowed;
 
             ParentObject.ValueChanged += ParentValueChanged;
 
             //// Setup the parent's PropertyChanged handler.
-            if (ParentObject.StoredValue != null)
+            if (ParentObject.StoredValue != null && ParentObject.StoredValue is INotifyPropertyChanged notifyParent)
             {
-                ParentObject.StoredValue.PropertyChanged += ParentPropertyChanged;
+                notifyParent.PropertyChanged += ParentPropertyChanged;
             }
             oldParent = ParentObject.StoredValue;
         }
 
-        /// <summary>
-        /// Creates a new get-only <see cref="PropertyBinding{TIn, TOut}"/> with a specific <see cref="string"/> property name.
-        /// </summary>
-        /// <param name="parentObject">An <see cref="IBinding{T}"/> to the parent object from which the property is retrieved.</param>
-        /// <param name="propertyName">The name of the <typeparamref name="TOut"/> property, which can be used to selectively trigger <see cref="Binding{T}.UpdateBinding"/> only when a property of this name is changed on the <see cref="ParentObject"/>.</param>
-        /// <param name="getProperty">A function that gets the <typeparamref name="TOut"/> property from a <typeparamref name="TIn"/> parent.</param>
-        /// <param name="nullAllowed">A <see cref="bool"/> indicating whether this <see cref="PropertyBinding{TIn, TOut}"/> should continue to call <see cref="GetPropertyFunc"/> and <see cref="SetPropertyAction"/> if the <see cref="ParentObject"/> is known to currently represent a 'null' value.</param>
-        public PropertyBinding(IBinding<TIn> parentObject, string propertyName, Func<TIn, TOut> getProperty, bool nullAllowed = false)
-            : this(parentObject, propertyName, getProperty, (i, o) => throw new BindingException("This is a get-only property binding. Setting the value of this property is not supported."), nullAllowed)
-        { }
-
-        /// <summary>
-        /// Creates a new <see cref="PropertyBinding{TIn, TOut}"/> with a specific <see cref="string"/> property name.
-        /// </summary>
-        /// <param name="parentObject">An <see cref="IBinding{T}"/> to the parent object from which the property is retrieved.</param>
-        /// <param name="propertyName">The name of the <typeparamref name="TOut"/> property, which can be used to selectively trigger <see cref="Binding{T}.UpdateBinding"/> only when a property of this name is changed on the <see cref="ParentObject"/>.</param>
-        /// <param name="getProperty">A function that gets the <typeparamref name="TOut"/> property from a <typeparamref name="TIn"/> parent.</param>
-        /// <param name="setProperty">A method that sets the <typeparamref name="TOut"/> property of a <typeparamref name="TIn"/> parent.</param>
-        /// <param name="nullAllowed">A <see cref="bool"/> indicating whether this <see cref="PropertyBinding{TIn, TOut}"/> should continue to call <see cref="GetPropertyFunc"/> and <see cref="SetPropertyAction"/> if the <see cref="ParentObject"/> is known to currently represent a 'null' value.</param>
-        public PropertyBinding(IBinding<TIn> parentObject, string propertyName, Func<TIn, TOut> getProperty, Action<TIn, TOut> setProperty, bool nullAllowed = false) : this(parentObject, getProperty, setProperty, nullAllowed)
-        {
-            PropertyName = propertyName;
-        }
 
         private TIn oldParent;
         private void ParentValueChanged(object sender, EventArgs e)
         {
             //// Replace PropertyChanged event handlers and call UpdateBinding().
-            if (oldParent != null)
+            if (oldParent != null && oldParent is INotifyPropertyChanged notifyOldParent)
             {
-                oldParent.PropertyChanged -= ParentPropertyChanged;
+                notifyOldParent.PropertyChanged -= ParentPropertyChanged;
             }
             UpdateBinding();
-            if(ParentObject.StoredValue != null)
+            if(ParentObject.StoredValue != null && ParentObject.StoredValue is INotifyPropertyChanged notifyNewParent)
             {
-                ParentObject.StoredValue.PropertyChanged += ParentPropertyChanged;
+                notifyNewParent.PropertyChanged += ParentPropertyChanged;
             }
             oldParent = ParentObject.StoredValue;
         }
