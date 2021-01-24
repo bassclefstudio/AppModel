@@ -220,11 +220,79 @@ public sealed partial class MainPage : Page, IView<MainViewModel>
 
 You've now told your app that you want this page `MainPage` to be connected with your `MainViewModel` - this means that this page will be navigated to when you call `MyApp.Navigate<MainViewModel>()` or another equivalent navigation statement. It will also be navigated to on application launch if you've registered the `MainViewModel` as an `IActivationHandler`.
 
-> **Note:** Pages/'views' in `AppModel` apps can _also_ use the DI container - simply request a service in the constructor in exactly the same way. This is considered preferrable than dealing with the `Uwp*` services directly, since these may change over time (the services are all registered as interfaces anyway).
+> **Note:** Pages/'views' in `AppModel` apps can _also_ use the DI container - simply request a service in the constructor in exactly the same way. This is considered preferrable than dealing with the `Wpf*` services directly, since these may change over time (the services are all registered as interfaces anyway).
 
 The `Initialize` method will be run after navigation is completed and the `ViewModel` property on the view is set, and can be used to call methods on the view-model if you really need to. Use this as your `OnNavigationCompleted` handler.
 
 At this point, your WPF application should launch and activate to your specified `MainPage` - services should work when called and navigation should bring up the desired connected WPF views. Notice a problem with the library or this tutorial? Submit an issue [here](https://github.com/bassclefstudio/AppModel/issues/new).
 
 ## Blazor (C#)
-_Coming soon!_
+Create a new C# Blazor project targeting .NET (Core) 5 or higher (to support the `.Blazor` library). Add a reference to _your_ .NET Standard model/view-model project, as well as the `BassClefStudio.AppModel.Blazor` Nuget package (should be same/similar version to the `BassClefStudio.AppModel` package, and will bring in `BassClefStudio.AppModel.Base` as a dependency). Replace the code inside of Program.cs with the following:
+
+**Program.cs**
+````C#
+using BassClefStudio.AppModel.Lifecycle;
+public class Program
+{
+    public static async Task Main(string[] args)
+    {
+        var app = new BlazorApplication(new MyApp(), typeof(Program).Assembly);
+            
+        await app.ActivateAsync<App>(args);
+    }
+}
+````
+This will give control over the startup and initializatio of the DI container that .NET creates for web applications to the AppModel framework and your `MyApp` instance. However, it doesn't start the UI framework and navigation, because that's done in a separate place for Blazor - the App.razor page.
+
+### Pages:
+Insert the following override method into the `@code` section of your App.razor page:
+
+**App.razor**
+````C#
+protected override void OnInitialized()
+{
+    CurrentApp.Activate(new Lifecycle.LaunchActivatedEventArgs());
+}
+````
+
+This correctly activates the application at the correct time, enabling navigation to the initial page. But how *does* navigation work in Blazor?
+
+Each page in a Blazor SPA has a path, such as `"/"`, that defines when the router should navigate and display that Razor page's content. AppModel uses the `INavigationService`, meaning that in order to use Blazor with the `INavigationService`, we'll need to associate each page's path with te `IViewModel` that it represents.
+
+Create a file called BlazorViews.cs and add the following:
+
+**BlazorViews.cs**
+````C#
+using BassClefStudio.AppModel.Navigation;
+public class MainBlazorView : BlazorView<MainViewModel>
+{
+    public override string ViewPath { get; } = "";
+}
+````
+
+For this, we don't need to include the initial `/` like you might see in other places in your Blazor project (this allows for you to host your website on a path on a domain, instead of at the top-level). The `BlazorView<MainViewModel>` class does the rest of the magic for you, associating the `MainViewModel` with the page at the root path.
+
+Now, we should setup that root page, right? Each page you make is created in the same manner - just remember to change the relative path!
+
+**Index.razor**
+````C#
+@page "/"
+@using MyApp.ViewModels
+@inject IBlazorViewProvider ViewProvider
+
+@code
+{
+    public MainViewModel ViewModel { get; set; }
+
+    protected override void OnInitialized()
+    {
+        ViewModel = (ViewProvider.CurrentView as BlazorView<MainViewModel>)?.ViewModel;
+    }
+}
+````
+
+The `IBlazorViewProvider` interface, in the `.Blazor` package's Navigation namespace, provides the `IViewModel` view-model to the Blazor app's pages, even though they're navigated to using .NET's Router. When you navigate to a page, the `IViewModel` type is checked against all `BlazorView<>`s registered in the view assemblies (see Program.cs). The correct page link is found and navigated to, and the `IBlazorViewProvider` contains the `IViewModel` that was resolved for the given view.
+
+The `OnInitialized` method will be run after navigation is completed and the `ViewModel` property on the `IBlazorViewProvider` is set, and can be used to call methods on the view-model if you really need to. Use this as your `OnNavigationCompleted` handler.
+
+At this point, your Blazor application should launch and activate to your specified `MainPage` - services should work when called and navigation should bring up the desired connected Blazor views. Notice a problem with the library or this tutorial? Submit an issue [here](https://github.com/bassclefstudio/AppModel/issues/new).
