@@ -62,6 +62,13 @@ namespace BassClefStudio.AppModel.Bindings
             NullAllowed = nullAllowed;
 
             ParentObject.ValueChanged += ParentValueChanged;
+
+            //// Setup the parent's PropertyChanged handler.
+            if (ParentObject.StoredValue != null)
+            {
+                ParentObject.StoredValue.PropertyChanged += ParentPropertyChanged;
+            }
+            oldParent = ParentObject.StoredValue;
         }
 
         /// <summary>
