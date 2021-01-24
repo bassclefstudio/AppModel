@@ -28,6 +28,7 @@ namespace BassClefStudio.AppModel.Bindings
             GetFunc = getFunc;
             SetFunc = setFunc;
             InitialBinding.ValueChanged += InitialValueChanged;
+            UpdateBinding();
         }
 
         private void InitialValueChanged(object sender, EventArgs e) => UpdateBinding();

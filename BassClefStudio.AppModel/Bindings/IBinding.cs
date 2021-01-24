@@ -49,14 +49,6 @@ namespace BassClefStudio.AppModel.Bindings
         public event EventHandler ValueChanged;
 
         /// <summary>
-        /// Creates a new <see cref="Binding{T}"/> and initializes its <see cref="StoredValue"/>.
-        /// </summary>
-        public Binding()
-        {
-            UpdateBinding();
-        }
-
-        /// <summary>
         /// Gets the current value to update this <see cref="IBinding{T}"/>'s <see cref="StoredValue"/>.
         /// </summary>
         /// <returns></returns>

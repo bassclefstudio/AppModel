@@ -72,6 +72,8 @@ namespace BassClefStudio.AppModel.Bindings
                 notifyParent.PropertyChanged += ParentPropertyChanged;
             }
             oldParent = ParentObject.StoredValue;
+
+            UpdateBinding();
         }
 
 

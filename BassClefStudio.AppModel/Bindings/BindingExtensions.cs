@@ -1,6 +1,7 @@
 ﻿using BassClefStudio.AppModel.Navigation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace BassClefStudio.AppModel.Bindings
@@ -13,20 +14,40 @@ namespace BassClefStudio.AppModel.Bindings
         /// <summary>
         /// Creates a <see cref="PropertyBinding{TIn, TOut}"/> stack to bind from some given <typeparamref name="T1"/> object, through a property path, to a given <typeparamref name="T2"/> property, using reflection.
         /// </summary>
-        /// <typeparam name="T1">The type of the <paramref name="baseObject"/>.</typeparam>
+        /// <typeparam name="T1">The type of the <paramref name="binding"/>.</typeparam>
         /// <typeparam name="T2">The desired type of the property.</typeparam>
-        /// <param name="baseObject">The <typeparamref name="T1"/> object which serves as the base of the binding with a <see cref="ConstantBinding{T}"/> expression.</param>
+        /// <param name="binding">The <typeparamref name="T1"/> object which serves as the base of the binding with a <see cref="ConstantBinding{T}"/> expression.</param>
         /// <param name="propertyPath">The <see cref="string"/> path from the <typeparamref name="T1"/> object to the <typeparamref name="T2"/> property.</param>
+        /// <param name="allowSet">A <see cref="bool"/> indicating whether the reflection binding should allow for setting of the property.</param>
         /// <returns>An <see cref="IBinding{T}"/> that references a <typeparamref name="T2"/> object.</returns>
-        public static IBinding<T2> CreateReflectionBinding<T1, T2>(this T1 baseObject, string propertyPath)
+        public static IBinding<T2> CreateReflectionBinding<T1, T2>(this IBinding<T1> binding, string propertyPath, bool allowSet = false)
         {
             var pathParts = propertyPath.Split(new string[] { "." }, StringSplitOptions.None);
-            Type currentType = baseObject.GetType();
-            IBinding<object> currentBinding = new ConstantBinding<object>(baseObject);
+            Type currentType = typeof(T1);
+            IBinding<object> currentBinding = binding.CastBinding<T1, object>();
             foreach (var part in pathParts)
             {
                 var property = currentType.GetProperty(part);
-                currentBinding = currentBinding.WithProperty(o => property.GetValue(o), (o, val) => property.SetValue(o, val), property.Name);
+                if (property == null)
+                {
+                    throw new BindingException($"Failed to find property with name {part} on type {currentType.Name}.");
+                }
+
+                if (allowSet && part == pathParts.Last())
+                {
+                    currentBinding = currentBinding.WithProperty(
+                        o => property.GetValue(o),
+                        (o, val) => property.SetValue(o, val),
+                        property.Name);
+                }
+                else
+                {
+                    currentBinding = currentBinding.WithProperty(
+                        o => property.GetValue(o),
+                        property.Name);
+                }
+
+                currentType = property.PropertyType;
             }
             return currentBinding.CastBinding<object, T2>();
         }
@@ -88,6 +109,16 @@ namespace BassClefStudio.AppModel.Bindings
         public static IBinding<T> ViewModelBinding<T>(this IView<T> view) where T : IViewModel
         {
             return new ConstantBinding<IView<T>>(view).WithProperty(v => v.ViewModel, "ViewModel");
+        }
+
+        /// <summary>
+        /// Creates a <see cref="ConstantBinding{T}"/> expression for the given object.
+        /// </summary>
+        /// <typeparam name="T">The type of the resulting <see cref="IBinding{T}.StoredValue"/>.</typeparam>
+        /// <param name="value">The <typeparamref name="T"/> value to store.</param>
+        public static IBinding<T> MyBinding<T>(this T value)
+        {
+            return new ConstantBinding<T>(value);
         }
     }
 }

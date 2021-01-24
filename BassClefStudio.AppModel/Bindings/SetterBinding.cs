@@ -16,6 +16,7 @@ namespace BassClefStudio.AppModel.Bindings
         public SetterBinding()
         {
             storedValue = default(T);
+            UpdateBinding();
         }
 
         /// <summary>
@@ -25,6 +26,7 @@ namespace BassClefStudio.AppModel.Bindings
         public SetterBinding(T initialValue)
         {
             storedValue = initialValue;
+            UpdateBinding();
         }
 
         /// <inheritdoc/>
