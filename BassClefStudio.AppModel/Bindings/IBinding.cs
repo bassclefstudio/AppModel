@@ -29,10 +29,13 @@ namespace BassClefStudio.AppModel.Bindings
     /// <typeparam name="T">The type of the object that this <see cref="IBinding{T}"/> represents.</typeparam>
     public abstract class OneWayBinding<T> : Observable, IBinding<T>
     {
-        private T storedValue;
+        /// <summary>
+        /// Backing field for <see cref="OneWayBinding{T}"/>'s implementation of the <see cref="StoredValue"/> property.
+        /// </summary>
+        protected T storedValue;
 
         /// <inheritdoc/>
-        public T StoredValue 
+        public virtual T StoredValue 
         { 
             get => storedValue; 
             set => throw new BindingException("OneWayBinding<T> does not support setting of the bound value."); 
@@ -65,12 +68,10 @@ namespace BassClefStudio.AppModel.Bindings
     /// Represents an abstract implementation of <see cref="IBinding{T}"/> that supports get- and set-based, two-way data binding.
     /// </summary>
     /// <typeparam name="T">The type of the object that this <see cref="IBinding{T}"/> represents.</typeparam>
-    public abstract class TwoWayBinding<T> : Observable, IBinding<T>
+    public abstract class TwoWayBinding<T> : OneWayBinding<T>
     {
-        private T storedValue;
-
         /// <inheritdoc/>
-        public T StoredValue
+        public override T StoredValue
         {
             get => storedValue;
             set 
@@ -80,31 +81,10 @@ namespace BassClefStudio.AppModel.Bindings
             }
         }
 
-        /// <inheritdoc/>
-        public event EventHandler ValueChanged;
-
-        /// <summary>
-        /// Gets the current value to update this <see cref="IBinding{T}"/>'s <see cref="StoredValue"/>.
-        /// </summary>
-        public abstract T GetValue();
-
         /// <summary>
         /// Sets the backing store for this <see cref="TwoWayBinding{T}"/> to a given <typeparamref name="T"/> value.
         /// </summary>
         /// <param name="newVal">The <typeparamref name="T"/> value to set.</param>
         public abstract void SetValue(T newVal);
-
-        /// <summary>
-        /// Calling this method causes the <see cref="TwoWayBinding{T}"/> to update itself, triggering <see cref="ValueChanged"/> and similar events.
-        /// </summary>
-        public void UpdateBinding()
-        {
-            var newVal = GetValue();
-            if (newVal == null || !newVal.Equals(StoredValue))
-            {
-                Set(ref storedValue, newVal, nameof(StoredValue));
-                ValueChanged?.Invoke(this, new EventArgs());
-            }
-        }
     }
 }
