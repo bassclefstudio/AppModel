@@ -1,68 +1,124 @@
 ﻿using BassClefStudio.AppModel.Navigation;
-using BassClefStudio.AppModel.Threading;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
+using System.Linq;
 using System.Text;
 
 namespace BassClefStudio.AppModel.Bindings
 {
     /// <summary>
-    /// Provides extension methods for creating complex <see cref="IBindingExpression{T}"/>s.
+    /// Provides extension methods for the <see cref="IBinding{T}"/> interface.
     /// </summary>
     public static class BindingExtensions
     {
         /// <summary>
-        /// Creates an <see cref="IBindingExpression{T}"/> for a property on an existing <see cref="IBindingExpression{T}"/>'s <see cref="IBindingExpression{T}.Value"/> object.
+        /// Creates a <see cref="PropertyBinding{TIn, TOut}"/> stack to bind from some given <typeparamref name="T1"/> object, through a property path, to a given <typeparamref name="T2"/> property, using reflection.
         /// </summary>
-        /// <typeparam name="T1">The type of the base object.</typeparam>
-        /// <typeparam name="T2">The type of the property to bind.</typeparam>
-        /// <param name="me">The base object's <see cref="IBindingExpression{T}"/>.</param>
-        /// <param name="getProperty">A <see cref="Func{T, TResult}"/> getting the property on <paramref name="me"/>.</param>
-        /// <returns>A new <see cref="IBindingExpression{T}"/> for the property on the base object.</returns>
-        public static IBindingExpression<T2> GetProperty<T1, T2>(this IBindingExpression<T1> me, Func<T1, T2> getProperty) where T1 : INotifyPropertyChanged
+        /// <typeparam name="T1">The type of the <paramref name="binding"/>.</typeparam>
+        /// <typeparam name="T2">The desired type of the property.</typeparam>
+        /// <param name="binding">The <typeparamref name="T1"/> object which serves as the base of the binding with a <see cref="ConstantBinding{T}"/> expression.</param>
+        /// <param name="propertyPath">The <see cref="string"/> path from the <typeparamref name="T1"/> object to the <typeparamref name="T2"/> property.</param>
+        /// <param name="allowSet">A <see cref="bool"/> indicating whether the reflection binding should allow for setting of the property.</param>
+        /// <returns>An <see cref="IBinding{T}"/> that references a <typeparamref name="T2"/> object.</returns>
+        public static IBinding<T2> CreateReflectionBinding<T1, T2>(this IBinding<T1> binding, string propertyPath, bool allowSet = false)
         {
-            return new PropertyBindingExpression<T1, T2>(me.DispatcherService, me, getProperty);
+            var pathParts = propertyPath.Split(new string[] { "." }, StringSplitOptions.None);
+            Type currentType = typeof(T1);
+            IBinding<object> currentBinding = binding.CastBinding<T1, object>();
+            foreach (var part in pathParts)
+            {
+                var property = currentType.GetProperty(part);
+                if (property == null)
+                {
+                    throw new BindingException($"Failed to find property with name {part} on type {currentType.Name}.");
+                }
+
+                if (allowSet && part == pathParts.Last())
+                {
+                    currentBinding = currentBinding.WithProperty(
+                        o => property.GetValue(o),
+                        (o, val) => property.SetValue(o, val),
+                        property.Name);
+                }
+                else
+                {
+                    currentBinding = currentBinding.WithProperty(
+                        o => property.GetValue(o),
+                        property.Name);
+                }
+
+                currentType = property.PropertyType;
+            }
+            return currentBinding.CastBinding<object, T2>();
         }
 
         /// <summary>
-        /// Creates an <see cref="IBindingExpression{T}"/> for an existing <see cref="IBindingExpression{T}"/> that applies a <see cref="Func{T, TResult}"/> to the existing <see cref="IBindingExpression{T}.Value"/>.
+        /// Creates a new <see cref="PropertyBinding{TIn, TOut}"/> with the parent as the given <see cref="IBinding{T}"/>.
         /// </summary>
-        /// <typeparam name="T1">The type of the base object.</typeparam>
-        /// <typeparam name="T2">The type of the transformed object.</typeparam>
-        /// <param name="me">The base object's <see cref="IBindingExpression{T}"/>.</param>
-        /// <param name="transform">A <see cref="Func{T, TResult}"/> transforming the base object to type <typeparamref name="T2"/>.</param>
-        /// <returns>A new <see cref="IBindingExpression{T}"/> for the transformed value of the base object.</returns>
-        public static IBindingExpression<T2> Transform<T1, T2>(this IBindingExpression<T1> me, Func<T1, T2> transform)
+        /// <typeparam name="T1">The type of the <see cref="PropertyBinding{TIn, TOut}.ParentObject"/>.</typeparam>
+        /// <typeparam name="T2">The type of the resulting <see cref="IBinding{T}.StoredValue"/>.</typeparam>
+        /// <param name="binding">An <see cref="IBinding{T}"/> to the parent object from which the property is retrieved.</param>
+        /// <param name="getProperty">A function that gets the <typeparamref name="T2"/> property from a <typeparamref name="T1"/> parent.</param>
+        /// <param name="setProperty">A method that sets the <typeparamref name="T2"/> property of a <typeparamref name="T1"/> parent.</param>
+        /// <param name="propertyName">The name of the <typeparamref name="T2"/> property, which can be used to selectively trigger <see cref="Binding{T}.UpdateBinding"/> only when a property of this name is changed on the <see cref="PropertyBinding{TIn, TOut}.ParentObject"/>.</param>
+        /// <param name="nullAllowed">A <see cref="bool"/> indicaT1g whether this <see cref="PropertyBinding{T1, T2}"/> should conT1ue to call <see cref="PropertyBinding{TIn, TOut}.GetPropertyFunc"/> and <see cref="PropertyBinding{TIn, TOut}.SetPropertyAction"/> if the <see cref="PropertyBinding{TIn, TOut}.ParentObject"/> is known to currently represent a 'null' value.</param>
+        /// <returns></returns>
+        public static IBinding<T2> WithProperty<T1, T2>(this IBinding<T1> binding, Func<T1, T2> getProperty, Action<T1, T2> setProperty, string propertyName = null, bool nullAllowed = false)
         {
-            return new TransformBindingExpression<T1, T2>(me.DispatcherService, me, transform);
+            return new PropertyBinding<T1, T2>(binding, getProperty, setProperty, propertyName, nullAllowed);
         }
 
         /// <summary>
-        /// Creates an <see cref="IBindingExpression{T}"/> for an existing <see cref="IBindingExpression{T}"/> that applies a <see cref="Func{T, TResult}"/> to an existing <see cref="IBindingExpression{T}.Value"/> collection.
+        /// Creates a new one-way <see cref="PropertyBinding{TIn, TOut}"/> with the parent as the given <see cref="IBinding{T}"/>.
         /// </summary>
-        /// <typeparam name="T1">The type of the base collection.</typeparam>
-        /// <typeparam name="T2">The type of the transformed collection.</typeparam>
-        /// <param name="me">The base collection's <see cref="IBindingExpression{T}"/>.</param>
-        /// <param name="transform">A <see cref="Func{T, TResult}"/> transforming the base collection to type <typeparamref name="T2"/>.</param>
-        /// <param name="update">An <see cref="Action{T}"/> that updates the transformed <see cref="IBindingExpression{T}.Value"/> based on changes to the base collection.</param>
-        /// <returns>A new <see cref="IBindingExpression{T}"/> for the transformed collection.</returns>
-        public static IBindingExpression<T2> TransformCollection<T1, T2>(this IBindingExpression<T1> me, Func<T1, T2> transform, Action<NotifyCollectionChangedEventArgs> update) where T1 : INotifyCollectionChanged
+        /// <typeparam name="T1">The type of the <see cref="PropertyBinding{TIn, TOut}.ParentObject"/>.</typeparam>
+        /// <typeparam name="T2">The type of the resulting <see cref="IBinding{T}.StoredValue"/>.</typeparam>
+        /// <param name="binding">An <see cref="IBinding{T}"/> to the parent object from which the property is retrieved.</param>
+        /// <param name="getProperty">A function that gets the <typeparamref name="T2"/> property from a <typeparamref name="T1"/> parent.</param>
+        /// <param name="propertyName">The name of the <typeparamref name="T2"/> property, which can be used to selectively trigger <see cref="Binding{T}.UpdateBinding"/> only when a property of this name is changed on the <see cref="PropertyBinding{TIn, TOut}.ParentObject"/>.</param>
+        /// <param name="nullAllowed">A <see cref="bool"/> indicaT1g whether this <see cref="PropertyBinding{T1, T2}"/> should conT1ue to call <see cref="PropertyBinding{TIn, TOut}.GetPropertyFunc"/> and <see cref="PropertyBinding{TIn, TOut}.SetPropertyAction"/> if the <see cref="PropertyBinding{TIn, TOut}.ParentObject"/> is known to currently represent a 'null' value.</param>
+        /// <returns></returns>
+        public static IBinding<T2> WithProperty<T1, T2>(this IBinding<T1> binding, Func<T1, T2> getProperty, string propertyName = null, bool nullAllowed = false)
         {
-            return new CollectionTransformBindingExpression<T1, T2>(me.DispatcherService, me, transform, update);
+            return new PropertyBinding<T1, T2>(binding, getProperty, propertyName, nullAllowed);
         }
 
         /// <summary>
-        /// Returns an <see cref="IBindingExpression{T}"/> to this <see cref="IView{T}"/>'s current <see cref="IView{T}.ViewModel"/>. Call this while or after <see cref="IView.Initialize"/> is called.
+        /// Creates a <see cref="TransformBinding{TIn, TOut}"/> that casts <see cref="IBinding{T}.StoredValue"/>s to and from different types.
         /// </summary>
-        /// <typeparam name="T">The type of the view-model to bind to.</typeparam>
-        /// <param name="dispatcherService">The <see cref="IDispatcherService"/> used to send change notifications.</param>
-        /// <param name="view">The <see cref="IView{T}"/> where the view-model could be found.</param>
-        /// <returns>An <see cref="IBindingExpression{T}"/> binding to the constant value of the current view-model.</returns>
-        public static IBindingExpression<T> ViewModelBinding<T>(this IView<T> view, IDispatcherService dispatcherService) where T : IViewModel
+        /// <typeparam name="T1">The initial type of the <see cref="IBinding{T}"/>.</typeparam>
+        /// <typeparam name="T2">The desired (cast) type of the <see cref="IBinding{T}"/>.</typeparam>
+        /// <param name="binding">The initial <see cref="IBinding{T}"/> expression.</param>
+        public static IBinding<T2> CastBinding<T1, T2>(this IBinding<T1> binding)
         {
-            return new ConstantBindingExpression<T>(dispatcherService, view.ViewModel);
+            return new TransformBinding<T1, T2>(
+                binding,
+                t1 => t1 is T2 t2
+                        ? t2
+                        : throw new BindingException($"Invalid casting in TransformBinding: {t1?.GetType()?.Name} to {typeof(T2).Name}."),
+                t2 => t2 is T1 t1
+                        ? t1
+                        : throw new BindingException($"Invalid casting in TransformBinding: {t2?.GetType()?.Name} to {typeof(T1).Name}."));
+        }
+
+        /// <summary>
+        /// Gets a <see cref="IBinding{T}"/> expression that attaches to the <see cref="IViewModel"/> present in this <see cref="IView{T}"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the <see cref="IViewModel"/> on this <see cref="IView{T}"/>.</typeparam>
+        /// <param name="view">This <see cref="IView"/> to get the <see cref="IView{T}.ViewModel"/>.</param>
+        public static IBinding<T> ViewModelBinding<T>(this IView<T> view) where T : IViewModel
+        {
+            return new ConstantBinding<IView<T>>(view).WithProperty(v => v.ViewModel, "ViewModel");
+        }
+
+        /// <summary>
+        /// Creates a <see cref="ConstantBinding{T}"/> expression for the given object.
+        /// </summary>
+        /// <typeparam name="T">The type of the resulting <see cref="IBinding{T}.StoredValue"/>.</typeparam>
+        /// <param name="value">The <typeparamref name="T"/> value to store.</param>
+        public static IBinding<T> MyBinding<T>(this T value)
+        {
+            return new ConstantBinding<T>(value);
         }
     }
 }
