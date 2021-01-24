@@ -24,34 +24,52 @@ namespace BassClefStudio.AppModel.Bindings
     }
 
     /// <summary>
-    /// Represents an abstract implementation of <see cref="IBinding{T}"/> that supports get-based, one-way data binding.
+    /// Represents an abstract implementation of <see cref="IBinding{T}"/> that supports get- and set- based, one- or two-way data binding.
     /// </summary>
     /// <typeparam name="T">The type of the object that this <see cref="IBinding{T}"/> represents.</typeparam>
-    public abstract class OneWayBinding<T> : Observable, IBinding<T>
+    public abstract class Binding<T> : Observable, IBinding<T>
     {
         /// <summary>
-        /// Backing field for <see cref="OneWayBinding{T}"/>'s implementation of the <see cref="StoredValue"/> property.
+        /// Backing field for <see cref="Binding{T}"/>'s implementation of the <see cref="StoredValue"/> property.
         /// </summary>
         protected T storedValue;
 
         /// <inheritdoc/>
         public virtual T StoredValue 
         { 
-            get => storedValue; 
-            set => throw new BindingException("OneWayBinding<T> does not support setting of the bound value."); 
+            get => storedValue;
+            set
+            {
+                SetValue(value);
+                UpdateBinding();
+            }
         }
 
         /// <inheritdoc/>
         public event EventHandler ValueChanged;
 
         /// <summary>
+        /// Creates a new <see cref="Binding{T}"/> and initializes its <see cref="StoredValue"/>.
+        /// </summary>
+        public Binding()
+        {
+            UpdateBinding();
+        }
+
+        /// <summary>
         /// Gets the current value to update this <see cref="IBinding{T}"/>'s <see cref="StoredValue"/>.
         /// </summary>
         /// <returns></returns>
-        public abstract T GetValue();
+        protected abstract T GetValue();
 
         /// <summary>
-        /// Calling this method causes the <see cref="OneWayBinding{T}"/> to update itself, triggering <see cref="ValueChanged"/> and similar events.
+        /// Sets the backing store for this <see cref="IBinding{T}"/> to a given <typeparamref name="T"/> value.
+        /// </summary>
+        /// <param name="newVal">The <typeparamref name="T"/> value to set.</param>
+        protected abstract void SetValue(T newVal);
+
+        /// <summary>
+        /// Calling this method causes the <see cref="Binding{T}"/> to update itself, triggering <see cref="ValueChanged"/> and similar events.
         /// </summary>
         public void UpdateBinding()
         {
@@ -61,30 +79,6 @@ namespace BassClefStudio.AppModel.Bindings
                 Set(ref storedValue, newVal, nameof(StoredValue));
                 ValueChanged?.Invoke(this, new EventArgs());
             }
-        }
-    }
-
-    /// <summary>
-    /// Represents an abstract implementation of <see cref="IBinding{T}"/> that supports get- and set-based, two-way data binding.
-    /// </summary>
-    /// <typeparam name="T">The type of the object that this <see cref="IBinding{T}"/> represents.</typeparam>
-    public abstract class TwoWayBinding<T> : OneWayBinding<T>
-    {
-        /// <inheritdoc/>
-        public override T StoredValue
-        {
-            get => storedValue;
-            set 
-            {
-                SetValue(value);
-                UpdateBinding();
-            }
-        }
-
-        /// <summary>
-        /// Sets the backing store for this <see cref="TwoWayBinding{T}"/> to a given <typeparamref name="T"/> value.
-        /// </summary>
-        /// <param name="newVal">The <typeparamref name="T"/> value to set.</param>
-        public abstract void SetValue(T newVal);
+        }   
     }
 }
