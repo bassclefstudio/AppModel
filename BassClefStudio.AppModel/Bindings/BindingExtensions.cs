@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BassClefStudio.AppModel.Navigation;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -17,7 +18,7 @@ namespace BassClefStudio.AppModel.Bindings
         /// <param name="baseObject">The <typeparamref name="T1"/> object which serves as the base of the binding with a <see cref="ConstantBinding{T}"/> expression.</param>
         /// <param name="propertyPath">The <see cref="string"/> path from the <typeparamref name="T1"/> object to the <typeparamref name="T2"/> property.</param>
         /// <returns>An <see cref="IBinding{T}"/> that references a <typeparamref name="T2"/> object.</returns>
-        public static IBinding<T2> CreateReflectionBinding<T1,T2>(this T1 baseObject, string propertyPath)
+        public static IBinding<T2> CreateReflectionBinding<T1, T2>(this T1 baseObject, string propertyPath)
         {
             var pathParts = propertyPath.Split(new string[] { "." }, StringSplitOptions.None);
             Type currentType = baseObject.GetType();
@@ -77,6 +78,16 @@ namespace BassClefStudio.AppModel.Bindings
                 t2 => t2 is T1 t1
                         ? t1
                         : throw new BindingException($"Invalid casting in TransformBinding: {t2?.GetType()?.Name} to {typeof(T1).Name}."));
+        }
+
+        /// <summary>
+        /// Gets a <see cref="IBinding{T}"/> expression that attaches to the <see cref="IViewModel"/> present in this <see cref="IView{T}"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the <see cref="IViewModel"/> on this <see cref="IView{T}"/>.</typeparam>
+        /// <param name="view">This <see cref="IView"/> to get the <see cref="IView{T}.ViewModel"/>.</param>
+        public static IBinding<T> ViewModelBinding<T>(this IView<T> view) where T : IViewModel
+        {
+            return new ConstantBinding<IView<T>>(view).WithProperty(v => v.ViewModel, "ViewModel");
         }
     }
 }
