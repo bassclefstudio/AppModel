@@ -15,12 +15,12 @@ namespace BassClefStudio.AppModel.Bindings
         /// <summary>
         /// Get or set the currently stored <typeparamref name="T"/> value this <see cref="IBinding{T}"/> represents.
         /// </summary>
-        T StoredValue { get; set; }
+        T CurrentValue { get; set; }
 
         /// <summary>
-        /// An event fired whenever the value of <see cref="StoredValue"/> changes. Equivalent to the <see cref="INotifyPropertyChanged"/> events from the <see cref="StoredValue"/> property.
+        /// An event fired whenever the value of <see cref="CurrentValue"/> changes. Equivalent to the <see cref="INotifyPropertyChanged"/> events from the <see cref="CurrentValue"/> property.
         /// </summary>
-        event EventHandler ValueChanged;
+        event EventHandler CurrentValueChanged;
     }
 
     /// <summary>
@@ -30,14 +30,14 @@ namespace BassClefStudio.AppModel.Bindings
     public abstract class Binding<T> : Observable, IBinding<T>
     {
         /// <summary>
-        /// Backing field for <see cref="Binding{T}"/>'s implementation of the <see cref="StoredValue"/> property.
+        /// Backing field for <see cref="Binding{T}"/>'s implementation of the <see cref="CurrentValue"/> property.
         /// </summary>
-        protected T storedValue;
+        protected T currentValue;
 
         /// <inheritdoc/>
-        public virtual T StoredValue 
+        public virtual T CurrentValue 
         { 
-            get => storedValue;
+            get => currentValue;
             set
             {
                 SetValue(value);
@@ -46,10 +46,10 @@ namespace BassClefStudio.AppModel.Bindings
         }
 
         /// <inheritdoc/>
-        public event EventHandler ValueChanged;
+        public event EventHandler CurrentValueChanged;
 
         /// <summary>
-        /// Gets the current value to update this <see cref="IBinding{T}"/>'s <see cref="StoredValue"/>.
+        /// Gets the current value to update this <see cref="IBinding{T}"/>'s <see cref="CurrentValue"/>.
         /// </summary>
         /// <returns></returns>
         protected abstract T GetValue();
@@ -61,16 +61,25 @@ namespace BassClefStudio.AppModel.Bindings
         protected abstract void SetValue(T newVal);
 
         /// <summary>
-        /// Calling this method causes the <see cref="Binding{T}"/> to update itself, triggering <see cref="ValueChanged"/> and similar events.
+        /// Calling this method causes the <see cref="Binding{T}"/> to update itself, triggering <see cref="CurrentValueChanged"/> and similar events.
         /// </summary>
         public void UpdateBinding()
         {
             var newVal = GetValue();
-            if(newVal == null || !newVal.Equals(StoredValue))
+            if(newVal == null || !newVal.Equals(CurrentValue))
             {
-                Set(ref storedValue, newVal, nameof(StoredValue));
-                ValueChanged?.Invoke(this, new EventArgs());
+                Set(ref currentValue, newVal, nameof(CurrentValue));
+                CurrentValueChanged?.Invoke(this, new EventArgs());
             }
-        }   
+        }
+        
+        /// <summary>
+        /// Triggers the <see cref="CurrentValueChanged"/> and <see cref="INotifyPropertyChanged.PropertyChanged"/> events, even if the value of the <see cref="CurrentValue"/> has not changed.
+        /// </summary>
+        protected void TriggerValueChanged()
+        {
+            Set(ref currentValue, currentValue, nameof(CurrentValue));
+            CurrentValueChanged?.Invoke(this, new EventArgs());
+        }
     }
 }

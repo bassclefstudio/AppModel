@@ -3,6 +3,7 @@ using BassClefStudio.NET.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,7 +19,8 @@ namespace BassClefStudio.AppModel.Tests
             {
                 Property = new MyPropertyClass()
                 {
-                    Name = "Test 1"
+                    Name = "Test 1",
+                    Keys = new ObservableCollection<string>() { "Test 1" }
                 }
             };
         }
@@ -29,37 +31,81 @@ namespace BassClefStudio.AppModel.Tests
             IBinding<string> nameBinding = getBinding(myObject);
 
             int val = 0;
-            nameBinding.ValueChanged += (s, e) => val++;
+            nameBinding.CurrentValueChanged += (s, e) => val++;
 
             myObject.Property.Name = "Test 2";
             Assert.AreEqual(1, val, "ValueChanged event was not fired.");
-            Assert.AreEqual(myObject.Property.Name, nameBinding.StoredValue, "Incorrect StoredValue on nameBinding.");
+            Assert.AreEqual(myObject.Property.Name, nameBinding.CurrentValue, "Incorrect StoredValue on nameBinding.");
 
             myObject.Property = new MyPropertyClass()
             {
                 Name = "Test 3"
             };
             Assert.AreEqual(2, val, "ValueChanged event was not fired.");
-            Assert.AreEqual(myObject.Property.Name, nameBinding.StoredValue, "Incorrect StoredValue on nameBinding.");
+            Assert.AreEqual(myObject.Property.Name, nameBinding.CurrentValue, "Incorrect StoredValue on nameBinding.");
 
-            nameBinding.StoredValue = "Test 4";
+            nameBinding.CurrentValue = "Test 4";
             Assert.AreEqual("Test 4", myObject.Property.Name, "Failed to set property through binding.");
+        }
+
+        private static void TestCollectionBinding(Func<MyClass, IBinding<ObservableCollection<string>>> getBinding)
+        {
+            var myObject = CreateTestObject();
+            IBinding<ObservableCollection<string>> collectionBinding = getBinding(myObject);
+
+            int val = 0;
+            collectionBinding.CurrentValueChanged += (s, e) => val++;
+
+            Assert.AreEqual(myObject.Property.Keys[0], collectionBinding.CurrentValue[0], "Incorrect initial StoredValue on collectionBinding.");
+            myObject.Property.Keys.Add("Test 2");
+            Assert.AreEqual(1, val, "ValueChanged event was not fired.");
+            Assert.AreEqual(myObject.Property.Keys[1], collectionBinding.CurrentValue[1], "Incorrect StoredValue on collectionBinding.");
+
+            myObject.Property = new MyPropertyClass()
+            {
+                Keys = new ObservableCollection<string>() { "Test 3" }
+            };
+            Assert.AreEqual(2, val, "ValueChanged event was not fired.");
+            Assert.AreEqual(myObject.Property.Keys[0], collectionBinding.CurrentValue[0], "Incorrect StoredValue on collectionBinding.");
         }
 
         [TestMethod]
         public void TestPropertyBinding()
         {
             TestBinding(myObject => myObject.MyBinding()
-                .WithProperty(m => m.Property)
-                .WithProperty(p => p.Name, (p, n) => p.Name = n));
+                .Property(m => m.Property)
+                .Property(p => p.Name, (p, n) => p.Name = n));
+            //// Strongly-typed - think {x:Bind Property.Name}
+        }
+
+        [TestMethod]
+        public void TestPropertyCollectionBinding()
+        {
+            TestCollectionBinding(myObject => myObject.MyBinding()
+                .Property(m => m.Property)
+                .Property(p => p.Keys)
+                .AsCollection());
+            //// Strongly-typed - think {x:Bind Property.Keys}
         }
 
         [TestMethod]
         public void TestReflectionBinding()
         {
             TestBinding(myObject => myObject.MyBinding()
-                .CreateReflectionBinding<MyClass, string>("Property.Name", true));
+                .ReflectionBinding<MyClass, string>("Property.Name", true));
+            //// Reflection - weakly-typed - think {Binding Property.Name}
         }
+
+        [TestMethod]
+        public void TestReflectionCollectionBinding()
+        {
+            TestCollectionBinding(myObject => myObject.MyBinding()
+                .ReflectionBinding<MyClass, ObservableCollection<string>>("Property.Keys")
+                .AsCollection());
+            //// Reflection - weakly-typed - think {Binding Property.Keys}
+        }
+
+
 
         [TestMethod]
         public void TestBadReflectionPath()
@@ -67,7 +113,7 @@ namespace BassClefStudio.AppModel.Tests
             var myObject = CreateTestObject();
             Assert.ThrowsException<BindingException>(() =>
                 myObject.MyBinding()
-                .CreateReflectionBinding<MyClass, string>("Property.Blah"));
+                .ReflectionBinding<MyClass, string>("Property.Blah"));
         }
 
         [TestMethod]
@@ -75,11 +121,11 @@ namespace BassClefStudio.AppModel.Tests
         {
             var myObject = CreateTestObject();
             var myBinding = myObject.MyBinding()
-                .WithProperty(m => m.Property)
-                .WithProperty(p => p.Name);
+                .Property(m => m.Property)
+                .Property(p => p.Name);
 
             Assert.ThrowsException<BindingException>(
-                () => myBinding.StoredValue = "Test 2");
+                () => myBinding.CurrentValue = "Test 2");
         }
 
         [TestMethod]
@@ -87,10 +133,10 @@ namespace BassClefStudio.AppModel.Tests
         {
             var myObject = CreateTestObject();
             var myBinding = myObject.MyBinding()
-                .CreateReflectionBinding<MyClass, string>("Property.Name");
+                .ReflectionBinding<MyClass, string>("Property.Name");
 
             Assert.ThrowsException<BindingException>(
-                () => myBinding.StoredValue = "Test 2");
+                () => myBinding.CurrentValue = "Test 2");
         }
     }
 
@@ -104,5 +150,7 @@ namespace BassClefStudio.AppModel.Tests
     {
         private string name;
         public string Name { get => name; set => Set(ref name, value); }
+
+        public ObservableCollection<string> Keys { get; set; }
     }
 }

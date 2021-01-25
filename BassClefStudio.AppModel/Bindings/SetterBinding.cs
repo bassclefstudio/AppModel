@@ -5,7 +5,7 @@ using System.Text;
 namespace BassClefStudio.AppModel.Bindings
 {
     /// <summary>
-    /// An <see cref="IBinding{T}"/> that is only changed by the setter on <see cref="IBinding{T}.StoredValue"/>.
+    /// An <see cref="IBinding{T}"/> that is only changed by the setter on <see cref="IBinding{T}.CurrentValue"/>.
     /// </summary>
     /// <typeparam name="T">The type of object this <see cref="IBinding{T}"/> represents.</typeparam>
     public class SetterBinding<T> : Binding<T>
@@ -15,24 +15,24 @@ namespace BassClefStudio.AppModel.Bindings
         /// </summary>
         public SetterBinding()
         {
-            storedValue = default(T);
+            currentValue = default(T);
             UpdateBinding();
         }
 
         /// <summary>
         /// Creates a new <see cref="SetterBinding{T}"/> with the given value.
         /// </summary>
-        /// <param name="initialValue">The initial <typeparamref name="T"/> value of the <see cref="IBinding{T}.StoredValue"/>.</param>
+        /// <param name="initialValue">The initial <typeparamref name="T"/> value of the <see cref="IBinding{T}.CurrentValue"/>.</param>
         public SetterBinding(T initialValue)
         {
-            storedValue = initialValue;
+            currentValue = initialValue;
             UpdateBinding();
         }
 
         /// <inheritdoc/>
-        protected override T GetValue() => storedValue;
+        protected override T GetValue() => currentValue;
 
         /// <inheritdoc/>
-        protected override void SetValue(T newVal) => storedValue = newVal;
+        protected override void SetValue(T newVal) => currentValue = newVal;
     }
 }

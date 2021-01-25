@@ -8,7 +8,7 @@ namespace BassClefStudio.AppModel.Bindings
     /// An <see cref="IBinding{T}"/> expression that can convert to and from two types of objects, backed by an existing <see cref="IBinding{T}"/>.
     /// </summary>
     /// <typeparam name="TIn">The type of the <see cref="InitialBinding"/>.</typeparam>
-    /// <typeparam name="TOut">The type of the <see cref="IBinding{T}.StoredValue"/>.</typeparam>
+    /// <typeparam name="TOut">The type of the <see cref="IBinding{T}.CurrentValue"/>.</typeparam>
     public class TransformBinding<TIn, TOut> : Binding<TOut>
     {
         /// <summary>
@@ -27,7 +27,7 @@ namespace BassClefStudio.AppModel.Bindings
             InitialBinding = initialBinding;
             GetFunc = getFunc;
             SetFunc = setFunc;
-            InitialBinding.ValueChanged += InitialValueChanged;
+            InitialBinding.CurrentValueChanged += InitialValueChanged;
             UpdateBinding();
         }
 
@@ -39,7 +39,7 @@ namespace BassClefStudio.AppModel.Bindings
         public Func<TIn, TOut> GetFunc { get; set; }
 
         /// <inheritdoc/>
-        protected override TOut GetValue() => GetFunc(InitialBinding.StoredValue);
+        protected override TOut GetValue() => GetFunc(InitialBinding.CurrentValue);
 
         /// <summary>
         /// A function that creates a <typeparamref name="TIn"/> from a <typeparamref name="TOut"/>.
@@ -47,6 +47,6 @@ namespace BassClefStudio.AppModel.Bindings
         public Func<TOut, TIn> SetFunc { get; set; }
 
         /// <inheritdoc/>
-        protected override void SetValue(TOut newVal) => InitialBinding.StoredValue = SetFunc(newVal);
+        protected override void SetValue(TOut newVal) => InitialBinding.CurrentValue = SetFunc(newVal);
     }
 }
