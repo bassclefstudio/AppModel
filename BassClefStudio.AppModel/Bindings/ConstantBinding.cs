@@ -15,14 +15,14 @@ namespace BassClefStudio.AppModel.Bindings
         private T storedValue;
 
         /// <inheritdoc/>
-        public T StoredValue 
+        public T CurrentValue 
         { 
             get => storedValue; 
             set => throw new BindingException("Cannot set the value of a ConstantBinding expression."); 
         }
 
         /// <inheritdoc/>
-        public event EventHandler ValueChanged;
+        public event EventHandler CurrentValueChanged;
 
         /// <summary>
         /// Creates a new <see cref="ConstantBinding{T}"/> with the given value.

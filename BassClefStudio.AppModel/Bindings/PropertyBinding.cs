@@ -9,7 +9,7 @@ namespace BassClefStudio.AppModel.Bindings
     /// Represents a one-way <see cref="IBinding{T}"/> between a parent object and a property.
     /// </summary>
     /// <typeparam name="TIn">The type of the <see cref="ParentObject"/>.</typeparam>
-    /// <typeparam name="TOut">The type of the <see cref="IBinding{T}.StoredValue"/>.</typeparam>
+    /// <typeparam name="TOut">The type of the <see cref="IBinding{T}.CurrentValue"/>.</typeparam>
     public class PropertyBinding<TIn, TOut> : Binding<TOut>
     {
         /// <summary>
@@ -64,14 +64,14 @@ namespace BassClefStudio.AppModel.Bindings
             PropertyName = propertyName;
             NullAllowed = nullAllowed;
 
-            ParentObject.ValueChanged += ParentValueChanged;
+            ParentObject.CurrentValueChanged += ParentValueChanged;
 
             //// Setup the parent's PropertyChanged handler.
-            if (ParentObject.StoredValue != null && ParentObject.StoredValue is INotifyPropertyChanged notifyParent)
+            if (ParentObject.CurrentValue != null && ParentObject.CurrentValue is INotifyPropertyChanged notifyParent)
             {
                 notifyParent.PropertyChanged += ParentPropertyChanged;
             }
-            oldParent = ParentObject.StoredValue;
+            oldParent = ParentObject.CurrentValue;
 
             UpdateBinding();
         }
@@ -86,11 +86,11 @@ namespace BassClefStudio.AppModel.Bindings
                 notifyOldParent.PropertyChanged -= ParentPropertyChanged;
             }
             UpdateBinding();
-            if(ParentObject.StoredValue != null && ParentObject.StoredValue is INotifyPropertyChanged notifyNewParent)
+            if(ParentObject.CurrentValue != null && ParentObject.CurrentValue is INotifyPropertyChanged notifyNewParent)
             {
                 notifyNewParent.PropertyChanged += ParentPropertyChanged;
             }
-            oldParent = ParentObject.StoredValue;
+            oldParent = ParentObject.CurrentValue;
         }
 
         private void ParentPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -105,9 +105,9 @@ namespace BassClefStudio.AppModel.Bindings
         /// <inheritdoc/>
         protected override TOut GetValue()
         {
-            if(NullAllowed || ParentObject.StoredValue != null)
+            if(NullAllowed || ParentObject.CurrentValue != null)
             {
-                return GetPropertyFunc(ParentObject.StoredValue);
+                return GetPropertyFunc(ParentObject.CurrentValue);
             }
             else
             {
@@ -118,9 +118,9 @@ namespace BassClefStudio.AppModel.Bindings
         /// <inheritdoc/>
         protected override void SetValue(TOut newVal)
         {
-            if (NullAllowed || ParentObject.StoredValue != null)
+            if (NullAllowed || ParentObject.CurrentValue != null)
             {
-                SetPropertyAction(ParentObject.StoredValue, newVal);
+                SetPropertyAction(ParentObject.CurrentValue, newVal);
             }
         }
     }
