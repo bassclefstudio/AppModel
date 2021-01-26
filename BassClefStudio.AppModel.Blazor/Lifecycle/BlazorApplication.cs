@@ -25,16 +25,16 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// </summary>
         public App CurrentApp { get; }
 
-        private Assembly[] ViewAssemblies { get; }
+        private Assembly[] PlatformAssemblies { get; }
         /// <summary>
         /// Creates a new <see cref="BlazorApplication"/> object.
         /// </summary>
         /// <param name="app">The cross-platform app to run in this Blazor project.</param>
-        /// <param name="viewAssemblies">An array of <see cref="Assembly"/> objects containing all of the <see cref="IView"/>s to register for this app.</param>
-        public BlazorApplication(App app, params Assembly[] viewAssemblies)
+        /// <param name="platformAssemblies">An array of <see cref="Assembly"/> objects containing all of the <see cref="IView"/>s and <see cref="IPlatformModule"/>s to register for this app.</param>
+        public BlazorApplication(App app, params Assembly[] platformAssemblies)
         {
             CurrentApp = app;
-            ViewAssemblies = viewAssemblies;
+            PlatformAssemblies = platformAssemblies;
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         public async Task ActivateAsync<TApp>(string[] args) where TApp : IComponent
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
-            builder.ConfigureContainer(new AutofacServiceProviderFactory(b => CurrentApp.SetupContainer(b, new BlazorAppPlatform(), ViewAssemblies)));
+            builder.ConfigureContainer(new AutofacServiceProviderFactory(b => CurrentApp.SetupContainer(b, new BlazorAppPlatform(), PlatformAssemblies)));
             builder.RootComponents.Add<TApp>("#app");
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddBlazoredLocalStorage();

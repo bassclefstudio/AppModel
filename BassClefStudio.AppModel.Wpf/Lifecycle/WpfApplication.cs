@@ -24,11 +24,11 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// Creates a new <see cref="WpfApplication"/> object and initializes required resources.
         /// </summary>
         /// <param name="app">The cross-platform app to run in this WPF project.</param>
-        /// <param name="viewAssemblies">An array of <see cref="Assembly"/> objects containing all of the <see cref="IView"/>s to register for this app.</param>
-        public WpfApplication(App app, params Assembly[] viewAssemblies)
+        /// <param name="platformAssemblies">An array of <see cref="Assembly"/> objects containing all of the <see cref="IView"/>s and <see cref="IPlatformModule"/>s to register for this app.</param>
+        public WpfApplication(App app, params Assembly[] platformAssemblies)
         {
             CurrentApp = app;
-            CurrentApp.Initialize(new WpfAppPlatform(), viewAssemblies);
+            CurrentApp.Initialize(new WpfAppPlatform(), platformAssemblies);
             this.Startup += AppStarting;
         }
 

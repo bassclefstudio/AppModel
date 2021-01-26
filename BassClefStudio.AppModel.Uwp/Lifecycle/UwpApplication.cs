@@ -32,8 +32,8 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// Creates a new <see cref="UwpApplication"/> object and initializes required resources.
         /// </summary>
         /// <param name="app">The cross-platform app to run in this UWP project.</param>
-        /// <param name="viewAssemblies">An array of <see cref="Assembly"/> objects containing all of the <see cref="IView"/>s to register for this app.</param>
-        public UwpApplication(App app, params Assembly[] viewAssemblies)
+        /// <param name="platformAssemblies">An array of <see cref="Assembly"/> objects containing all of the <see cref="IView"/>s and <see cref="IPlatformModule"/>s to register for this app.</param>
+        public UwpApplication(App app, params Assembly[] platformAssemblies)
         {
             ////Register system events
             this.Suspending += OnSuspending;
@@ -41,7 +41,7 @@ namespace BassClefStudio.AppModel.Lifecycle
             this.LeavingBackground += LeaveBackground;
 
             CurrentApp = app;
-            CurrentApp.Initialize(new UwpAppPlatform(), viewAssemblies);
+            CurrentApp.Initialize(new UwpAppPlatform(), platformAssemblies);
         }
 
         private bool backHandled = false;

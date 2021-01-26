@@ -60,7 +60,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// Initializes the default DI <see cref="Services"/> container and runs initialization methods. A shortcut around the <see cref="SetupContainer(ContainerBuilder, IAppPlatform, Assembly[])"/> and <see cref="RunInitMethods"/>.
         /// </summary>
         /// <param name="platform">The app platform that this <see cref="App"/> will use for native services.</param>
-        /// <param name="assemblies">The assemblies for this platform that contain any <see cref="IView"/>s that the <see cref="App"/> requires.</param>
+        /// <param name="assemblies">The assemblies for this platform that contain any <see cref="IView"/>s or <see cref="IPlatformModule"/>s that the <see cref="App"/> requires.</param>
         public void Initialize(IAppPlatform platform, params Assembly[] assemblies)
         {
             var builder = new ContainerBuilder();
@@ -74,10 +74,11 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// </summary>
         /// <param name="builder">The Autofac <see cref="ContainerBuilder"/> to register services to.</param>
         /// <param name="platform">The app platform that this <see cref="App"/> will use for native services.</param>
-        /// <param name="assemblies">The assemblies for this platform that contain any <see cref="IView"/>s that the <see cref="App"/> requires.</param>
+        /// <param name="assemblies">The assemblies for this platform that contain any <see cref="IView"/>s or <see cref="IPlatformModule"/>s that the <see cref="App"/> requires.</param>
         public void SetupContainer(ContainerBuilder builder, IAppPlatform platform, params Assembly[] assemblies)
         {
             platform.ConfigureServices(builder);
+            builder.RegisterAssemblyModules<IPlatformModule>(assemblies);
             this.ConfigureServices(builder);
             //// Resister this app instance to all view-models, etc.
             builder.RegisterInstance<App>(this);
