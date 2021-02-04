@@ -6,6 +6,8 @@
     <Version>1.6.0</Version>
     <Authors>BassClefStudio</Authors>
     <Description>An implementation of BassClefStudio.AppModel, providing services and application classes for running cross-platform MVVM applications in .NET Console applications.</Description>
+    <PackageProjectUrl>https://github.com/bassclefstudio/AppModel</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/bassclefstudio/AppModel.git</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
