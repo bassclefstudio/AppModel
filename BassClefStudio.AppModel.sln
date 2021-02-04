@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BassClefStudio.AppModel.Wpf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BassClefStudio.AppModel.Blazor", "BassClefStudio.AppModel.Blazor\BassClefStudio.AppModel.Blazor.csproj", "{78E94E60-CBDE-4BC6-9DF3-A2EA9EA77FD6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BassClefStudio.AppModel.Console", "BassClefStudio.AppModel.Console\BassClefStudio.AppModel.Console.csproj", "{940968AB-A00E-4CF3-86E6-AFC29AA68CBE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BassClefStudio.AppModel.Console", "BassClefStudio.AppModel.Console\BassClefStudio.AppModel.Console.csproj", "{940968AB-A00E-4CF3-86E6-AFC29AA68CBE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
