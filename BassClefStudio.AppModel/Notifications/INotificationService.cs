@@ -24,6 +24,13 @@ namespace BassClefStudio.AppModel.Notifications
         /// <param name="showTime">The <see cref="DateTimeOffset"/> when the notification will be sent.</param>
         /// <returns>A unique ID that can be used to manage the scheduled alarm notifications.</returns>
         Task<string> ShowAlarmAsync(NotificationContent content, DateTimeOffset showTime);
+
+        /// <summary>
+        /// Attempts to cancel the scheduled notification with the given ID.
+        /// </summary>
+        /// <param name="id">The <see cref="string"/> ID of the notification to cancel - see <see cref="ShowNotificationAsync(NotificationContent)"/> and <see cref="ShowAlarmAsync(NotificationContent, DateTimeOffset)"/> for how to get this ID.</param>
+        /// <returns>A <see cref="bool"/> indicating that the operation succeeded.</returns>
+        Task<bool> CancelAlarmAsync(string id);
     }
 
     /// <summary>

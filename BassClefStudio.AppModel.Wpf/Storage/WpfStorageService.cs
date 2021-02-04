@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using BassClefStudio.AppModel.Lifecycle;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,14 +21,14 @@ namespace BassClefStudio.AppModel.Storage
         /// <summary>
         /// Creates a new <see cref="WpfStorageService"/> from the current <see cref="Lifecycle.App"/>
         /// </summary>
-        /// <param name="app">The <see cref="Lifecycle.App"/> and its name provides information used to determine the location of the local folder.</param>
-        public WpfStorageService(Lifecycle.App app)
+        /// <param name="packageInfo">The app's <see cref="IPackageInfo"/> provides information used to determine the location of the local folder.</param>
+        public WpfStorageService(IPackageInfo packageInfo)
         {
             AppDataFolder = new BaseFolder(
                 new System.IO.DirectoryInfo(
                     Path.Combine(
                         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                        app.ApplicationName)));
+                        packageInfo.ApplicationName)));
         }
 
         /// <inheritdoc/>

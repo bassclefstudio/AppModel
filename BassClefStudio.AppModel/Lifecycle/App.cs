@@ -36,24 +36,28 @@ namespace BassClefStudio.AppModel.Lifecycle
         protected abstract void ConfigureServices(ContainerBuilder builder);
 
         /// <summary>
-        /// The name of the <see cref="App"/>.
+        /// The <see cref="IPackageInfo"/> created by this <see cref="App"/>, containing its name and version info.
         /// </summary>
-        public string ApplicationName { get; }
+        public IPackageInfo PackageInfo { get; }
 
         /// <summary>
         /// Creates a new AppModel <see cref="App"/>.
         /// </summary>
         /// <param name="name">The name of this <see cref="App"/>.</param>
-        public App(string name)
+        /// <param name="version">The <see cref="System.Version"/> current version of this <see cref="App"/>.</param>
+        public App(string name, Version version)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw new ArgumentException("An application name must be set.");
             }
-            else
+
+            if (version == null)
             {
-                ApplicationName = name;
+                throw new ArgumentException("An application version must be present");
             }
+
+            PackageInfo = new PackageInfo() { ApplicationName = name, Version = version };
         }
 
         /// <summary>
@@ -82,6 +86,8 @@ namespace BassClefStudio.AppModel.Lifecycle
             this.ConfigureServices(builder);
             //// Resister this app instance to all view-models, etc.
             builder.RegisterInstance<App>(this);
+            //// If all a service needs is app information (such as name), the IPackageInfo is registered separately.
+            builder.RegisterInstance<IPackageInfo>(this.PackageInfo);
             builder.RegisterViews(assemblies);
         }
 
