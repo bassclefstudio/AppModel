@@ -18,7 +18,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         public App CurrentApp { get; }
 
         /// <summary>
-        /// Creates a new <see cref="BlazorApplication"/> object.
+        /// Creates a new <see cref="ConsoleApplication"/> object.
         /// </summary>
         /// <param name="app">The cross-platform app to run in this console project.</param>
         /// <param name="platformAssemblies">An array of <see cref="Assembly"/> objects containing all of the <see cref="IView"/>s and <see cref="IPlatformModule"/>s to register for this app.</param>
