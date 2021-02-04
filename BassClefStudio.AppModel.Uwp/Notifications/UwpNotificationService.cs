@@ -46,6 +46,21 @@ namespace BassClefStudio.AppModel.Notifications
             ToastNotifier.Show(notification);
             return tag;
         }
+
+        /// <inheritdoc/>
+        public async Task<bool> CancelAlarmAsync(string id)
+        {
+            var toast = ToastNotifier.GetScheduledToastNotifications().FirstOrDefault(t => t.Id == id);
+            if(toast != null)
+            {
+                ToastNotifier.RemoveFromSchedule(toast);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 
     /// <summary>

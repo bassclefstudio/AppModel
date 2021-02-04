@@ -12,8 +12,14 @@ using Windows.UI.Xaml.Controls;
 
 namespace BassClefStudio.AppModel.Navigation
 {
+    /// <summary>
+    /// An <see cref="INavigationService"/> built on the UWP's <see cref="ContentControl"/> and <see cref="Window"/> classes.
+    /// </summary>
     public class UwpNavigationService : INavigationService
     {
+        /// <summary>
+        /// The current frame for navigation content.
+        /// </summary>
         public ContentControl CurrentFrame { get; set; }
         
         internal IDispatcherService DispatcherService { get; }
