@@ -48,7 +48,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<BassClefStudio.AppModel.Storage.IStorageItem>> GetItemsAsync()
+        public async Task<IEnumerable<IStorageItem>> GetItemsAsync()
         {
             return (await Folder.GetItemsAsync()).Select(i => i.ToMvvm());
         }
@@ -63,12 +63,6 @@ namespace BassClefStudio.AppModel.Storage
         public async Task<IStorageFolder> CreateFolderAsync(string name, CollisionOptions options = CollisionOptions.OpenExisting)
         {
             return new UwpFolder(await Folder.CreateFolderAsync(name, options.ToUwp()));
-        }
-
-        /// <inheritdoc/>
-        public async Task<bool> ContainsItemAsync(string relativePath)
-        {
-            return (await GetItemsAsync()).Any(i => i.Name == relativePath);
         }
 
         /// <inheritdoc/>

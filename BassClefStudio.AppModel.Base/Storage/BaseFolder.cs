@@ -145,12 +145,6 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<bool> ContainsItemAsync(string relativePath)
-        {
-            return (await GetItemsAsync()).Any(i => i.Name == relativePath);
-        }
-
-        /// <inheritdoc/>
         public async Task RemoveAsync()
         {
             Directory.Delete(true);

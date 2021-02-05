@@ -17,12 +17,6 @@ namespace BassClefStudio.AppModel.Storage
         Task<IEnumerable<IStorageItem>> GetItemsAsync();
 
         /// <summary>
-        /// Checks to see if the file or folder at the given path is in the <see cref="IStorageFolder"/>.
-        /// </summary>
-        /// <param name="relativePath">The <see cref="string"/> path to the item, relative to this <see cref="IStorageFolder"/>.</param>
-        Task<bool> ContainsItemAsync(string relativePath);
-
-        /// <summary>
         /// Gets the child folder in this folder with the given path.
         /// </summary>
         /// <param name="relativePath">The <see cref="string"/> path to the item, relative to this <see cref="IStorageFolder"/>.</param>
