@@ -7,13 +7,13 @@ using Windows.Storage.Streams;
 namespace BassClefStudio.AppModel.Storage
 {
     /// <summary>
-    /// Represents an <see cref="IFile"/> wrapper over <see cref="IStorageFile"/>.
+    /// Represents an <see cref="IStorageFile"/> wrapper over <see cref="Windows.Storage.IStorageFile"/>.
     /// </summary>
-    public class UwpFile : IFile
+    public class UwpFile : IStorageFile
     {
-        private IStorageFile File { get; }
+        private Windows.Storage.IStorageFile File { get; }
 
-        public UwpFile(IStorageFile file)
+        public UwpFile(Windows.Storage.IStorageFile file)
         {
             File = file;
         }
@@ -40,6 +40,12 @@ namespace BassClefStudio.AppModel.Storage
         public async Task WriteTextAsync(string text)
         {
             await FileIO.WriteTextAsync(File, text);
+        }
+
+        /// <inheritdoc/>
+        public async Task RemoveAsync()
+        {
+            await File.DeleteAsync();
         }
 
         public static bool operator ==(UwpFile a, UwpFile b) => a.File == b.File;

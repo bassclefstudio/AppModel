@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace BassClefStudio.AppModel.Storage
 {
     /// <summary>
-    /// An <see cref="IFile"/> implementation that uses the .NET <see cref="FileInfo"/> class for creating and managing a file.
+    /// An <see cref="IStorageFile"/> implementation that uses the .NET <see cref="FileInfo"/> class for creating and managing a file.
     /// </summary>
-    public class BaseFile : IFile
+    public class BaseFile : IStorageFile
     {
         private FileInfo File { get; }
 
@@ -55,6 +55,26 @@ namespace BassClefStudio.AppModel.Storage
         public async Task WriteTextAsync(string text)
         {
             System.IO.File.WriteAllText(File.FullName, text);
+        }
+
+        /// <inheritdoc/>
+        public async Task RemoveAsync()
+        {
+            File.Delete();
+        }
+
+        public static bool operator ==(BaseFile a, BaseFile b) => a.File == b.File;
+        public static bool operator !=(BaseFile a, BaseFile b) => !(a == b);
+
+        public override bool Equals(object obj)
+        {
+            return obj is BaseFile file
+                && this == file;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 

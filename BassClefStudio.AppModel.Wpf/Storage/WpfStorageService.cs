@@ -16,7 +16,7 @@ namespace BassClefStudio.AppModel.Storage
     public class WpfStorageService : IStorageService
     {
         /// <inheritdoc/>
-        public IFolder AppDataFolder { get; }
+        public IStorageFolder AppDataFolder { get; }
 
         /// <summary>
         /// Creates a new <see cref="WpfStorageService"/> from the current <see cref="Lifecycle.App"/>
@@ -32,7 +32,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<IFile> RequestFileOpenAsync(StorageDialogSettings settings)
+        public async Task<IStorageFile> RequestFileOpenAsync(StorageDialogSettings settings)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             if (settings.ShownFileTypes != null)
@@ -56,7 +56,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<IFile> RequestFileSaveAsync(StorageDialogSettings settings)
+        public async Task<IStorageFile> RequestFileSaveAsync(StorageDialogSettings settings)
         {
             SaveFileDialog fileDialog = new SaveFileDialog();
             if (settings.ShownFileTypes != null)
@@ -80,7 +80,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<IFolder> RequestFolderAsync(StorageDialogSettings settings)
+        public async Task<IStorageFolder> RequestFolderAsync(StorageDialogSettings settings)
         {
             throw new PlatformNotSupportedException("WPF does not currently provide an API for picking folders.");
         }
