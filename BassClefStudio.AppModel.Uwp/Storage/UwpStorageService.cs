@@ -14,7 +14,7 @@ namespace BassClefStudio.AppModel.Storage
     public class UwpStorageService : IStorageService
     {
         /// <inheritdoc/>
-        public IFolder AppDataFolder { get; } = new UwpFolder(ApplicationData.Current.LocalFolder);
+        public IStorageFolder AppDataFolder { get; } = new UwpFolder(ApplicationData.Current.LocalFolder);
 
         internal IDispatcherService DispatcherService { get; }
         public UwpStorageService(IDispatcherService dispatcherService)
@@ -23,7 +23,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<IFile> RequestFileOpenAsync(StorageDialogSettings settings)
+        public async Task<IStorageFile> RequestFileOpenAsync(StorageDialogSettings settings)
         {
             FileOpenPicker dialog = new FileOpenPicker();
             if (settings.ShownFileTypes == null || !settings.ShownFileTypes.Any())
@@ -45,7 +45,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<IFile> RequestFileSaveAsync(StorageDialogSettings settings)
+        public async Task<IStorageFile> RequestFileSaveAsync(StorageDialogSettings settings)
         {
             FileSavePicker dialog = new FileSavePicker();
             if (settings.ShownFileTypes == null || !settings.ShownFileTypes.Any())
@@ -69,7 +69,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<IFolder> RequestFolderAsync(StorageDialogSettings settings)
+        public async Task<IStorageFolder> RequestFolderAsync(StorageDialogSettings settings)
         {
             FolderPicker dialog = new FolderPicker();
             if (settings.ShownFileTypes == null || !settings.ShownFileTypes.Any())

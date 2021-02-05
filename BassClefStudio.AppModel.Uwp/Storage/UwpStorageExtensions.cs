@@ -14,11 +14,11 @@ namespace BassClefStudio.AppModel.Storage
         /// <returns>Either a <see cref="UwpFile"/> or <see cref="UwpFolder"/> wrapper around the item.</returns>
         public static BassClefStudio.AppModel.Storage.IStorageItem ToMvvm(this Windows.Storage.IStorageItem item)
         {
-            if (item is IStorageFolder folder)
+            if (item is Windows.Storage.IStorageFolder folder)
             {
                 return new UwpFolder(folder);
             }
-            else if (item is IStorageFile file)
+            else if (item is Windows.Storage.IStorageFile file)
             {
                 return new UwpFile(file);
             }

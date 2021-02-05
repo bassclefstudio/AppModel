@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BassClefStudio.AppModel.Storage
 {
@@ -13,5 +14,10 @@ namespace BassClefStudio.AppModel.Storage
         /// The name of the <see cref="IStorageItem"/>, including any file extension.
         /// </summary>
         string Name { get; }
+
+        /// <summary>
+        /// Deletes the <see cref="IStorageItem"/> from the filesystem.
+        /// </summary>
+        Task RemoveAsync();
     }
 }

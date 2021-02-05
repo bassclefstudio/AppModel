@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace BassClefStudio.AppModel.Storage
 {
     /// <summary>
-    /// An <see cref="IFolder"/> implementation that uses the .NET <see cref="DirectoryInfo"/> class for creating and managing a folder.
+    /// An <see cref="IStorageFolder"/> implementation that uses the .NET <see cref="DirectoryInfo"/> class for creating and managing a folder.
     /// </summary>
-    public class BaseFolder : IFolder
+    public class BaseFolder : IStorageFolder
     {
         private DirectoryInfo Directory { get; }
 
@@ -31,7 +31,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<IFile> CreateFileAsync(string name, CollisionOptions options = CollisionOptions.OpenExisting)
+        public async Task<IStorageFile> CreateFileAsync(string name, CollisionOptions options = CollisionOptions.OpenExisting)
         {
             var info = new FileInfo(Path.Combine(Directory.FullName, name));
             if (info.Exists && options != CollisionOptions.Overwrite)
@@ -71,7 +71,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<IFolder> CreateFolderAsync(string name, CollisionOptions options = CollisionOptions.OpenExisting)
+        public async Task<IStorageFolder> CreateFolderAsync(string name, CollisionOptions options = CollisionOptions.OpenExisting)
         {
             var info = new DirectoryInfo(Path.Combine(Directory.FullName, name));
             if (info.Exists && options != CollisionOptions.Overwrite)
@@ -107,12 +107,26 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<IStorageItem> GetItemAsync(string relativePath)
+        public async Task<IStorageFile> GetFileAsync(string relativePath)
         {
             var info = new FileInfo(Path.Combine(Directory.FullName, relativePath));
             if(info.Exists)
             {
                 return new BaseFile(info);
+            }
+            else
+            {
+                throw new StorageAccessException($"The given file {Path.Combine(Directory.FullName, relativePath)} does not exist.");
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<IStorageFolder> GetFolderAsync(string relativePath)
+        {
+            var info = new DirectoryInfo(Path.Combine(Directory.FullName, relativePath));
+            if (info.Exists)
+            {
+                return new BaseFolder(info);
             }
             else
             {
@@ -128,6 +142,12 @@ namespace BassClefStudio.AppModel.Storage
                 .Concat(
                 Directory.EnumerateDirectories()
                     .Select<DirectoryInfo, IStorageItem>(d => new BaseFolder(d)));
+        }
+
+        /// <inheritdoc/>
+        public async Task RemoveAsync()
+        {
+            Directory.Delete(true);
         }
     }
 }

@@ -7,13 +7,13 @@ using Windows.Storage;
 namespace BassClefStudio.AppModel.Storage
 {
     /// <summary>
-    /// Represents an <see cref="IFolder"/> wrapper over <see cref="IStorageFolder"/>.
+    /// Represents an <see cref="IStorageFolder"/> wrapper over <see cref="Windows.Storage.IStorageFolder"/>.
     /// </summary>
-    public class UwpFolder : IFolder
+    public class UwpFolder : IStorageFolder
     {
-        public IStorageFolder Folder { get; }
+        public Windows.Storage.IStorageFolder Folder { get; }
 
-        public UwpFolder(IStorageFolder folder)
+        public UwpFolder(Windows.Storage.IStorageFolder folder)
         {
             Folder = folder;
         }
@@ -22,28 +22,53 @@ namespace BassClefStudio.AppModel.Storage
         public string Name => Folder.Name;
 
         /// <inheritdoc/>
-        public async Task<BassClefStudio.AppModel.Storage.IStorageItem> GetItemAsync(string relativePath)
+        public async Task<IStorageFolder> GetFolderAsync(string relativePath)
         {
-            return (await Folder.GetItemAsync(relativePath)).ToMvvm();
-            
+            try
+            {
+                return new UwpFolder(await Folder.GetFolderAsync(relativePath));
+            }
+            catch (Exception ex)
+            {
+                throw new StorageAccessException($"The given folder {System.IO.Path.Combine(Folder.Path, relativePath)} does not exist.", ex);
+            }
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<BassClefStudio.AppModel.Storage.IStorageItem>> GetItemsAsync()
+        public async Task<IStorageFile> GetFileAsync(string relativePath)
+        {
+            try
+            { 
+                return new UwpFile(await Folder.GetFileAsync(relativePath));
+            }
+            catch (Exception ex)
+            {
+                throw new StorageAccessException($"The given file {System.IO.Path.Combine(Folder.Path, relativePath)} does not exist.", ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<IStorageItem>> GetItemsAsync()
         {
             return (await Folder.GetItemsAsync()).Select(i => i.ToMvvm());
         }
 
         /// <inheritdoc/>
-        public async Task<IFile> CreateFileAsync(string name, CollisionOptions options = CollisionOptions.OpenExisting)
+        public async Task<IStorageFile> CreateFileAsync(string name, CollisionOptions options = CollisionOptions.OpenExisting)
         {
             return new UwpFile(await Folder.CreateFileAsync(name, options.ToUwp()));
         }
 
         /// <inheritdoc/>
-        public async Task<IFolder> CreateFolderAsync(string name, CollisionOptions options = CollisionOptions.OpenExisting)
+        public async Task<IStorageFolder> CreateFolderAsync(string name, CollisionOptions options = CollisionOptions.OpenExisting)
         {
             return new UwpFolder(await Folder.CreateFolderAsync(name, options.ToUwp()));
+        }
+
+        /// <inheritdoc/>
+        public async Task RemoveAsync()
+        {
+            await Folder.DeleteAsync();
         }
     }
 }

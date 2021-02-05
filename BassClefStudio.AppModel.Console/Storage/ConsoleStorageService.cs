@@ -14,7 +14,7 @@ namespace BassClefStudio.AppModel.Storage
     public class ConsoleStorageService : IStorageService
     {
         /// <inheritdoc/>
-        public IFolder AppDataFolder { get; }
+        public IStorageFolder AppDataFolder { get; }
 
         /// <summary>
         /// Creates a new <see cref="ConsoleStorageService"/> from the current <see cref="App"/>
@@ -30,7 +30,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<IFile> RequestFileOpenAsync(StorageDialogSettings settings)
+        public async Task<IStorageFile> RequestFileOpenAsync(StorageDialogSettings settings)
         {
             IEnumerable<string> fileTypes = settings.ShownFileTypes?.Select(t => $".{t}");
             if (fileTypes == null || !fileTypes.Any())
@@ -77,7 +77,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<IFile> RequestFileSaveAsync(StorageDialogSettings settings)
+        public async Task<IStorageFile> RequestFileSaveAsync(StorageDialogSettings settings)
         {
             IEnumerable<string> fileTypes = settings.ShownFileTypes?.Select(t => $".{t}");
             if (fileTypes == null || !fileTypes.Any())
@@ -144,7 +144,7 @@ namespace BassClefStudio.AppModel.Storage
         }
 
         /// <inheritdoc/>
-        public async Task<IFolder> RequestFolderAsync(StorageDialogSettings settings)
+        public async Task<IStorageFolder> RequestFolderAsync(StorageDialogSettings settings)
         {
             Console.Write($"Select folder: ");
             string name = Console.ReadLine();
