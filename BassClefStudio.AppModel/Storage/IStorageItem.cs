@@ -19,5 +19,12 @@ namespace BassClefStudio.AppModel.Storage
         /// Deletes the <see cref="IStorageItem"/> from the filesystem.
         /// </summary>
         Task RemoveAsync();
+
+        /// <summary>
+        /// Renames the existing file to the desired <see cref="Name"/>, or fails if renaming cannot complete.
+        /// </summary>
+        /// <param name="desiredName">The desired <see cref="string"/> name (including extension, if applicable) of the <see cref="IStorageItem"/>.</param>
+        /// <exception cref="StorageConflictException">The <paramref name="desiredName"/> is already used in the parent directory.</exception>
+        Task RenameAsync(string desiredName);
     }
 }

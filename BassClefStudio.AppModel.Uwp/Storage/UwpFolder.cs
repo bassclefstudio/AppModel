@@ -70,5 +70,36 @@ namespace BassClefStudio.AppModel.Storage
         {
             await Folder.DeleteAsync();
         }
+
+        /// <inheritdoc/>
+        public async Task RenameAsync(string desiredName)
+        {
+            try
+            {
+                await Folder.RenameAsync(desiredName, NameCollisionOption.FailIfExists);
+            }
+            catch (Exception ex)
+            {
+                throw new StorageConflictException($"\"{Folder.Path}\" could not be renamed to {desiredName} because a file of that name already exists.", ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public static bool operator ==(UwpFolder a, UwpFolder b) => a.Folder == b.Folder;
+        /// <inheritdoc/>
+        public static bool operator !=(UwpFolder a, UwpFolder b) => !(a == b);
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return obj is UwpFolder folder
+                && this == folder;
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

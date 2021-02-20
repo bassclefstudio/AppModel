@@ -63,15 +63,28 @@ namespace BassClefStudio.AppModel.Storage
             File.Delete();
         }
 
+        /// <inheritdoc/>
+        public async Task RenameAsync(string desiredName)
+        {
+            await this.MoveToAsync(
+                new BaseFolder(new DirectoryInfo(Path.GetDirectoryName(File.FullName))),
+                CollisionOptions.FailIfExists,
+                desiredName);
+        }
+
+        /// <inheritdoc/>
         public static bool operator ==(BaseFile a, BaseFile b) => a.File == b.File;
+        /// <inheritdoc/>
         public static bool operator !=(BaseFile a, BaseFile b) => !(a == b);
 
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
             return obj is BaseFile file
                 && this == file;
         }
 
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             return base.GetHashCode();
