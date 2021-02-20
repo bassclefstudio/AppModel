@@ -32,6 +32,8 @@ namespace BassClefStudio.AppModel.Storage
             return allItems.Any(i => i.Name == name);
         }
 
+        #region Copy and Move
+
         /// <summary>
         /// Copies the contents of the given <see cref="IStorageFile"/> into a new file located in the specified <see cref="IStorageFolder"/>.
         /// </summary>
@@ -126,7 +128,13 @@ namespace BassClefStudio.AppModel.Storage
                 {
                     await dir.CopyToAsync(destination, CollisionOptions.FailIfExists);
                 }
+                else
+                {
+                    throw new StorageAccessException($"Attempted to copy an item that was neither a file or folder. Type \"{item?.GetType().Name}\"");
+                }
             }
         }
+
+        #endregion
     }
 }
