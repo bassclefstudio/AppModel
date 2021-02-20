@@ -149,5 +149,32 @@ namespace BassClefStudio.AppModel.Storage
         {
             Directory.Delete(true);
         }
+
+        /// <inheritdoc/>
+        public async Task RenameAsync(string desiredName)
+        {
+            await this.MoveToAsync(
+                new BaseFolder(new DirectoryInfo(Path.GetDirectoryName(Directory.FullName))),
+                CollisionOptions.FailIfExists,
+                desiredName);
+        }
+
+        /// <inheritdoc/>
+        public static bool operator ==(BaseFolder a, BaseFolder b) => a.Directory == b.Directory;
+        /// <inheritdoc/>
+        public static bool operator !=(BaseFolder a, BaseFolder b) => !(a == b);
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return obj is BaseFolder folder
+                && this == folder;
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

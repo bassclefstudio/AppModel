@@ -13,6 +13,7 @@ namespace BassClefStudio.AppModel.Storage
         /// <summary>
         /// Gets all of the child items of this folder.
         /// </summary>
+        /// <exception cref="StorageAccessException">An error occurred accessing the backend data for the file.</exception>
         /// <returns>An <see cref="IEnumerable{T}"/> of each <see cref="IStorageItem"/> child of the <see cref="IStorageFolder"/>.</returns>
         Task<IEnumerable<IStorageItem>> GetItemsAsync();
 
@@ -20,6 +21,7 @@ namespace BassClefStudio.AppModel.Storage
         /// Gets the child folder in this folder with the given path.
         /// </summary>
         /// <param name="relativePath">The <see cref="string"/> path to the item, relative to this <see cref="IStorageFolder"/>.</param>
+        /// <exception cref="StorageAccessException">An error occurred accessing the backend data for the file.</exception>
         /// <returns>The child <see cref="IStorageFolder"/> at the given path.</returns>
         Task<IStorageFolder> GetFolderAsync(string relativePath);
 
@@ -27,6 +29,7 @@ namespace BassClefStudio.AppModel.Storage
         /// Gets the child file in this folder with the given path.
         /// </summary>
         /// <param name="relativePath">The <see cref="string"/> path to the item, relative to this <see cref="IStorageFolder"/>.</param>
+        /// <exception cref="StorageAccessException">An error occurred accessing the backend data for the file.</exception>
         /// <returns>The child <see cref="IStorageFile"/> at the given path.</returns>
         Task<IStorageFile> GetFileAsync(string relativePath);
 
@@ -35,6 +38,8 @@ namespace BassClefStudio.AppModel.Storage
         /// </summary>
         /// <param name="name">The name of the new file, including its file extension.</param>
         /// <param name="options">A <see cref="CollisionOptions"/> value indicating the action to take if the file exists.</param>
+        /// <exception cref="StorageAccessException">An error occurred accessing the backend data for the file.</exception>
+        /// <exception cref="StorageConflictException">A file with the given <paramref name="name"/> exists, and the <paramref name="options"/> did not provide a way to handle the conflict.</exception>
         /// <returns>The newly created file.</returns>
         Task<IStorageFile> CreateFileAsync(string name, CollisionOptions options = CollisionOptions.OpenExisting);
 
@@ -43,6 +48,8 @@ namespace BassClefStudio.AppModel.Storage
         /// </summary>
         /// <param name="name">The name of the new folder.</param>
         /// <param name="options">A <see cref="CollisionOptions"/> value indicating the action to take if the file exists.</param>
+        /// <exception cref="StorageAccessException">An error occurred accessing the backend data for the file.</exception>
+        /// <exception cref="StorageConflictException">A folder with the given <paramref name="name"/> exists, and the <paramref name="options"/> did not provide a way to handle the conflict.</exception>
         /// <returns>The newly created folder.</returns>
         Task<IStorageFolder> CreateFolderAsync(string name, CollisionOptions options = CollisionOptions.OpenExisting);
     }
