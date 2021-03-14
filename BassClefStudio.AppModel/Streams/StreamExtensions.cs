@@ -277,10 +277,10 @@ namespace BassClefStudio.AppModel.Streams
         /// </summary>
         /// <typeparam name="T">The type of value emitted by this <see cref="IStream{T}"/>.</typeparam>
         /// <param name="value">The singular <typeparamref name="T"/> value to emit.</param>
-        /// <returns>An <see cref="IStream{T}"/> that will emit <paramref name="value"/> and complete when <see cref="IStream{T}.StartAsync"/> is called.</returns>
+        /// <returns>An <see cref="IStream{T}"/> that will emit <paramref name="value"/> when <see cref="IStream{T}.StartAsync"/> is called.</returns>
         public static IStream<T> AsStream<T>(this T value)
         {
-            return new SourceStream<T>(new StreamValue<T>(value), new StreamValue<T>());
+            return new SourceStream<T>(value);
         }
 
         #endregion

@@ -77,6 +77,46 @@ namespace BassClefStudio.AppModel.Tests
         }
 
         #endregion
+        #region Linq
+
+        [TestMethod]
+        public async Task TestFilter()
+        {
+            string[] values = new string[] { "wow!", "hello", "cool!", "great", "awesome!" };
+            List<string> results = new List<string>();
+            var stream = new SourceStream<string>(values)
+                .Where(s => s.Last() == '!')
+                .BindResult(results.Add);
+            await stream.StartAsync();
+            Assert.AreEqual(3, results.Count, "Result does not contain expected number of items.");
+            Assert.IsTrue(results.SequenceEqual(new string[] { values[0], values[2], values[4] }));
+        }
+
+        [TestMethod]
+        public async Task TestAggregateCounter()
+        {
+            int length = 8;
+            int number = 0;
+            var stream = SourceStream<string>.Repeat("Hello World!", length)
+                .Aggregate<string, int>((n, s) => n + 1)
+                .BindResult(n => number = n);
+            await stream.StartAsync();
+            Assert.AreEqual(length, number, "Aggregate was not expected value.");
+        }
+
+        [TestMethod]
+        public async Task TestSum()
+        {
+            int length = 8;
+            int number = 0;
+            var stream = SourceStream<int>.Repeat(2, length)
+                .Sum()
+                .BindResult(n => number = n);
+            await stream.StartAsync();
+            Assert.AreEqual(length * 2, number, "Sum was not expected value.");
+        }
+
+        #endregion
     }
 
     class MyClass : Observable

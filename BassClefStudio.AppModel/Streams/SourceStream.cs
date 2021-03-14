@@ -63,6 +63,28 @@ namespace BassClefStudio.AppModel.Streams
             StartInputs = inputs.Select(t => new StreamValue<T>(t));
         }
 
+        /// <summary>
+        /// Creates a <see cref="SourceStream{T}"/> that returns consecutive <see cref="int"/> values.
+        /// </summary>
+        /// <param name="start">The starting <see cref="int"/> to begin with.</param>
+        /// <param name="length">The number of items to emit.</param>
+        /// <returns>A new <see cref="SourceStream{T}"/> that outputs <see cref="int"/> values.</returns>
+        public static SourceStream<int> CountStream(int start, int length)
+        {
+            return new SourceStream<int>(Enumerable.Range(start, length));
+        }
+
+        /// <summary>
+        /// Creates a <see cref="SourceStream{T}"/> that returns some <typeparamref name="T"/> value multiple times.
+        /// </summary>
+        /// <param name="value">The <typeparamref name="T"/> value to emit.</param>
+        /// <param name="length">The number of items to emit.</param>
+        /// <returns>A new <see cref="SourceStream{T}"/> that outputs <paramref name="value"/> <paramref name="length"/> times.</returns>
+        public static SourceStream<T> Repeat(T value, int length)
+        {
+            return new SourceStream<T>(Enumerable.Repeat(value, length));
+        }
+
         /// <inheritdoc/>
         public async Task StartAsync()
         {
