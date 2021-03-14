@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.AppModel.Bindings
+namespace BassClefStudio.AppModel.Streams
 {
     /// <summary>
     /// Represents a basic <see cref="IStream{T}"/> that transforms the returned values from another parent <see cref="IStream{T}"/>, one-to-one, in their initial order.

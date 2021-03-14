@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.AppModel.Bindings
+namespace BassClefStudio.AppModel.Streams
 {
     /// <summary>
     /// Represents a basic <see cref="IStream{T}"/> that transforms the returned values from another parent <see cref="IStream{T}"/> asynchronously. The resulting values are added to the stream in the order they're completed.

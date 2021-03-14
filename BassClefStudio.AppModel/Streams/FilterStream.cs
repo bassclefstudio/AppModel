@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.AppModel.Bindings
+namespace BassClefStudio.AppModel.Streams
 {
     /// <summary>
     /// Represents an <see cref="IStream{T}"/> which filters only certain events from a parent <see cref="IStream{T}"/>.

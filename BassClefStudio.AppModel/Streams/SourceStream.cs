@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.AppModel.Bindings
+namespace BassClefStudio.AppModel.Streams
 {
     /// <summary>
     /// Represents the most basic implementation of <see cref="IStream{T}"/> that produces content.

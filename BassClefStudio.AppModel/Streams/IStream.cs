@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.AppModel.Bindings
+namespace BassClefStudio.AppModel.Streams
 {
     /// <summary>
     /// Represents a reactive stream, which outputs some series of values asynchronously over time.

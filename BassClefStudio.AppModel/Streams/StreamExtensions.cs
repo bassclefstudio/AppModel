@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.AppModel.Bindings
+namespace BassClefStudio.AppModel.Streams
 {
     /// <summary>
     /// Provides a series of extension methods for dealing with <see cref="IStream{T}"/>s of all types.
@@ -14,7 +14,7 @@ namespace BassClefStudio.AppModel.Bindings
         #region Cast
 
         /// <summary>
-        /// Creates an <see cref="IStream{T}"/> that casts the values of the given <see cref="IStream{T}"/> as type <typeparamref name="T2"/>.
+        /// Creates an <see cref="IStream{T}"/> that returns the values of the given <see cref="IStream{T}"/> as type <typeparamref name="T2"/>.
         /// </summary>
         /// <typeparam name="T1">The type of values returned by the parent <see cref="IStream{T}"/>.</typeparam>
         /// <typeparam name="T2">The type of the cast values this <see cref="IStream{T}"/> returns.</typeparam>
@@ -23,6 +23,22 @@ namespace BassClefStudio.AppModel.Bindings
         public static IStream<T2> As<T1, T2>(this IStream<T1> stream) where T1 : T2
         {
             return new MapStream<T1, T2>(stream, t1 => (T2)t1);
+        }
+
+        /// <summary>
+        /// Creates an <see cref="IStream{T}"/> that attempts to cast the values of the given <see cref="IStream{T}"/> as type <typeparamref name="T2"/>.
+        /// </summary>
+        /// <typeparam name="T1">The type of values returned by the parent <see cref="IStream{T}"/>.</typeparam>
+        /// <typeparam name="T2">The type of the cast values this <see cref="IStream{T}"/> returns.</typeparam>
+        /// <param name="stream">The parent <see cref="IStream{T}"/> producing <typeparamref name="T1"/> values.</param>
+        /// <returns>An <see cref="IStream{T}"/> that returns cast <typeparamref name="T2"/> values.</returns>
+        public static IStream<T2> Cast<T1, T2>(this IStream<T1> stream)
+        {
+            return new MapStream<T1, T2>(
+                stream,
+                t1 => t1 is T2 t2
+                    ? t2
+                    : throw new StreamException($"Invalid casting in MapStream: {t1?.GetType()?.Name} to {typeof(T2).Name}."));
         }
 
         #endregion
@@ -212,14 +228,45 @@ namespace BassClefStudio.AppModel.Bindings
         /// <summary>
         /// Returns an <see cref="IStream{T}"/> that emits the change-notified values of the given <typeparamref name="T2"/> property on this <typeparamref name="T1"/> object.
         /// </summary>
-        /// <typeparam name="T1">The type of the <see cref="INotifyPropertyChanged"/> objects that will alert the <see cref="IStream{T}"/> to incoming changes.</typeparam>
+        /// <typeparam name="T1">The type of the (usually <see cref="INotifyPropertyChanged"/>) objects that will alert the <see cref="IStream{T}"/> to incoming changes.</typeparam>
         /// <typeparam name="T2">The type of output values this <see cref="IStream{T}"/> produces.</typeparam>
-        /// <param name="parent">The parent <see cref="IStream{T}"/> that produces <see cref="INotifyPropertyChanged"/> objects.</param>
+        /// <param name="parent">The parent <see cref="IStream{T}"/> that produces parent objects.</param>
         /// <param name="getProperty">The <see cref="Func{T, TResult}"/> that gets the <typeparamref name="T2"/> property from the <typeparamref name="T1"/> parent.</param>
+        /// <param name="propertyName">For debugging purposes, include the name of the property this <see cref="IStream{T}"/> is retrieving.</param>
         /// <returns>An <see cref="IStream{T}"/> that returns the <typeparamref name="T2"/> property values.</returns>
-        public static IStream<T2> Property<T1, T2>(this IStream<T1> parent, Func<T1, T2> getProperty) where T1 : INotifyPropertyChanged
+        public static IStream<T2> Property<T1, T2>(this IStream<T1> parent, Func<T1, T2> getProperty, string propertyName = null)
         {
-            return new PropertyStream<T1, T2>(parent, getProperty);
+            return new PropertyStream<T1, T2>(parent, getProperty, propertyName);
+        }
+
+        /// <summary>
+        /// Returns an <see cref="IStream{T}"/> that emits the change-notified values of the given <typeparamref name="T2"/> property on this <typeparamref name="T1"/> object.
+        /// </summary>
+        /// <typeparam name="T1">The type of the (usually <see cref="INotifyPropertyChanged"/>) objects that will alert the <see cref="IStream{T}"/> to incoming changes.</typeparam>
+        /// <typeparam name="T2">The type of output values this <see cref="IStream{T}"/> produces.</typeparam>
+        /// <param name="parent">The parent <see cref="IStream{T}"/> that produces parent objects.</param>
+        /// <param name="propertyPath">The <see cref="string"/>, dot-delimited path to the desired property.</param>
+        /// <returns>An <see cref="IStream{T}"/> that returns <typeparamref name="T2"/> property values through reflection.</returns>
+        public static IStream<T2> Property<T1, T2>(this IStream<T1> parent, string propertyPath)
+        {
+            var pathParts = propertyPath.Split(new string[] { "." }, StringSplitOptions.None);
+            Type currentType = typeof(T1);
+            IStream<object> currentBinding = parent.Cast<T1, object>();
+            foreach (var part in pathParts)
+            {
+                var property = currentType.GetProperty(part);
+                if (property == null)
+                {
+                    throw new StreamException($"Failed to find property with name {part} on type {currentType.Name}.");
+                }
+
+                currentBinding = currentBinding.Property(
+                         o => property.GetValue(o),
+                         property.Name);
+
+                currentType = property.PropertyType;
+            }
+            return currentBinding.Cast<object, T2>();
         }
 
         #endregion

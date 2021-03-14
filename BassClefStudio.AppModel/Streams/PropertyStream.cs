@@ -4,20 +4,20 @@ using System.ComponentModel;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BassClefStudio.AppModel.Bindings
+namespace BassClefStudio.AppModel.Streams
 {
     /// <summary>
     /// Represents an <see cref="IStream{T}"/>/<see cref="SourceStream{T}"/> that is bound to the value of some observable <typeparamref name="T2"/> property.
     /// </summary>
-    /// <typeparam name="T1">The type of the <see cref="INotifyPropertyChanged"/> objects that will alert the <see cref="IStream{T}"/> to incoming changes.</typeparam>
+    /// <typeparam name="T1">The type of the (usually <see cref="INotifyPropertyChanged"/>) objects that will alert the <see cref="IStream{T}"/> to incoming changes.</typeparam>
     /// <typeparam name="T2">The type of output values this <see cref="IStream{T}"/> produces.</typeparam>
-    public class PropertyStream<T1, T2> : IStream<T2> where T1 : INotifyPropertyChanged
+    public class PropertyStream<T1, T2> : IStream<T2>
     {
         /// <inheritdoc/>
         public event EventHandler<StreamValue<T2>> ValueEmitted;
 
         /// <summary>
-        /// The parent <see cref="IStream{T}"/> that produces <see cref="INotifyPropertyChanged"/> objects.
+        /// The parent <see cref="IStream{T}"/> that produces parent objects.
         /// </summary>
         public IStream<T1> ParentStream { get; }
 
@@ -30,14 +30,17 @@ namespace BassClefStudio.AppModel.Bindings
             get => currentParent;
             set
             {
-                if (currentParent != null)
+                if (currentParent != null && currentParent is INotifyPropertyChanged notifyOld)
                 {
-                    currentParent.PropertyChanged -= ParentPropertyChanged;
+                    notifyOld.PropertyChanged -= ParentPropertyChanged;
                 }
                 currentParent = value;
                 if (currentParent != null)
                 {
-                    currentParent.PropertyChanged += ParentPropertyChanged;
+                    if (currentParent is INotifyPropertyChanged notifyNew)
+                    {
+                        notifyNew.PropertyChanged += ParentPropertyChanged;
+                    }
                     CurrentValue = GetProperty(currentParent);
                 }
             }
@@ -52,7 +55,7 @@ namespace BassClefStudio.AppModel.Bindings
             get => currentValue;
             set
             {
-                if (!currentValue.Equals(value))
+                if ((currentValue == null && value != null) || !currentValue.Equals(value))
                 {
                     currentValue = value;
                     ValueEmitted?.Invoke(this, new StreamValue<T2>(currentValue));
@@ -66,14 +69,21 @@ namespace BassClefStudio.AppModel.Bindings
         public Func<T1, T2> GetProperty { get; set; }
 
         /// <summary>
+        /// For debugging purposes, can contain the name of the property this <see cref="PropertyStream{T1, T2}"/> is connected to.
+        /// </summary>
+        public string PropertyName { get; }
+
+        /// <summary>
         /// Creates a new <see cref="PropertyStream{T1, T2}"/>.
         /// </summary>
         /// <param name="parent">The parent <see cref="IStream{T}"/> that produces <see cref="INotifyPropertyChanged"/> objects.</param>
         /// <param name="getProperty">The <see cref="Func{T, TResult}"/> that gets the <typeparamref name="T2"/> property from the <typeparamref name="T1"/> parent.</param>
-        public PropertyStream(IStream<T1> parent, Func<T1, T2> getProperty)
+        /// <param name="propertyName">For debugging purposes, include the name of the property this <see cref="PropertyStream{T1, T2}"/> is connected to.</param>
+        public PropertyStream(IStream<T1> parent, Func<T1, T2> getProperty, string propertyName = null)
         {
             ParentStream = parent;
             GetProperty = getProperty;
+            PropertyName = propertyName;
             ParentStream.ValueEmitted += ParentValueEmitted;
         }
 
