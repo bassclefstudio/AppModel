@@ -66,7 +66,7 @@ namespace BassClefStudio.AppModel.Streams
         /// <summary>
         /// The <see cref="Func{T, TResult}"/> that gets the <typeparamref name="T2"/> property from the <typeparamref name="T1"/> parent.
         /// </summary>
-        public Func<T1, T2> GetProperty { get; set; }
+        public Func<T1, T2> GetProperty { get; }
 
         /// <summary>
         /// For debugging purposes, can contain the name of the property this <see cref="PropertyStream{T1, T2}"/> is connected to.
