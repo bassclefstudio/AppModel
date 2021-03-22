@@ -82,8 +82,15 @@ namespace BassClefStudio.AppModel.Lifecycle
         public void SetupContainer(ContainerBuilder builder, IAppPlatform platform, params Assembly[] assemblies)
         {
             platform.ConfigureServices(builder);
+            //// Register any internal services that deal with lifecycle of the app.
+            builder.RegisterAssemblyTypes(typeof(App).Assembly)
+                .AssignableTo<ILifecycleHandler>()
+                .AsImplementedInterfaces();
+            //// Register any IPlatformModules as both modules and types 
             builder.RegisterAssemblyModules<IPlatformModule>(assemblies);
-            builder.RegisterAssemblyTypes(assemblies).AssignableTo<IPlatformModule>();
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<IPlatformModule>()
+                .SingleInstance();
             this.ConfigureServices(builder);
             //// Resister this app instance to all view-models, etc.
             builder.RegisterInstance<App>(this);
@@ -97,11 +104,11 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// </summary>
         public void RunInitMethods()
         {
-            //// Declare the loaded IPlatformModules
             var modules = Services.Resolve<IEnumerable<IPlatformModule>>();
-            foreach(var mod in modules)
+            //// Declare the loaded IPlatformModules
+            foreach (var mod in modules)
             {
-                Debug.WriteLine($"AppModel: Loaded module \"{mod.Name}\"");
+                Debug.WriteLine($"AppModel: Found module \"{mod.Name}\"");
             }
 
             //// Run any IInitializationHandlers.
