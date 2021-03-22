@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using BassClefStudio.AppModel.Settings;
+using BassClefStudio.AppModel.Threading;
 using BassClefStudio.NET.Serialization;
 using BassClefStudio.NET.Sync;
 using System;
@@ -26,29 +27,32 @@ namespace BassClefStudio.AppModel.Helpers
         public bool UseSerializer { get; }
 
         internal ISettingsService SettingsService { get; }
+        internal IDispatcherService DispatcherService { get; }
         internal ISerializationService SerializationService { get; }
         /// <summary>
         /// Creates a new <see cref="SettingsLink{T}"/> from the required services.
         /// </summary>
-        public SettingsLink(ISettingsService settingsService)
+        public SettingsLink(ISettingsService settingsService, IDispatcherService dispatcherService)
         {
             SettingsService = settingsService;
+            DispatcherService = dispatcherService;
             UseSerializer = false;
         }
 
         /// <summary>
         /// Creates a new <see cref="SettingsLink{T}"/> from the required services and optional <see cref="ISerializationService"/>.
         /// </summary>
-        public SettingsLink(ISettingsService settingsService, ISerializationService serializationService)
+        public SettingsLink(ISettingsService settingsService, IDispatcherService dispatcherService, ISerializationService serializationService)
         {
             SettingsService = settingsService;
+            DispatcherService = dispatcherService;
             SerializationService = serializationService;
             UseSerializer = SerializationService.IsSerializable<T>();
         }
 
         /// <inheritdoc/>
         public async Task PushAsync(ISyncItem<T> item)
-        {
+        { 
             if (UseSerializer)
             {
                 string json = SerializationService.Serialize(item.Item);
@@ -62,6 +66,9 @@ namespace BassClefStudio.AppModel.Helpers
 
         /// <inheritdoc/>
         public async Task UpdateAsync(ISyncItem<T> item)
+            => await DispatcherService.RunOnUIThreadAsync(() => UpdateAsyncInternal(item));
+
+        private async Task UpdateAsyncInternal(ISyncItem<T> item)
         {
             if (UseSerializer)
             {
