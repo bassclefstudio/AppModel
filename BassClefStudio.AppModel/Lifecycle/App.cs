@@ -83,6 +83,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         {
             platform.ConfigureServices(builder);
             builder.RegisterAssemblyModules<IPlatformModule>(assemblies);
+            builder.RegisterAssemblyTypes(assemblies).AssignableTo<IPlatformModule>();
             this.ConfigureServices(builder);
             //// Resister this app instance to all view-models, etc.
             builder.RegisterInstance<App>(this);
@@ -92,10 +93,17 @@ namespace BassClefStudio.AppModel.Lifecycle
         }
 
         /// <summary>
-        /// Runs the default initialization methods 
+        /// Runs the default initialization methods.
         /// </summary>
         public void RunInitMethods()
         {
+            //// Declare the loaded IPlatformModules
+            var modules = Services.Resolve<IEnumerable<IPlatformModule>>();
+            foreach(var mod in modules)
+            {
+                Debug.WriteLine($"AppModel: Loaded module \"{mod.Name}\"");
+            }
+
             //// Run any IInitializationHandlers.
             var inits = Services.Resolve<IEnumerable<IInitializationHandler>>();
             foreach (var i in inits.Where(s => s.Enabled))
@@ -149,7 +157,7 @@ namespace BassClefStudio.AppModel.Lifecycle
                 }
                 else
                 {
-                    Debug.WriteLine($"No background task found: {args.TaskName}");
+                    Debug.WriteLine($"AppModel: Background task \"{args.TaskName}\" not found.");
                 }
             }
             finally
@@ -166,7 +174,7 @@ namespace BassClefStudio.AppModel.Lifecycle
             }
             catch(Exception ex)
             {
-                Debug.WriteLine($"Background task {task.Id} failed: {ex}");
+                Debug.WriteLine($"AppModel: Background task \"{task.Id}\" failed: {ex}");
             }
             finally
             {
@@ -181,11 +189,14 @@ namespace BassClefStudio.AppModel.Lifecycle
             {
                 IEnumerable<IBackgroundTask> tasks = Services.Resolve<IEnumerable<IBackgroundTask>>();
                 await service.RegisterCollectionAsync(tasks);
-                Debug.WriteLine($"Background tasks registered: {string.Join(",", service.CurrentlyRegistered)}.");
+                foreach (var taskName in service.CurrentlyRegistered)
+                {
+                    Debug.WriteLine($"AppModel: Background task {taskName} registered.");
+                }
             }
             else
             {
-                Debug.WriteLine("Background activation has not been set up for the given platform.");
+                Debug.WriteLine("AppModel: Background task service not found. Skipping...");
             }
         }
 
