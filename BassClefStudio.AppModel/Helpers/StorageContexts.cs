@@ -61,13 +61,13 @@ namespace BassClefStudio.AppModel.Helpers
     public static class StorageLinkExtensions
     {
         /// <summary>
-        /// Registers <see cref="ISyncItem{T}"/> of the specified type <typeparamref name="T"/> to return a <see cref="SyncItem{T}"/> that is connected to the backing store of a specific location in settings using a <see cref="SettingsLink{T}"/>.
+        /// Registers <see cref="ISyncItem{T}"/> of the specified type <typeparamref name="T"/> to return a <see cref="SyncItem{T}"/> that is connected to the backing store of a specific location in the app data folder using a <see cref="StorageLink{T}"/>.
         /// </summary>
         /// <typeparam name="T">The type of the context to provide. Generally, there should only be one declaration of this type of <see cref="ISyncItem{T}"/> per application.</typeparam>
         /// <param name="builder">The <see cref="ContainerBuilder"/> to add services to.</param>
         /// <param name="filePath">The <see cref="string"/> 'path' to the location in in app data folder where the <typeparamref name="T"/> object should be stored.</param>
         /// <param name="friendlyName">A <see cref="string"/> 'friendly name' to use to identify the <see cref="ILink{T}"/> to this specific file in the DI registration.</param>
-        public static void RegisterSettingsContext<T>(this ContainerBuilder builder, string filePath, string friendlyName = null)
+        public static void RegisterStorageContext<T>(this ContainerBuilder builder, string filePath, string friendlyName = null)
         {
             string diName = friendlyName ?? filePath.Replace(Path.DirectorySeparatorChar, '-');
             builder.RegisterType<StorageLink<T>>()
