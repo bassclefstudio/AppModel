@@ -370,10 +370,12 @@ namespace BassClefStudio.AppModel.Lifecycle
         public static void RegisterViewModels(this ContainerBuilder builder, params Assembly[] assemblies)
         {
             builder.RegisterAssemblyTypes(assemblies)
-                .AssignableTo<IViewModel>();
+                .AssignableTo<IViewModel>()
+                .PropertiesAutowired();
             builder.RegisterAssemblyTypes(assemblies)
                 .AssignableTo<IViewModel>()
-                .AsImplementedInterfaces();
+                .AsImplementedInterfaces()
+                .PropertiesAutowired();
         }
 
         /// <summary>
