@@ -26,7 +26,7 @@ namespace BassClefStudio.AppModel.Helpers
         internal IDispatcherService DispatcherService { get; }
         internal ISerializationService SerializationService { get; }
         /// <summary>
-        /// Creates a new <see cref="SettingsLink{T}"/> from the required services.
+        /// Creates a new <see cref="StorageLink{T}"/> from the required services.
         /// </summary>
         public StorageLink(IStorageService storageService, IDispatcherService dispatcherService, ISerializationService serializationService)
         {
@@ -56,7 +56,7 @@ namespace BassClefStudio.AppModel.Helpers
     }
 
     /// <summary>
-    /// Provides extension methods for registering <see cref="ISyncItem{T}"/>s to the DI container that are linked using <see cref="SettingsLink{T}"/> to a location in the settings store.
+    /// Provides extension methods for registering <see cref="ISyncItem{T}"/>s to the DI container that are linked using <see cref="StorageLink{T}"/> to a specific location in the app data folder.
     /// </summary>
     public static class StorageLinkExtensions
     {
