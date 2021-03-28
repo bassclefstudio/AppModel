@@ -13,6 +13,7 @@ namespace BassClefStudio.AppModel.Navigation
         /// <summary>
         /// Called asynchnously after all dependencies that this <see cref="IViewModel"/> requires have been resolved through dependency injection.
         /// </summary>
-        Task InitializeAsync();
+        /// <param name="parameter">A parameter passed to the view-model when this <see cref="IViewModel"/> is navigated to.</param>
+        Task InitializeAsync(object parameter = null);
     }
 }
