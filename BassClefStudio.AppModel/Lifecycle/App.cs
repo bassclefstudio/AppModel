@@ -236,6 +236,7 @@ namespace BassClefStudio.AppModel.Lifecycle
 
         #endregion
         #endregion
+        #region Navigation
 
         /// <summary>
         /// Resolves the given <see cref="IViewModel"/>'s view dependencies for the platform and navigates to a new view.
@@ -320,6 +321,11 @@ namespace BassClefStudio.AppModel.Lifecycle
         private Stack<NavigatedEventArgs> NavigationStack { get; } = new Stack<NavigatedEventArgs>();
 
         /// <summary>
+        /// A <see cref="bool"/> indicating whether the <see cref="App"/> can initiate back navigation - trigger this by calling the <see cref="GoBack"/> navigation method.
+        /// </summary>
+        public bool CanGoBack => NavigationStack.Count > 1;
+
+        /// <summary>
         /// Initiates a request to return to the last saved state of the application (i.e. a back button was pressed or gesture detected).
         /// </summary>
         /// <returns>A <see cref="bool"/> indicating whether the <see cref="App"/> could, and did, initiate navigation to a previous page.</returns>
@@ -343,6 +349,7 @@ namespace BassClefStudio.AppModel.Lifecycle
             }
         }
 
+        #endregion
         #endregion
     }
 

@@ -29,7 +29,12 @@ namespace BassClefStudio.AppModel.Helpers
         /// <summary>
         /// A <see cref="SourceStream{T}"/> that emits selected <see cref="NavigationItem"/> items that have been selected in the UI.
         /// </summary>
-        public SourceStream<NavigationItem> TriggerStream { get; }
+        public SourceStream<NavigationItem> NavigateStream { get; }
+
+        /// <summary>
+        /// A <see cref="SourceStream{T}"/> that emits <see cref="bool"/> values - any 'true' values recieved will trigger back navigation (if possible).
+        /// </summary>
+        public SourceStream<bool> BackStream { get; }
 
         private NavigationItem selected;
         /// <summary>
@@ -50,6 +55,12 @@ namespace BassClefStudio.AppModel.Helpers
                 }
             }
         }
+
+        private bool backEnabled;
+        /// <summary>
+        /// A <see cref="bool"/> value indicating whether any 'back button' UI should be shown.
+        /// </summary>
+        public bool BackEnabled { get => backEnabled; private set => Set(ref backEnabled, value); }
 
         /// <summary>
         /// Sets the value of <see cref="SelectedItem"/> without triggering navigation.
@@ -77,10 +88,22 @@ namespace BassClefStudio.AppModel.Helpers
             NavigationItems = new ObservableCollection<NavigationItem>(GetInitialItems());
             MyApp = myApp;
             MyApp.Navigated += AppNavigated;
-            TriggerStream = new SourceStream<NavigationItem>();
-            TriggerStream.BindResult(Navigate);
+            NavigateStream = new SourceStream<NavigationItem>();
+            NavigateStream.BindResult(Navigate);
+            BackStream = new SourceStream<bool>();
+            BackStream.BindResult(b =>
+            {
+                if (b && MyApp.CanGoBack)
+                {
+                    MyApp.GoBack();
+                    BackEnabled = MyApp.CanGoBack;
+                }
+            });
             //// Starting an empty SourceStream doesn't actually *do* anything, but still...
-            _ = TriggerStream.StartAsync();
+            _ = NavigateStream.StartAsync();
+            _ = BackStream.StartAsync();
+
+            BackEnabled = MyApp.CanGoBack;
         }
 
         /// <inheritdoc/>
@@ -90,6 +113,7 @@ namespace BassClefStudio.AppModel.Helpers
         {
             var viewModelType = e.NavigatedViewModel.GetType();
             SetSelected(NavigationItems.FirstOrDefault(i => i.ViewModelType == viewModelType));
+            BackEnabled = MyApp.CanGoBack;
         }
 
         /// <summary>
@@ -105,7 +129,7 @@ namespace BassClefStudio.AppModel.Helpers
         /// </summary>
         public void Navigate()
         {
-            MyApp.NavigateReflection(SelectedItem.ViewModelType);
+            MyApp.NavigateReflection(SelectedItem.ViewModelType, SelectedItem.Parameter);
         }
     }
 
@@ -130,16 +154,23 @@ namespace BassClefStudio.AppModel.Helpers
         public char Icon { get; }
 
         /// <summary>
+        /// An optional <see cref="object"/> parameter to pass to the navigation service when navigating to the specified page.
+        /// </summary>
+        public object Parameter { get; }
+
+        /// <summary>
         /// Creates a new <see cref="NavigationItem"/>.
         /// </summary>
         /// <param name="name">The display name of the <see cref="NavigationItem"/>.</param>
         /// <param name="viewModelType">The type of the view-model (<see cref="IViewModel"/>) that this <see cref="NavigationItem"/> refers to.</param>
         /// <param name="icon">A <see cref="char"/> that represents the icon of this <see cref="NavigationItem"/>.</param>
-        public NavigationItem(string name, Type viewModelType, char icon)
+        /// <param name="param">An optional <see cref="object"/> parameter to pass to the navigation service when navigating to the specified page.</param>
+        public NavigationItem(string name, Type viewModelType, char icon, object param = null)
         {
             Name = name;
             ViewModelType = viewModelType;
             Icon = icon;
+            Parameter = param;
         }
     }
 }
