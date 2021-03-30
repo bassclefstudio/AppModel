@@ -212,8 +212,8 @@ namespace BassClefStudio.AppModel.Lifecycle
 
         private void ActivateForeground(IActivatedEventArgs args)
         {
-            var navService = Services.Resolve<INavigationService>();
-            navService.InitializeNavigation();
+            NavigationService = Services.Resolve<INavigationService>();
+            NavigationService.InitializeNavigation();
 
             var shellHandler = Services.ResolveOptional<IShellHandler>();
             if (shellHandler != null)
@@ -238,6 +238,8 @@ namespace BassClefStudio.AppModel.Lifecycle
         #endregion
         #region Navigation
 
+        private INavigationService NavigationService { get; set; }
+
         /// <summary>
         /// Resolves the given <see cref="IViewModel"/>'s view dependencies for the platform and navigates to a new view.
         /// </summary>
@@ -258,8 +260,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         public void Navigate<T>(T viewModel, object parameter = null) where T : IViewModel
         {
             var view = Services.Resolve<IView<T>>();
-            var navService = Services.Resolve<INavigationService>();
-            navService.Navigate(view);
+            NavigationService.Navigate(view);
             view.ViewModel = viewModel;
             NavigatedInitialize(viewModel, view, parameter);
         }
@@ -274,8 +275,7 @@ namespace BassClefStudio.AppModel.Lifecycle
             var viewType = typeof(IView<>).MakeGenericType(viewModelType);
             var viewModel = (IViewModel)Services.Resolve(viewModelType);
             var view = (IView)Services.Resolve(viewType);
-            var navService = Services.Resolve<INavigationService>();
-            navService.Navigate(view);
+            NavigationService.Navigate(view);
             viewType.GetProperty("ViewModel").SetValue(view, viewModel);
             NavigatedInitialize(viewModel, view, parameter);
         }
@@ -289,9 +289,8 @@ namespace BassClefStudio.AppModel.Lifecycle
         {
             var viewType = typeof(IView<>).MakeGenericType(viewModel.GetType());
             var view = (IView)Services.Resolve(viewType);
-            var navService = Services.Resolve<INavigationService>();
             viewType.GetProperty("ViewModel").SetValue(view, viewModel);
-            navService.Navigate(view);
+            NavigationService.Navigate(view);
             NavigatedInitialize(viewModel, view, parameter);
         }
 
@@ -320,20 +319,12 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// <summary>
         /// A <see cref="bool"/> indicating whether the <see cref="App"/> can initiate back navigation - trigger this by calling the <see cref="GoBack"/> navigation method.
         /// </summary>
-        public bool CanGoBack()
-        {
-            var navService = Services.Resolve<INavigationService>();
-            return navService.CanGoBack;
-        }
+        public bool CanGoBack => NavigationService.CanGoBack;
 
         /// <summary>
         /// Initiates a request to return to the last saved state of the application (i.e. a back button was pressed or gesture detected).
         /// </summary>
-        public void GoBack()
-        {
-            var navService = Services.Resolve<INavigationService>();
-            navService.GoBack();
-        }
+        public void GoBack() => NavigationService.GoBack();
 
         #endregion
         #endregion

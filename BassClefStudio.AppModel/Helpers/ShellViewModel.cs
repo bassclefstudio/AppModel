@@ -93,17 +93,17 @@ namespace BassClefStudio.AppModel.Helpers
             BackStream = new SourceStream<bool>();
             BackStream.BindResult(b =>
             {
-                if (b && MyApp.CanGoBack())
+                if (b && MyApp.CanGoBack)
                 {
                     MyApp.GoBack();
-                    BackEnabled = MyApp.CanGoBack();
+                    BackEnabled = MyApp.CanGoBack;
                 }
             });
             //// Starting an empty SourceStream doesn't actually *do* anything, but still...
             _ = NavigateStream.StartAsync();
             _ = BackStream.StartAsync();
 
-            BackEnabled = MyApp.CanGoBack();
+            BackEnabled = MyApp.CanGoBack;
         }
 
         /// <inheritdoc/>
@@ -113,7 +113,7 @@ namespace BassClefStudio.AppModel.Helpers
         {
             var viewModelType = e.NavigatedViewModel.GetType();
             SetSelected(NavigationItems.FirstOrDefault(i => i.ViewModelType == viewModelType));
-            BackEnabled = MyApp.CanGoBack();
+            BackEnabled = MyApp.CanGoBack;
         }
 
         /// <summary>
