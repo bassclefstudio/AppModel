@@ -5,6 +5,7 @@ using BassClefStudio.NET.Serialization;
 using BassClefStudio.NET.Sync;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -51,33 +52,60 @@ namespace BassClefStudio.AppModel.Helpers
         }
 
         /// <inheritdoc/>
-        public async Task PushAsync(ISyncItem<T> item)
-        { 
-            if (UseSerializer)
+        public async Task<bool> PushAsync(ISyncItem<T> item)
+        {
+            try
             {
-                string json = SerializationService.Serialize(item.Item);
-                await SettingsService.SetValueAsync(Key, json);
+                if (UseSerializer)
+                {
+                    string json = SerializationService.Serialize(item.Item);
+                    await SettingsService.SetValueAsync(Key, json);
+                    return true;
+                }
+                else
+                {
+                    await SettingsService.SetValueAsync(Key, item.Item);
+                    return true;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await SettingsService.SetValueAsync(Key, item.Item);
+                Debug.WriteLine($"Settings context failed: {ex}");
+                return false;
             }
         }
 
         /// <inheritdoc/>
-        public async Task UpdateAsync(ISyncItem<T> item)
+        public async Task<bool> UpdateAsync(ISyncItem<T> item)
             => await DispatcherService.RunOnUIThreadAsync(() => UpdateAsyncInternal(item));
 
-        private async Task UpdateAsyncInternal(ISyncItem<T> item)
+        private async Task<bool> UpdateAsyncInternal(ISyncItem<T> item)
         {
-            if (UseSerializer)
+            try
             {
-                string json = await SettingsService.GetValueAsync<string>(Key);
-                item.Item = SerializationService.Deserialize<T>(json);
+                if (UseSerializer)
+                {
+                    string json = await SettingsService.GetValueAsync<string>(Key);
+                    if (string.IsNullOrWhiteSpace(json))
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        item.Item = SerializationService.Deserialize<T>(json);
+                        return true;
+                    }
+                }
+                else
+                {
+                    item.Item = await SettingsService.GetValueAsync<T>(Key);
+                    return true;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                item.Item = await SettingsService.GetValueAsync<T>(Key);
+                Debug.WriteLine($"Settings context failed: {ex}");
+                return false;
             }
         }
     }

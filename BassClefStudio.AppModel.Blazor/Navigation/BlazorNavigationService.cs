@@ -31,7 +31,7 @@ namespace BassClefStudio.AppModel.Navigation
         { }
 
         /// <inheritdoc/>
-        public void Navigate(IView view, object parameter = null)
+        public void Navigate(IView view)
         {
             Console.WriteLine($"Navigate {view}.");
             if(view is BlazorView blazorView)

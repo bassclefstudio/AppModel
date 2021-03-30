@@ -20,19 +20,6 @@ namespace BassClefStudio.AppModel.Lifecycle
     }
 
     /// <summary>
-    /// Represents a service that can manage an <see cref="App"/>'s back navigation.
-    /// </summary>
-    public interface IBackHandler : ILifecycleHandler
-    {
-        /// <summary>
-        /// A method that is called whenever the <see cref="App"/> receieves a back navigation request.
-        /// </summary>
-        /// <param name="app">The app's <see cref="App"/> object.</param>
-        /// <returns>A <see cref="bool"/> value indicating whether any action was performed successfully.</returns>
-        bool GoBack(App app);
-    }
-
-    /// <summary>
     /// Represents a service that can manage an <see cref="App"/>'s suspension from the foreground.
     /// </summary>
     public interface ISuspendingHandler : ILifecycleHandler
@@ -73,10 +60,5 @@ namespace BassClefStudio.AppModel.Lifecycle
     /// Represents a service that can handle lifecycle events for an <see cref="App"/>.
     /// </summary>
     public interface ILifecycleHandler
-    {
-        /// <summary>
-        /// A <see cref="bool"/> value indicating whether the <see cref="ILifecycleHandler"/> is enabled.
-        /// </summary>
-        bool Enabled { get; }
-    }
+    { }
 }

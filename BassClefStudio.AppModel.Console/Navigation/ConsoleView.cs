@@ -13,8 +13,7 @@ namespace BassClefStudio.AppModel.Navigation
         /// <summary>
         /// Show the view, calling <see cref="Console"/> methods and displaying text to the user. Ensure that this <see cref="Task"/> never completes without calling either <see cref="Lifecycle.App.Suspend"/> or navigating to a different <see cref="ConsoleView{T}"/>.
         /// </summary>
-        /// <param name="parameter">An <see cref="object"/> parameter that can be passed to the <see cref="IConsoleView{T}"/> on navigation.</param>
-        Task ShowView(object parameter);
+        Task ShowView();
     }
 
     /// <summary>
@@ -41,7 +40,7 @@ namespace BassClefStudio.AppModel.Navigation
         { }
 
         /// <inheritdoc/>
-        public abstract Task ShowView(object parameter);
+        public abstract Task ShowView();
 
         /// <summary>
         /// Creates a new completion-task - an awaitable <see cref="Task"/> that can be completed at a later time (i.e. to advance the UI after a specific event).

@@ -1,11 +1,7 @@
-﻿using BassClefStudio.AppModel.Navigation;
-using BassClefStudio.AppModel.Threading;
+﻿using BassClefStudio.AppModel.Threading;
 using BassClefStudio.NET.Core;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -49,7 +45,7 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        public void Navigate(IView view, object parameter = null)
+        public void Navigate(IView view)
         {
             if(!(view is UIElement))
             {
@@ -73,6 +69,5 @@ namespace BassClefStudio.AppModel.Navigation
         {
             return await dialog.ShowAsync();
         }
-
     }
 }

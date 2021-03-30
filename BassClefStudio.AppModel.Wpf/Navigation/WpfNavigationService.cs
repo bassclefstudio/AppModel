@@ -40,7 +40,7 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        public void Navigate(IView view, object parameter = null)
+        public void Navigate(IView view)
         {
             if (!(view is UIElement))
             {

@@ -113,7 +113,7 @@ namespace BassClefStudio.AppModel.Lifecycle
 
             //// Run any IInitializationHandlers.
             var inits = Services.Resolve<IEnumerable<IInitializationHandler>>();
-            foreach (var i in inits.Where(s => s.Enabled))
+            foreach (var i in inits)
             {
                 i.Initialize(this);
             }
@@ -215,15 +215,14 @@ namespace BassClefStudio.AppModel.Lifecycle
             var navService = Services.Resolve<INavigationService>();
             navService.InitializeNavigation();
 
-            var shellHandlers = Services.Resolve<IEnumerable<IShellHandler>>();
-            var shellHandler = shellHandlers.FirstOrDefault(h => h.Enabled);
+            var shellHandler = Services.ResolveOptional<IShellHandler>();
             if (shellHandler != null)
             {
                 NavigateReflection(shellHandler);
             }
 
             var activationHandlers = Services.Resolve<IEnumerable<IActivationHandler>>();
-            var activateViewModel = activationHandlers.Where(h => h.Enabled).FirstOrDefault(h => h.CanHandle(args));
+            var activateViewModel = activationHandlers.FirstOrDefault(h => h.CanHandle(args));
             if (activateViewModel != null)
             {
                 activateViewModel.Activate(args);
@@ -301,7 +300,9 @@ namespace BassClefStudio.AppModel.Lifecycle
                 new SynchronousTask(() => viewModel.InitializeAsync(parameter));
             initViewModelTask.RunTask();
             view.Initialize();
-            Navigated?.Invoke(this, new NavigatedEventArgs(view, viewModel, parameter));
+            var args = new NavigatedEventArgs(view, viewModel, parameter);
+            NavigationStack.Push(args);
+            Navigated?.Invoke(this, args);
         }
 
         /// <summary>
@@ -310,26 +311,35 @@ namespace BassClefStudio.AppModel.Lifecycle
         public void Suspend()
         {
             var handlers = Services.Resolve<IEnumerable<ISuspendingHandler>>();
-            foreach (var h in handlers.Where(s => s.Enabled))
+            foreach (var h in handlers)
             {
                 h.Suspend(this);
             }
         }
 
+        private Stack<NavigatedEventArgs> NavigationStack { get; } = new Stack<NavigatedEventArgs>();
+
         /// <summary>
         /// Initiates a request to return to the last saved state of the application (i.e. a back button was pressed or gesture detected).
         /// </summary>
-        public void GoBack()
+        /// <returns>A <see cref="bool"/> indicating whether the <see cref="App"/> could, and did, initiate navigation to a previous page.</returns>
+        public bool GoBack()
         {
-            var handlers = Services.Resolve<IEnumerable<IBackHandler>>();
-            var myHandler = handlers.Where(h => h.Enabled).FirstOrDefault();
-            if (myHandler != null)
+            if (NavigationStack.Count > 1)
             {
-                myHandler.GoBack(this);
+                //// Pops the current state from the navigation stack.
+                NavigationStack.Pop();
+                //// Peeks at the previously-saved state.
+                var args = NavigationStack.Peek();
+                //// TODO: Potentially create a new instance of the view-model, rather than navigating to the currently existing one. Note this means IViewModel.InitializeAsync() is called twice.
+                var navService = Services.Resolve<INavigationService>();
+                //// The view-model, etc. for this view is already set-up!
+                navService.Navigate(args.NavigatedView);
+                return true;
             }
             else
             {
-                throw new LifecycleException($"No enabled IBackHandlers could be found in the services container for the App.");
+                return false;
             }
         }
 

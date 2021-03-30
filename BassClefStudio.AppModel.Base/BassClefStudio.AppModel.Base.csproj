@@ -5,7 +5,7 @@
     <RootNamespace>BassClefStudio.AppModel</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Authors>BassClefStudio</Authors>
-    <Version>1.8.5</Version>
+    <Version>1.8.6</Version>
     <Description>Services and classes for the BassClefStudio.AppModel library that provide basic features for cross-platform MVVM applications running on .NET Standard.</Description>
     <PackageProjectUrl>https://github.com/bassclefstudio/AppModel</PackageProjectUrl>
     <RepositoryUrl>https://github.com/bassclefstudio/AppModel.git</RepositoryUrl>
