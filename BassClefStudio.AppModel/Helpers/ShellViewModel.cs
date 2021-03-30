@@ -129,7 +129,7 @@ namespace BassClefStudio.AppModel.Helpers
         /// </summary>
         public void Navigate()
         {
-            MyApp.NavigateReflection(SelectedItem.ViewModelType);
+            MyApp.NavigateReflection(SelectedItem.ViewModelType, SelectedItem.Parameter);
         }
     }
 
@@ -154,16 +154,23 @@ namespace BassClefStudio.AppModel.Helpers
         public char Icon { get; }
 
         /// <summary>
+        /// An optional <see cref="object"/> parameter to pass to the navigation service when navigating to the specified page.
+        /// </summary>
+        public object Parameter { get; }
+
+        /// <summary>
         /// Creates a new <see cref="NavigationItem"/>.
         /// </summary>
         /// <param name="name">The display name of the <see cref="NavigationItem"/>.</param>
         /// <param name="viewModelType">The type of the view-model (<see cref="IViewModel"/>) that this <see cref="NavigationItem"/> refers to.</param>
         /// <param name="icon">A <see cref="char"/> that represents the icon of this <see cref="NavigationItem"/>.</param>
-        public NavigationItem(string name, Type viewModelType, char icon)
+        /// <param name="param">An optional <see cref="object"/> parameter to pass to the navigation service when navigating to the specified page.</param>
+        public NavigationItem(string name, Type viewModelType, char icon, object param = null)
         {
             Name = name;
             ViewModelType = viewModelType;
             Icon = icon;
+            Parameter = param;
         }
     }
 }
