@@ -9,11 +9,10 @@ namespace BassClefStudio.AppModel.Navigation
     /// <summary>
     /// An <see cref="INavigationService"/> built on the <see cref="ConsoleView{T}"/> abstract class.
     /// </summary>
-    public class ConsoleNavigationService : INavigationService
+    public class ConsoleNavigationService : NavigationService<IConsoleView>, INavigationService
     {
-        internal string AppName { get; }
-        internal Version Version { get; }
-
+        private string AppName { get; }
+        private Version Version { get; }
         /// <summary>
         /// Creates a new <see cref="ConsoleNavigationService"/>.
         /// </summary>
@@ -25,7 +24,7 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        public void InitializeNavigation()
+        public override void InitializeNavigation()
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"{AppName} v{Version}");
@@ -33,18 +32,11 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        public void Navigate(IView view)
+        protected override void NavigateInternal(IConsoleView view)
         {
-            if (view is IConsoleView consoleView)
-            {
-                SynchronousTask syncTask = new SynchronousTask(
-                    () => consoleView.ShowView());
-                syncTask.RunTask();
-            }
-            else
-            {
-                throw new ArgumentException($"Console navigation usually expects that the resolved IViews be IConsoleViews. View type: {view?.GetType().Name}");
-            }
+            SynchronousTask syncTask = new SynchronousTask(
+                    () => view.ShowView());
+            syncTask.RunTask();
         }
     }
 }
