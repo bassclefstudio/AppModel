@@ -11,10 +11,10 @@ namespace BassClefStudio.AppModel.Navigation
     /// <summary>
     /// Represents a <see cref="BlazorNavigationService"/> that navigates to URLs in the Blazor SPA and provides the current view information for components to retrieve their <see cref="IViewModel"/>.
     /// </summary>
-    public class BlazorNavigationService : INavigationService
+    public class BlazorNavigationService : NavigationService<BlazorView>, INavigationService
     {
-        internal IBlazorViewProvider ViewProvider { get; }
-        internal NavigationManager NavigationManager { get; }
+        private IBlazorViewProvider ViewProvider { get; }
+        private NavigationManager NavigationManager { get; }
         /// <summary>
         /// Creates a new <see cref="BlazorNavigationService"/> from the required Blazor dependencies.
         /// </summary>
@@ -27,22 +27,15 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        public void InitializeNavigation()
+        public override void InitializeNavigation()
         { }
 
         /// <inheritdoc/>
-        public void Navigate(IView view)
+        protected override void NavigateInternal(BlazorView view)
         {
-            Console.WriteLine($"Navigate {view}.");
-            if(view is BlazorView blazorView)
-            {
-                ViewProvider.CurrentView = blazorView;
-                NavigationManager.NavigateTo($"{NavigationManager.BaseUri}{blazorView.ViewPath}");
-            }
-            else
-            {
-                Debug.WriteLine("Blazor navigation expects a BlazorView IView instance.");
-            }
+            Console.WriteLine($"Navigate {view.ViewPath}.");
+            ViewProvider.CurrentView = view;
+            NavigationManager.NavigateTo($"{NavigationManager.BaseUri}{view.ViewPath}");
         }
     }
 }

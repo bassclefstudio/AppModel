@@ -13,25 +13,33 @@ namespace BassClefStudio.AppModel.Navigation
     /// <summary>
     /// An <see cref="INavigationService"/> built on the WPF's <see cref="ContentControl"/> and <see cref="Window"/> classes.
     /// </summary>
-    public class WpfNavigationService : INavigationService
+    public class WpfNavigationService : NavigationService<UIElement>, INavigationService
     {
+        private ContentControl currentFrame;
         /// <summary>
         /// The current frame for navigation content.
         /// </summary>
-        public ContentControl CurrentFrame { get; set; }
+        public ContentControl CurrentFrame
+        {
+            get => currentFrame;
+            set
+            {
+                if (currentFrame != value)
+                {
+                    currentFrame = value;
+                    NavigationStack.Clear();
+                }
+            }
+        }
 
-        internal IDispatcherService DispatcherService { get; }
         /// <summary>
         /// Creates a new <see cref="WpfNavigationService"/>.
         /// </summary>
-        /// <param name="dispatcherService">The <see cref="IDispatcherService"/> for running UI code on the correct thread.</param>
-        public WpfNavigationService(IDispatcherService dispatcherService)
-        {
-            DispatcherService = dispatcherService;
-        }
+        public WpfNavigationService()
+        { }
 
         /// <inheritdoc/>
-        public void InitializeNavigation()
+        public override void InitializeNavigation()
         {
             var myWindow = new Window();
             Application.Current.MainWindow = myWindow;
@@ -40,20 +48,15 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        public void Navigate(IView view)
+        protected override void NavigateInternal(UIElement element)
         {
-            if (!(view is UIElement))
-            {
-                Debug.Write($"WPF Navigation usually expects that the resolved IViews be UIElements. View type: {view?.GetType().Name}");
-            }
-
-            if (view is Window window)
+            if (element is Window window)
             {
                 window.Show();
             }
             else
             {
-                CurrentFrame.Content = view;
+                CurrentFrame.Content = element;
             }
         }
     }

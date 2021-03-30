@@ -302,7 +302,6 @@ namespace BassClefStudio.AppModel.Lifecycle
             initViewModelTask.RunTask();
             view.Initialize();
             var args = new NavigatedEventArgs(view, viewModel, parameter);
-            NavigationStack.Push(args);
             Navigated?.Invoke(this, args);
         }
 
@@ -318,35 +317,22 @@ namespace BassClefStudio.AppModel.Lifecycle
             }
         }
 
-        private Stack<NavigatedEventArgs> NavigationStack { get; } = new Stack<NavigatedEventArgs>();
-
         /// <summary>
         /// A <see cref="bool"/> indicating whether the <see cref="App"/> can initiate back navigation - trigger this by calling the <see cref="GoBack"/> navigation method.
         /// </summary>
-        public bool CanGoBack => NavigationStack.Count > 1;
+        public bool CanGoBack()
+        {
+            var navService = Services.Resolve<INavigationService>();
+            return navService.CanGoBack;
+        }
 
         /// <summary>
         /// Initiates a request to return to the last saved state of the application (i.e. a back button was pressed or gesture detected).
         /// </summary>
-        /// <returns>A <see cref="bool"/> indicating whether the <see cref="App"/> could, and did, initiate navigation to a previous page.</returns>
-        public bool GoBack()
+        public void GoBack()
         {
-            if (NavigationStack.Count > 1)
-            {
-                //// Pops the current state from the navigation stack.
-                NavigationStack.Pop();
-                //// Peeks at the previously-saved state.
-                var args = NavigationStack.Peek();
-                //// TODO: Potentially create a new instance of the view-model, rather than navigating to the currently existing one. Note this means IViewModel.InitializeAsync() is called twice.
-                var navService = Services.Resolve<INavigationService>();
-                //// The view-model, etc. for this view is already set-up!
-                navService.Navigate(args.NavigatedView);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            var navService = Services.Resolve<INavigationService>();
+            navService.GoBack();
         }
 
         #endregion

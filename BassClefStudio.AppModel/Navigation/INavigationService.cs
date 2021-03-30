@@ -22,5 +22,75 @@ namespace BassClefStudio.AppModel.Navigation
         /// </summary>
         /// <param name="view">The instance of the <see cref="IView"/> to navigate to.</param>
         void Navigate(IView view);
+
+        /// <summary>
+        /// A <see cref="bool"/> indicating whether this <see cref="INavigationService"/> supports back navigation in its current state. 
+        /// </summary>
+        bool CanGoBack { get; }
+
+        /// <summary>
+        /// Initiate back navigation and navigate to the previously visited <see cref="IView"/> view.
+        /// </summary>
+        void GoBack();
+    }
+
+    /// <summary>
+    /// Represents a base <see cref="INavigationService"/> that navigates between views of type <typeparamref name="T"/> and implements stack-based back navigation.
+    /// </summary>
+    /// <typeparam name="T">The type of views this <see cref="NavigationService{T}"/> navigates between.</typeparam>
+    public abstract class NavigationService<T> : INavigationService
+    {
+        /// <inheritdoc/>
+        public bool CanGoBack => NavigationStack.Count > 1;
+
+        /// <summary>
+        /// The <see cref="Stack{T}"/> containing back navigation information.
+        /// </summary>
+        protected Stack<T> NavigationStack { get; }
+
+        /// <summary>
+        /// Creates a new <see cref="NavigationService{T}"/>.
+        /// </summary>
+        public NavigationService()
+        {
+            NavigationStack = new Stack<T>();
+        }
+
+        /// <inheritdoc/>
+        public abstract void InitializeNavigation();
+
+        /// <summary>
+        /// Navigates to a <typeparamref name="T"/> view internally, using the platform-specific navigation APIs.
+        /// </summary>
+        /// <param name="view">The <see cref="IView"/> and <typeparamref name="T"/> to navigate to.</param>
+        protected abstract void NavigateInternal(T view);
+
+        /// <inheritdoc/>
+        public void Navigate(IView view)
+        {
+            if(view is T tView)
+            {
+                NavigateInternal(tView);
+                NavigationStack.Push(tView);
+            }
+            else
+            {
+                throw new ArgumentException($"Navigation only supports views of type \"{typeof(T).Name}\"; view is of type \"{view?.GetType().Name}\".");
+            }
+        }
+
+        /// <inheritdoc/>
+        public void GoBack()
+        {
+            if (CanGoBack)
+            {
+                NavigationStack.Pop();
+                NavigateInternal(NavigationStack.Peek());
+            }
+            else
+            {
+                throw new InvalidOperationException("Cannot initiate back navigation - CanGoBack is currently 'false'.");
+            }
+        }
     }
 }

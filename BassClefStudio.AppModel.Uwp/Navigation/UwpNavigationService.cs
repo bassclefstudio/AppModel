@@ -1,6 +1,7 @@
 ﻿using BassClefStudio.AppModel.Threading;
 using BassClefStudio.NET.Core;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
@@ -11,21 +12,36 @@ namespace BassClefStudio.AppModel.Navigation
     /// <summary>
     /// An <see cref="INavigationService"/> built on the UWP's <see cref="ContentControl"/> and <see cref="Window"/> classes.
     /// </summary>
-    public class UwpNavigationService : INavigationService
+    public class UwpNavigationService : NavigationService<UIElement>, INavigationService
     {
+        private ContentControl currentFrame;
         /// <summary>
         /// The current frame for navigation content.
         /// </summary>
-        public ContentControl CurrentFrame { get; set; }
-        
-        internal IDispatcherService DispatcherService { get; }
+        public ContentControl CurrentFrame
+        { 
+            get => currentFrame;
+            set
+            {
+                if(currentFrame != value)
+                {
+                    currentFrame = value;
+                    NavigationStack.Clear();
+                }
+            }
+        }
+
+        private IDispatcherService DispatcherService { get; }
+        /// <summary>
+        /// Creates a new <see cref="UwpNavigationService"/>.
+        /// </summary>
         public UwpNavigationService(IDispatcherService dispatcherService)
         {
             DispatcherService = dispatcherService;
         }
 
         /// <inheritdoc/>
-        public void InitializeNavigation()
+        public override void InitializeNavigation()
         {
             Frame rootFrame = Window.Current.Content as Frame;
 
@@ -45,14 +61,9 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        public void Navigate(IView view)
+        protected override void NavigateInternal(UIElement element)
         {
-            if(!(view is UIElement))
-            {
-                Debug.Write($"UWP Navigation usually expects that the resolved IViews be UIElements. View type: {view?.GetType().Name}");
-            }
-
-            if (view is ContentDialog dialog)
+            if (element is ContentDialog dialog)
             {
                 SynchronousTask showTask = new SynchronousTask(
                     () => DispatcherService.RunOnUIThreadAsync(
@@ -61,7 +72,7 @@ namespace BassClefStudio.AppModel.Navigation
             }
             else
             {
-                CurrentFrame.Content = view;
+                CurrentFrame.Content = element;
             }
         }
 
