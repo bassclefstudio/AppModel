@@ -5,6 +5,7 @@ using BassClefStudio.NET.Serialization;
 using BassClefStudio.NET.Sync;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,22 +37,47 @@ namespace BassClefStudio.AppModel.Helpers
         }
 
         /// <inheritdoc/>
-        public async Task PushAsync(ISyncItem<T> item)
+        public async Task<bool> PushAsync(ISyncItem<T> item)
         {
-            string json = SerializationService.Serialize(item.Item);
-            var file = await StorageService.AppDataFolder.CreateFileAsync(Path);
-            await file.WriteTextAsync(json);
+            try
+            {
+                string json = SerializationService.Serialize(item.Item);
+                var file = await StorageService.AppDataFolder.CreateFileAsync(Path);
+                await file.WriteTextAsync(json);
+                return true;
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine($"Storage context failed: {ex}");
+                return false;
+            }
         }
 
         /// <inheritdoc/>
-        public async Task UpdateAsync(ISyncItem<T> item)
-        { 
-            var file = await StorageService.AppDataFolder.CreateFileAsync(Path);
-            string json = await file.ReadTextAsync();
-            await DispatcherService.RunOnUIThreadAsync(() =>
+        public async Task<bool> UpdateAsync(ISyncItem<T> item)
+        {
+            try
             {
-                item.Item = SerializationService.Deserialize<T>(json);
-            });
+                var file = await StorageService.AppDataFolder.CreateFileAsync(Path);
+                string json = await file.ReadTextAsync();
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    return false;
+                }
+                else
+                {
+                    await DispatcherService.RunOnUIThreadAsync(() =>
+                    {
+                        item.Item = SerializationService.Deserialize<T>(json);
+                    });
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Storage context failed: {ex}");
+                return false;
+            }
         }
     }
 

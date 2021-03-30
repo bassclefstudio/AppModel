@@ -11,8 +11,8 @@ namespace BassClefStudio.AppModel.Navigation
     /// </summary>
     public class ConsoleNavigationService : INavigationService
     {
-        public string AppName { get; set; }
-        public Version Version { get; set; }
+        internal string AppName { get; }
+        internal Version Version { get; }
 
         /// <summary>
         /// Creates a new <see cref="ConsoleNavigationService"/>.
@@ -33,12 +33,12 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        public void Navigate(IView view, object parameter = null)
+        public void Navigate(IView view)
         {
             if (view is IConsoleView consoleView)
             {
                 SynchronousTask syncTask = new SynchronousTask(
-                    () => consoleView.ShowView(parameter));
+                    () => consoleView.ShowView());
                 syncTask.RunTask();
             }
             else
