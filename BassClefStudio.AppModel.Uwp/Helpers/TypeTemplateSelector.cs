@@ -5,12 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Markup;
 
 namespace BassClefStudio.AppModel.Helpers
 {
     /// <summary>
     /// Represents a <see cref="DataTemplateSelector"/> that selects between one or more <see cref="DataTemplate"/>s based on the type of the items.
     /// </summary>
+    [ContentProperty(Name = nameof(Templates))]
     public class TypeTemplateSelector : DataTemplateSelector
     {
         /// <summary>
@@ -46,6 +48,7 @@ namespace BassClefStudio.AppModel.Helpers
     /// <summary>
     /// Represents a single entry in the <see cref="TypeTemplateSelector"/>'s list of available templates.
     /// </summary>
+    [ContentProperty(Name = nameof(Template))]
     public class TypeTemplateEntry
     {
         /// <summary>
