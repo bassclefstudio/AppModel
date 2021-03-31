@@ -8,7 +8,7 @@ using System.Text;
 namespace BassClefStudio.AppModel.Navigation
 {
     /// <summary>
-    /// Represents a service that can navigate between <see cref="IView{T}"/>s in a platform-specific way.
+    /// Represents a service that can navigate between <see cref="IView{T}"/>s in a platform-specific way. This interface is generally for internal use, and for most navigation apps should use the methods available on the <see cref="App"/> class instead, as they provide additional functionality.
     /// </summary>
     public interface INavigationService
     {
@@ -31,7 +31,8 @@ namespace BassClefStudio.AppModel.Navigation
         /// <summary>
         /// Initiate back navigation and navigate to the previously visited <see cref="IView"/> view.
         /// </summary>
-        void GoBack();
+        /// <returns>The <see cref="IView"/> that has been navigated to.</returns>
+        IView GoBack();
     }
 
     /// <summary>
@@ -80,12 +81,14 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        public void GoBack()
+        public IView GoBack()
         {
             if (CanGoBack)
             {
                 NavigationStack.Pop();
-                NavigateInternal(NavigationStack.Peek());
+                var view = NavigationStack.Peek();
+                NavigateInternal(view);
+                return (view as IView);
             }
             else
             {
