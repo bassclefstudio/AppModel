@@ -123,6 +123,7 @@
   <ItemGroup>
     <Compile Include="Background\UwpBackgroundService.cs" />
     <Compile Include="Background\UwpDeferral.cs" />
+    <Compile Include="Helpers\TypeTemplateSelector.cs" />
     <Compile Include="Lifecycle\UwpApplication.cs" />
     <Compile Include="Navigation\UwpNavigationService.cs" />
     <Compile Include="Notifications\UwpNotificationService.cs" />
