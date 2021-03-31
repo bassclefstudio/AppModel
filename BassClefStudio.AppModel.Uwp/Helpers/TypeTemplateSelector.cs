@@ -18,7 +18,7 @@ namespace BassClefStudio.AppModel.Helpers
         /// <summary>
         /// A list of <see cref="TypeTemplateEntry"/> objects describing all available templates.
         /// </summary>
-        public List<TypeTemplateEntry> Templates { get; set; }
+        public TypeTemplateEntry[] Templates { get; set; }
 
         /// <summary>
         /// Creates a new <see cref="TypeTemplateSelector"/>.
@@ -32,7 +32,7 @@ namespace BassClefStudio.AppModel.Helpers
         /// <param name="templates">A collection of <see cref="TypeTemplateEntry"/> objects describing all available templates.</param>
         public TypeTemplateSelector(IEnumerable<TypeTemplateEntry> templates)
         {
-            Templates = new List<TypeTemplateEntry>(templates);
+            Templates = templates.ToArray();
         }
 
         /// <inheritdoc/>
