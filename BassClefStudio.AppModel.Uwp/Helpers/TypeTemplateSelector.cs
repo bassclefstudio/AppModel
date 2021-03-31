@@ -18,13 +18,15 @@ namespace BassClefStudio.AppModel.Helpers
         /// <summary>
         /// A list of <see cref="TypeTemplateEntry"/> objects describing all available templates.
         /// </summary>
-        public TypeTemplateEntry[] Templates { get; set; }
+        public List<TypeTemplateEntry> Templates { get; set; }
 
         /// <summary>
         /// Creates a new <see cref="TypeTemplateSelector"/>.
         /// </summary>
         public TypeTemplateSelector()
-        { }
+        {
+            Templates = new List<TypeTemplateEntry>();
+        }
 
         /// <summary>
         /// Creates a new <see cref="TypeTemplateSelector"/>.

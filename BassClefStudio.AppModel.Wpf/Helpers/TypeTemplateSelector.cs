@@ -24,7 +24,9 @@ namespace BassClefStudio.AppModel.Helpers
         /// Creates a new <see cref="TypeTemplateSelector"/>.
         /// </summary>
         public TypeTemplateSelector()
-        { }
+        {
+            Templates = new List<TypeTemplateEntry>();
+        }
 
         /// <summary>
         /// Creates a new <see cref="TypeTemplateSelector"/>.
