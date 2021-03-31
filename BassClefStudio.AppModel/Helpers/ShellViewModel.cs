@@ -67,7 +67,10 @@ namespace BassClefStudio.AppModel.Helpers
         /// </summary>
         private void SetSelected(NavigationItem item)
         {
-            Set(ref selected, item, nameof(SelectedItem));
+            if (selected != item)
+            {
+                Set(ref selected, item, nameof(SelectedItem));
+            }
         }
 
         /// <summary>
@@ -112,7 +115,7 @@ namespace BassClefStudio.AppModel.Helpers
         private void AppNavigated(object sender, NavigatedEventArgs e)
         {
             var viewModelType = e.NavigatedViewModel.GetType();
-            SetSelected(NavigationItems.FirstOrDefault(i => i.ViewModelType == viewModelType));
+            SetSelected(NavigationItems.FirstOrDefault(i => i.ViewModelType == viewModelType && i.Parameter == e.Parameter));
             BackEnabled = MyApp.CanGoBack;
         }
 
