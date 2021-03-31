@@ -301,6 +301,7 @@ namespace BassClefStudio.AppModel.Lifecycle
             initViewModelTask.RunTask();
             view.Initialize();
             var args = new NavigatedEventArgs(view, viewModel, parameter);
+            PreviousNavigations.Add(args);
             Navigated?.Invoke(this, args);
         }
 
@@ -322,9 +323,27 @@ namespace BassClefStudio.AppModel.Lifecycle
         public bool CanGoBack => NavigationService.CanGoBack;
 
         /// <summary>
+        /// A list of all previous <see cref="NavigatedEventArgs"/>, used for finding the correct arguments to send when the <see cref="GoBack"/> method is called.
+        /// </summary>
+        private List<NavigatedEventArgs> PreviousNavigations { get; } = new List<NavigatedEventArgs>();
+
+        /// <summary>
         /// Initiates a request to return to the last saved state of the application (i.e. a back button was pressed or gesture detected).
         /// </summary>
-        public void GoBack() => NavigationService.GoBack();
+        public void GoBack()
+        {
+            IView view = NavigationService.GoBack();
+            NavigatedEventArgs args = PreviousNavigations.FirstOrDefault(a => a.NavigatedView == view);
+            if (args != null)
+            {
+                //// Resend the Navigated event for the previously navigated page.
+                Navigated?.Invoke(this, args);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Back navigation was attempted to an IView that appears not to have been previously navigated to. View: \"{view}\"");
+            }
+        }
 
         #endregion
         #endregion
