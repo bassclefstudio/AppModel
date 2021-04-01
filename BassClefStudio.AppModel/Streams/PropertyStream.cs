@@ -55,7 +55,9 @@ namespace BassClefStudio.AppModel.Streams
             get => currentValue;
             set
             {
-                if ((currentValue == null && value != null) || !currentValue.Equals(value))
+                if (!(currentValue == null && value == null) 
+                    && ((currentValue == null && value != null) 
+                    || !currentValue.Equals(value)))
                 {
                     currentValue = value;
                     ValueEmitted?.Invoke(this, new StreamValue<T2>(currentValue));
