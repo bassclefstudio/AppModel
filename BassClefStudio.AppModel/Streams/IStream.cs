@@ -19,7 +19,7 @@ namespace BassClefStudio.AppModel.Streams
         /// <summary>
         /// If this <see cref="IStream{T}"/> contains data that is ready to be emitted, this will start the <see cref="IStream{T}"/>. Call this method after all binding and transformations to desired <see cref="IStream{T}"/>s have occurred.
         /// </summary>
-        Task StartAsync();
+        void Start();
     }
 
     /// <summary>

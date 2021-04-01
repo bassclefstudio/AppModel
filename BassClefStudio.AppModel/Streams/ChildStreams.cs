@@ -38,9 +38,9 @@ namespace BassClefStudio.AppModel.Streams
         }
 
         /// <inheritdoc/>
-        public virtual async Task StartAsync()
+        public void Start()
         {
-            await ParentStream.StartAsync();
+            ParentStream.Start();
         }
 
         private Queue<StreamValue<T1>> incomingInputs = new Queue<StreamValue<T1>>();

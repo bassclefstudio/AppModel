@@ -274,11 +274,11 @@ namespace BassClefStudio.AppModel.Streams
         #region Source
 
         /// <summary>
-        /// Returns a deferred <see cref="IStream{T}"/> that will emit the given value when <see cref="IStream{T}.StartAsync"/> is called.
+        /// Returns a deferred <see cref="IStream{T}"/> that will emit the given value when <see cref="IStream{T}.Start"/> is called.
         /// </summary>
         /// <typeparam name="T">The type of value emitted by this <see cref="IStream{T}"/>.</typeparam>
         /// <param name="value">The singular <typeparamref name="T"/> value to emit.</param>
-        /// <returns>An <see cref="IStream{T}"/> that will emit <paramref name="value"/> when <see cref="IStream{T}.StartAsync"/> is called.</returns>
+        /// <returns>An <see cref="IStream{T}"/> that will emit <paramref name="value"/> when <see cref="IStream{T}.Start"/> is called.</returns>
         public static IStream<T> AsStream<T>(this T value)
         {
             return new SourceStream<T>(value);

@@ -88,9 +88,9 @@ namespace BassClefStudio.AppModel.Streams
         }
 
         /// <inheritdoc/>
-        public async Task StartAsync()
+        public void Start()
         {
-            await ParentStream.StartAsync();
+            ParentStream.Start();
         }
 
         private void ParentValueEmitted(object sender, StreamValue<T1> e)

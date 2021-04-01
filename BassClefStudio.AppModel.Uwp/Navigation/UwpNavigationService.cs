@@ -69,7 +69,8 @@ namespace BassClefStudio.AppModel.Navigation
                     () => DispatcherService.RunOnUIThreadAsync(
                         () => ShowDialogTask(dialog)));
                 showTask.RunTask();
-                return false;
+                //// Because dialogs must be closed first, before any other pages can be navigated to, they should be added to the back stack in UWP.
+                return true;
             }
             else
             {

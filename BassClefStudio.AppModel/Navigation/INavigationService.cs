@@ -21,7 +21,8 @@ namespace BassClefStudio.AppModel.Navigation
         /// Navigates to the given <see cref="IView"/> view, displaying its content to the user.
         /// </summary>
         /// <param name="view">The instance of the <see cref="IView"/> to navigate to.</param>
-        void Navigate(IView view);
+        /// <returns>A <see cref="bool"/> indicating whether the <see cref="IView"/> overlays or replaces existing content. If 'false', another window or dialog was launched to show the <see cref="IView"/> instead.</returns>
+        bool Navigate(IView view);
 
         /// <summary>
         /// A <see cref="bool"/> indicating whether this <see cref="INavigationService"/> supports back navigation in its current state. 
@@ -67,13 +68,19 @@ namespace BassClefStudio.AppModel.Navigation
         protected abstract bool NavigateInternal(T view);
 
         /// <inheritdoc/>
-        public void Navigate(IView view)
+        public bool Navigate(IView view)
         {
             if(view is T tView)
             {
-                if (NavigateInternal(tView))
+                bool isPage = NavigateInternal(tView);
+                if (isPage)
                 {
                     NavigationStack.Push(tView);
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
             else

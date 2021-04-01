@@ -103,8 +103,8 @@ namespace BassClefStudio.AppModel.Helpers
                 }
             });
             //// Starting an empty SourceStream doesn't actually *do* anything, but still...
-            _ = NavigateStream.StartAsync();
-            _ = BackStream.StartAsync();
+            NavigateStream.Start();
+            BackStream.Start();
 
             BackEnabled = MyApp.CanGoBack;
         }
