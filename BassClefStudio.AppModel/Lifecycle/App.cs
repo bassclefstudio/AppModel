@@ -260,9 +260,9 @@ namespace BassClefStudio.AppModel.Lifecycle
         public void Navigate<T>(T viewModel, object parameter = null) where T : IViewModel
         {
             var view = Services.Resolve<IView<T>>();
-            NavigationService.Navigate(view);
+            bool triggerEvent = NavigationService.Navigate(view);
             view.ViewModel = viewModel;
-            NavigatedInitialize(viewModel, view, parameter);
+            NavigatedInitialize(viewModel, view, parameter, triggerEvent);
         }
 
         /// <summary>
@@ -275,9 +275,9 @@ namespace BassClefStudio.AppModel.Lifecycle
             var viewType = typeof(IView<>).MakeGenericType(viewModelType);
             var viewModel = (IViewModel)Services.Resolve(viewModelType);
             var view = (IView)Services.Resolve(viewType);
-            NavigationService.Navigate(view);
+            bool triggerEvent = NavigationService.Navigate(view);
             viewType.GetProperty("ViewModel").SetValue(view, viewModel);
-            NavigatedInitialize(viewModel, view, parameter);
+            NavigatedInitialize(viewModel, view, parameter, triggerEvent);
         }
 
         /// <summary>
@@ -290,19 +290,22 @@ namespace BassClefStudio.AppModel.Lifecycle
             var viewType = typeof(IView<>).MakeGenericType(viewModel.GetType());
             var view = (IView)Services.Resolve(viewType);
             viewType.GetProperty("ViewModel").SetValue(view, viewModel);
-            NavigationService.Navigate(view);
-            NavigatedInitialize(viewModel, view, parameter);
+            bool triggerEvent = NavigationService.Navigate(view);
+            NavigatedInitialize(viewModel, view, parameter, triggerEvent);
         }
 
-        private void NavigatedInitialize(IViewModel viewModel, IView view, object parameter)
+        private void NavigatedInitialize(IViewModel viewModel, IView view, object parameter, bool triggerEvent = true)
         {
             SynchronousTask initViewModelTask =
                 new SynchronousTask(() => viewModel.InitializeAsync(parameter));
             initViewModelTask.RunTask();
             view.Initialize();
-            var args = new NavigatedEventArgs(view, viewModel, parameter);
-            PreviousNavigations.Add(args);
-            Navigated?.Invoke(this, args);
+            if (triggerEvent)
+            {
+                var args = new NavigatedEventArgs(view, viewModel, parameter);
+                PreviousNavigations.Add(args);
+                Navigated?.Invoke(this, args);
+            }
         }
 
         /// <summary>

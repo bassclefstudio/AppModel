@@ -20,17 +20,19 @@ namespace BassClefStudio.AppModel.Streams
         /// Creates an empty <see cref="SourceStream{T}"/>.
         /// </summary>
         public SourceStream()
-        { }
+        {
+            StartInputs = Array.Empty<StreamValue<T>>();
+        }
 
         /// <summary>
-        /// A collection of <see cref="StreamValue{T}"/> inputs that will be sent onto the <see cref="SourceStream{T}"/> when <see cref="IStream{T}.StartAsync"/> is called.
+        /// A collection of <see cref="StreamValue{T}"/> inputs that will be sent onto the <see cref="SourceStream{T}"/> when <see cref="IStream{T}.Start"/> is called.
         /// </summary>
         public IEnumerable<StreamValue<T>> StartInputs { get; }
 
         /// <summary>
         /// Creates a <see cref="SourceStream{T}"/> with a collection of <see cref="StreamValue{T}"/> inputs.
         /// </summary>
-        /// <param name="inputs">A collection of <see cref="StreamValue{T}"/> inputs that will be sent onto the <see cref="SourceStream{T}"/> when <see cref="IStream{T}.StartAsync"/> is called.</param>
+        /// <param name="inputs">A collection of <see cref="StreamValue{T}"/> inputs that will be sent onto the <see cref="SourceStream{T}"/> when <see cref="IStream{T}.Start"/> is called.</param>
         public SourceStream(IEnumerable<StreamValue<T>> inputs)
         {
             StartInputs = inputs;
@@ -39,7 +41,7 @@ namespace BassClefStudio.AppModel.Streams
         /// <summary>
         /// Creates a <see cref="SourceStream{T}"/> with a collection of <see cref="StreamValue{T}"/> inputs.
         /// </summary>
-        /// <param name="inputs">A collection of <see cref="StreamValue{T}"/> inputs that will be sent onto the <see cref="SourceStream{T}"/> when <see cref="IStream{T}.StartAsync"/> is called.</param>
+        /// <param name="inputs">A collection of <see cref="StreamValue{T}"/> inputs that will be sent onto the <see cref="SourceStream{T}"/> when <see cref="IStream{T}.Start"/> is called.</param>
         public SourceStream(params StreamValue<T>[] inputs)
         {
             StartInputs = inputs;
@@ -48,7 +50,7 @@ namespace BassClefStudio.AppModel.Streams
         /// <summary>
         /// Creates a <see cref="SourceStream{T}"/> with a collection of <typeparamref name="T"/> inputs.
         /// </summary>
-        /// <param name="inputs">A collection of <typeparamref name="T"/> inputs that will be sent onto the <see cref="SourceStream{T}"/> when <see cref="IStream{T}.StartAsync"/> is called.</param>
+        /// <param name="inputs">A collection of <typeparamref name="T"/> inputs that will be sent onto the <see cref="SourceStream{T}"/> when <see cref="IStream{T}.Start"/> is called.</param>
         public SourceStream(IEnumerable<T> inputs)
         {
             StartInputs = inputs.Select(t => new StreamValue<T>(t));
@@ -57,7 +59,7 @@ namespace BassClefStudio.AppModel.Streams
         /// <summary>
         /// Creates a <see cref="SourceStream{T}"/> with a collection of <typeparamref name="T"/> inputs.
         /// </summary>
-        /// <param name="inputs">A collection of <typeparamref name="T"/> inputs that will be sent onto the <see cref="SourceStream{T}"/> when <see cref="IStream{T}.StartAsync"/> is called.</param>
+        /// <param name="inputs">A collection of <typeparamref name="T"/> inputs that will be sent onto the <see cref="SourceStream{T}"/> when <see cref="IStream{T}.Start"/> is called.</param>
         public SourceStream(params T[] inputs)
         {
             StartInputs = inputs.Select(t => new StreamValue<T>(t));
@@ -86,7 +88,7 @@ namespace BassClefStudio.AppModel.Streams
         }
 
         /// <inheritdoc/>
-        public async Task StartAsync()
+        public void Start()
         {
             EmitValues(StartInputs);
         }

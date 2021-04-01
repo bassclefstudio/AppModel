@@ -55,7 +55,9 @@ namespace BassClefStudio.AppModel.Streams
             get => currentValue;
             set
             {
-                if ((currentValue == null && value != null) || !currentValue.Equals(value))
+                if (!(currentValue == null && value == null) 
+                    && ((currentValue == null && value != null) 
+                    || !currentValue.Equals(value)))
                 {
                     currentValue = value;
                     ValueEmitted?.Invoke(this, new StreamValue<T2>(currentValue));
@@ -88,9 +90,9 @@ namespace BassClefStudio.AppModel.Streams
         }
 
         /// <inheritdoc/>
-        public async Task StartAsync()
+        public void Start()
         {
-            await ParentStream.StartAsync();
+            ParentStream.Start();
         }
 
         private void ParentValueEmitted(object sender, StreamValue<T1> e)
