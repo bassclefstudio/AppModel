@@ -30,10 +30,9 @@ namespace BassClefStudio.AppModel.Tests
         private static void TestBinding(Func<MyClass, IStream<string>> getBinding)
         {
             var myObject = CreateTestObject();
-            IStream<string> nameBinding = getBinding(myObject);
-
             string value = null;
-            nameBinding.ValueEmitted += (s, e) => value = e.Result;
+            IStream<string> nameBinding = getBinding(myObject)
+                .BindResult(v => value = v);
             nameBinding.Start();
 
             myObject.Property.Name = "Test 2";
@@ -76,6 +75,36 @@ namespace BassClefStudio.AppModel.Tests
             //// Reflection - weakly-typed - think {Binding Property.Blah} (where the property name doesn't exist).
         }
 
+        [TestMethod]
+        public void TestNullSets()
+        {
+            var a = new MyPropertyClass()
+            {
+                Name = "Fred",
+                Keys = null
+            };
+
+            var b = new MyPropertyClass()
+            {
+                Name = "George",
+                Keys = null
+            };
+
+            var myObject = new MyClass()
+            {
+                Property = a
+            };
+
+            int register = 0;
+            IStream<ObservableCollection<string>> keysBinding = myObject
+                .AsStream().Property(m => m.Property).Property(p => p.Keys)
+                .BindResult(v => register++);
+            keysBinding.Start();
+
+            myObject.Property = b;
+            Assert.AreEqual(0, register, "ValueChanged event was accidentally fired.");
+        }
+
         #endregion
         #region Linq
 
@@ -114,6 +143,30 @@ namespace BassClefStudio.AppModel.Tests
                 .BindResult(n => number = n);
             stream.Start();
             Assert.AreEqual(length * 2, number, "Sum was not expected value.");
+        }
+
+        #endregion
+        #region Sources
+
+        [TestMethod]
+        public void EmptySource()
+        {
+            SourceStream<string> source = new SourceStream<string>();
+            string value = null;
+            source.BindResult(s => value = s);
+            source.Start();
+            Assert.AreEqual(null, value, "SourceStream unintentionally emitted a value.");
+        }
+
+        [TestMethod]
+        public void ListSource()
+        {
+            SourceStream<string> source = new SourceStream<string>("hello", "world!");
+            string value = null;
+            source.BindResult(s => value = s);
+            source.Start();
+            Assert.IsNotNull(value, "SourceStream failed to emit a value.");
+            Assert.AreEqual("world!", value, "SourceStream's last emitted value was unexpected.");
         }
 
         #endregion
