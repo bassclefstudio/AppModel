@@ -20,7 +20,9 @@ namespace BassClefStudio.AppModel.Streams
         /// Creates an empty <see cref="SourceStream{T}"/>.
         /// </summary>
         public SourceStream()
-        { }
+        {
+            StartInputs = Array.Empty<StreamValue<T>>();
+        }
 
         /// <summary>
         /// A collection of <see cref="StreamValue{T}"/> inputs that will be sent onto the <see cref="SourceStream{T}"/> when <see cref="IStream{T}.Start"/> is called.
