@@ -64,15 +64,17 @@ namespace BassClefStudio.AppModel.Navigation
         /// Navigates to a <typeparamref name="T"/> view internally, using the platform-specific navigation APIs.
         /// </summary>
         /// <param name="view">The <see cref="IView"/> and <typeparamref name="T"/> to navigate to.</param>
-        protected abstract void NavigateInternal(T view);
+        protected abstract bool NavigateInternal(T view);
 
         /// <inheritdoc/>
         public void Navigate(IView view)
         {
             if(view is T tView)
             {
-                NavigateInternal(tView);
-                NavigationStack.Push(tView);
+                if (NavigateInternal(tView))
+                {
+                    NavigationStack.Push(tView);
+                }
             }
             else
             {

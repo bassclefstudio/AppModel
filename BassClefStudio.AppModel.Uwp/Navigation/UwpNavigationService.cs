@@ -61,7 +61,7 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        protected override void NavigateInternal(UIElement element)
+        protected override bool NavigateInternal(UIElement element)
         {
             if (element is ContentDialog dialog)
             {
@@ -69,10 +69,12 @@ namespace BassClefStudio.AppModel.Navigation
                     () => DispatcherService.RunOnUIThreadAsync(
                         () => ShowDialogTask(dialog)));
                 showTask.RunTask();
+                return false;
             }
             else
             {
                 CurrentFrame.Content = element;
+                return true;
             }
         }
 

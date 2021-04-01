@@ -32,11 +32,12 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        protected override void NavigateInternal(IConsoleView view)
+        protected override bool NavigateInternal(IConsoleView view)
         {
             SynchronousTask syncTask = new SynchronousTask(
                     () => view.ShowView());
             syncTask.RunTask();
+            return true;
         }
     }
 }

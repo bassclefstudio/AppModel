@@ -31,11 +31,12 @@ namespace BassClefStudio.AppModel.Navigation
         { }
 
         /// <inheritdoc/>
-        protected override void NavigateInternal(BlazorView view)
+        protected override bool NavigateInternal(BlazorView view)
         {
             Console.WriteLine($"Navigate {view.ViewPath}.");
             ViewProvider.CurrentView = view;
             NavigationManager.NavigateTo($"{NavigationManager.BaseUri}{view.ViewPath}");
+            return true;
         }
     }
 }
