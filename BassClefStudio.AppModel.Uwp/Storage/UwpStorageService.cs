@@ -1,6 +1,7 @@
 ﻿using BassClefStudio.AppModel.Threading;
 using BassClefStudio.NET.Core;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -16,10 +17,10 @@ namespace BassClefStudio.AppModel.Storage
         /// <inheritdoc/>
         public IStorageFolder AppDataFolder { get; } = new UwpFolder(ApplicationData.Current.LocalFolder);
 
-        internal IDispatcherService DispatcherService { get; }
-        public UwpStorageService(IDispatcherService dispatcherService)
+        private IEnumerable<IDispatcher> Dispatchers { get; }
+        public UwpStorageService(IEnumerable<IDispatcher> dispatchers)
         {
-            DispatcherService = dispatcherService;
+            Dispatchers = dispatchers;
         }
 
         /// <inheritdoc/>

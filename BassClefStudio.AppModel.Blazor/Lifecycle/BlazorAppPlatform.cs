@@ -31,7 +31,8 @@ namespace BassClefStudio.AppModel.Lifecycle
             //    .AsImplementedInterfaces();
             builder.RegisterType<BlazorSettingsService>()
                 .AsImplementedInterfaces();
-            builder.RegisterType<BaseDispatcherService>()
+            builder.RegisterType<BaseDispatcher>()
+                .WithParameter("dispatcherType", DispatcherType.Main)
                 .AsImplementedInterfaces();
             //builder.RegisterType<BlazorNotificationService>()
             //    .AsImplementedInterfaces();

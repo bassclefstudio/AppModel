@@ -5,9 +5,9 @@ using Windows.UI.Core;
 namespace BassClefStudio.AppModel.Threading
 {
     /// <summary>
-    /// An <see cref="IDispatcherService"/> wrapper for the <see cref="CoreDispatcher"/> to run syncronous/asyncronous code on the UI thread in a UWP application.
+    /// An <see cref="IDispatcher"/> wrapper for the <see cref="CoreDispatcher"/> to run syncronous/asyncronous code on the UI thread in a UWP application.
     /// </summary>
-    public class UwpDispatcherService : IDispatcherService
+    public class UwpDispatcher : IDispatcher
     {
         /// <summary>
         /// A get/set-able <see cref="bool"/> indicating whether UI thread code needs to be sent through this <see cref="IDispatcherService"/>'s <see cref="CoreDispatcher"/> (i.e. if the app has a foreground UI).
@@ -15,7 +15,18 @@ namespace BassClefStudio.AppModel.Threading
         public static bool Activated { get; set; } = false;
 
         /// <inheritdoc/>
-        public async Task RunOnUIThreadAsync(Action execute)
+        public DispatcherType DispatcherType { get; }
+
+        /// <summary>
+        /// Creates a new <see cref="UwpDispatcher"/>.
+        /// </summary>
+        public UwpDispatcher()
+        {
+            DispatcherType = DispatcherType.Main;
+        }
+
+        /// <inheritdoc/>
+        public async Task RunAsync(Action execute)
         {
             if (Activated)
             {
@@ -29,7 +40,7 @@ namespace BassClefStudio.AppModel.Threading
         }
 
         /// <inheritdoc/>
-        public async Task<T> RunOnUIThreadAsync<T>(Func<T> execute)
+        public async Task<T> RunAsync<T>(Func<T> execute)
         {
             if (Activated)
             {
@@ -44,7 +55,7 @@ namespace BassClefStudio.AppModel.Threading
             }
         }
 
-        public async Task RunOnUIThreadAsync<T>(Func<Task> execute)
+        public async Task RunAsync<T>(Func<Task> execute)
         {
             if (Activated)
             {
@@ -57,7 +68,7 @@ namespace BassClefStudio.AppModel.Threading
             }
         }
 
-        public async Task<T> RunOnUIThreadAsync<T>(Func<Task<T>> execute)
+        public async Task<T> RunAsync<T>(Func<Task<T>> execute)
         {
             if (Activated)
             {
@@ -70,6 +81,11 @@ namespace BassClefStudio.AppModel.Threading
             {
                 return await execute();
             }
+        }
+
+        public Task RunAsync(Func<Task> execute)
+        {
+            throw new NotImplementedException();
         }
     }
 }
