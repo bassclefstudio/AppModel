@@ -31,13 +31,13 @@ namespace BassClefStudio.AppModel.Navigation
             }
         }
 
-        private IDispatcherService DispatcherService { get; }
+        private IEnumerable<IDispatcher> Dispatchers { get; }
         /// <summary>
         /// Creates a new <see cref="UwpNavigationService"/>.
         /// </summary>
-        public UwpNavigationService(IDispatcherService dispatcherService)
+        public UwpNavigationService(IEnumerable<IDispatcher> dispatchers)
         {
-            DispatcherService = dispatcherService;
+            Dispatchers = dispatchers;
         }
 
         /// <inheritdoc/>
@@ -66,7 +66,7 @@ namespace BassClefStudio.AppModel.Navigation
             if (element is ContentDialog dialog)
             {
                 SynchronousTask showTask = new SynchronousTask(
-                    () => DispatcherService.RunOnUIThreadAsync(
+                    () => Dispatchers.RunOnUIThreadAsync(
                         () => ShowDialogTask(dialog)));
                 showTask.RunTask();
                 //// Because dialogs must be closed first, before any other pages can be navigated to, they should be added to the back stack in UWP.

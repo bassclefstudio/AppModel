@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BassClefStudio.NET.Core;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,9 @@ namespace BassClefStudio.AppModel.Streams
     /// <typeparam name="T2">The type of the transformed values this <see cref="IStream{T}"/> returns.</typeparam>
     public abstract class ParallelStream<T1, T2> : IStream<T2>
     {
+        /// <inheritdoc/>
+        public bool Started { get; private set; } = false;
+
         /// <inheritdoc/>
         public event EventHandler<StreamValue<T2>> ValueEmitted;
 
@@ -33,18 +37,23 @@ namespace BassClefStudio.AppModel.Streams
         public ParallelStream(IStream<T1> parent)
         {
             ParentStream = parent;
-            ParentStream.ValueEmitted += ParentValueEmitted;
         }
 
         /// <inheritdoc/>
         public void Start()
         {
-            ParentStream.Start();
+            if (!Started)
+            {
+                Started = true;
+                ParentStream.ValueEmitted += ParentValueEmitted;
+                ParentStream.Start();
+            }
         }
 
         private void ParentValueEmitted(object sender, StreamValue<T1> e)
         {
-            _ = ProcessInput(e);
+            SynchronousTask inputTask = new SynchronousTask(() => ProcessInput(e));
+            inputTask.RunTask();
         }
 
         private async Task ProcessInput(StreamValue<T1> current)
@@ -98,6 +107,43 @@ namespace BassClefStudio.AppModel.Streams
         protected override async Task<T2> ProduceValue(T1 input)
         {
             return await ProduceFunc(input);
+        }
+    }
+
+    /// <summary>
+    /// An <see cref="IStream{T}"/>/<see cref="ChildStream{T1, T2}"/> that aggregates incoming <typeparamref name="T1"/> values from the parent stream into a <typeparamref name="T2"/> <see cref="CurrentState"/>.
+    /// </summary>
+    /// <typeparam name="T1">The type of values returned by the parent <see cref="IStream{T}"/>.</typeparam>
+    /// <typeparam name="T2">The type of the transformed values this <see cref="IStream{T}"/> returns.</typeparam>
+    public class ParallelAggregateStream<T1, T2> : ParallelStream<T1, T2>
+    {
+        /// <summary>
+        /// A <typeparamref name="T2"/> value indicating the current aggregated state.
+        /// </summary>
+        public T2 CurrentState { get; private set; }
+
+        /// <summary>
+        /// The asynchronous function that returns a new <typeparamref name="T2"/> aggregate from the <see cref="CurrentState"/> and the next <typeparamref name="T1"/> input.
+        /// </summary>
+        public Func<T2, T1, Task<T2>> AggregateFunc { get; }
+
+        /// <summary>
+        /// Creates a new asynchronous <see cref="ParallelAggregateStream{T1, T2}"/>.
+        /// </summary>
+        /// <param name="parent">The parent <see cref="IStream{T}"/> producing <typeparamref name="T1"/> values.</param>
+        /// <param name="aggregateFunc">The asynchronous function that returns a new <typeparamref name="T2"/> aggregate from the <see cref="CurrentState"/> and the next <typeparamref name="T1"/> input.</param>
+        /// <param name="initialState">The initial <typeparamref name="T2"/> aggregate to set the <see cref="CurrentState"/> to.</param>
+        public ParallelAggregateStream(IStream<T1> parent, Func<T2, T1, Task<T2>> aggregateFunc, T2 initialState = default(T2)) : base(parent)
+        {
+            AggregateFunc = aggregateFunc;
+            CurrentState = initialState;
+        }
+
+        /// <inheritdoc/>
+        protected override async Task<T2> ProduceValue(T1 input)
+        {
+            CurrentState = await AggregateFunc(CurrentState, input);
+            return CurrentState;
         }
     }
 }

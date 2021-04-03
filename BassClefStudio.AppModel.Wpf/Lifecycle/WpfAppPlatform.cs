@@ -29,7 +29,7 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .AsImplementedInterfaces();
             builder.RegisterType<BaseSettingsService>()
                 .AsImplementedInterfaces();
-            builder.RegisterType<WpfDispatcherService>()
+            builder.RegisterType<WpfDispatcher>()
                 .AsImplementedInterfaces();
             //builder.RegisterType<WpfNotificationService>()
             //    .AsImplementedInterfaces();

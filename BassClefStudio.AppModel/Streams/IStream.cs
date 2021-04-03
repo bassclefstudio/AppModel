@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BassClefStudio.AppModel.Threading;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,11 @@ namespace BassClefStudio.AppModel.Streams
     /// <typeparam name="T">The type of values emitted by the stream (see <see cref="ValueEmitted"/>).</typeparam>
     public interface IStream<T>
     {
+        /// <summary>
+        /// A <see cref="bool"/> indicating whether this <see cref="IStream{T}"/> has been started yet (see <see cref="Start"/>).
+        /// </summary>
+        bool Started { get; }
+
         /// <summary>
         /// An event produced by the <see cref="IStream{T}"/> every time a new value is available.
         /// </summary>

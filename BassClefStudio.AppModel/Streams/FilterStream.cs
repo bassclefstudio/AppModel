@@ -12,6 +12,9 @@ namespace BassClefStudio.AppModel.Streams
     public class FilterStream<T> : IStream<T>
     {
         /// <inheritdoc/>
+        public bool Started { get; private set; } = false;
+
+        /// <inheritdoc/>
         public event EventHandler<StreamValue<T>> ValueEmitted;
 
         /// <summary>
@@ -33,22 +36,33 @@ namespace BassClefStudio.AppModel.Streams
         {
             ParentStream = parent;
             Filter = filter;
-            ParentStream.ValueEmitted += ParentValueEmitted;
         }
 
         /// <inheritdoc/>
         public void Start()
         {
-            ParentStream.Start();
+            if (!Started)
+            {
+                Started = true;
+                ParentStream.ValueEmitted += ParentValueEmitted;
+                ParentStream.Start();
+            }
         }
 
         private void ParentValueEmitted(object sender, StreamValue<T> value)
         {
             if (value.DataType == StreamValueType.Result)
             {
-                if (Filter(value.Result))
+                try
                 {
-                    ValueEmitted?.Invoke(this, value);
+                    if (Filter(value.Result))
+                    {
+                        ValueEmitted?.Invoke(this, value);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    ValueEmitted?.Invoke(this, new StreamValue<T>(ex));
                 }
             }
             else

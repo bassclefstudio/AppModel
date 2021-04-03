@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BassClefStudio.AppModel.Threading;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -14,6 +15,9 @@ namespace BassClefStudio.AppModel.Streams
     public class SourceStream<T> : IStream<T>
     {
         /// <inheritdoc/>
+        public bool Started { get; private set; } = false;
+
+        /// <inheritdoc/>
         public event EventHandler<StreamValue<T>> ValueEmitted;
 
         /// <summary>
@@ -27,7 +31,7 @@ namespace BassClefStudio.AppModel.Streams
         /// <summary>
         /// A collection of <see cref="StreamValue{T}"/> inputs that will be sent onto the <see cref="SourceStream{T}"/> when <see cref="IStream{T}.Start"/> is called.
         /// </summary>
-        public IEnumerable<StreamValue<T>> StartInputs { get; }
+        public IEnumerable<StreamValue<T>> StartInputs { get; protected set; }
 
         /// <summary>
         /// Creates a <see cref="SourceStream{T}"/> with a collection of <see cref="StreamValue{T}"/> inputs.
@@ -90,7 +94,11 @@ namespace BassClefStudio.AppModel.Streams
         /// <inheritdoc/>
         public void Start()
         {
-            EmitValues(StartInputs);
+            if (!Started)
+            {
+                Started = true;
+                EmitValues(StartInputs);
+            }
         }
 
         /// <summary>

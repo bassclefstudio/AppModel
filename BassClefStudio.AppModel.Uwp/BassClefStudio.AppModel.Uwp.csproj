@@ -134,7 +134,7 @@
     <Compile Include="Storage\UwpStorageService.cs" />
     <Compile Include="Storage\UwpFolder.cs" />
     <Compile Include="Storage\UwpStorageExtensions.cs" />
-    <Compile Include="Threading\UwpDispatcherService.cs" />
+    <Compile Include="Threading\UwpDispatcher.cs" />
     <EmbeddedResource Include="Properties\BassClefStudio.UWP.Mvvm.rd.xml" />
   </ItemGroup>
   <ItemGroup>

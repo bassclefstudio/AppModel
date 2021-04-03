@@ -24,15 +24,15 @@ namespace BassClefStudio.AppModel.Helpers
         public string Path { get; set; }
 
         internal IStorageService StorageService { get; }
-        internal IDispatcherService DispatcherService { get; }
+        internal IEnumerable<IDispatcher> Dispatchers { get; }
         internal ISerializationService SerializationService { get; }
         /// <summary>
         /// Creates a new <see cref="StorageLink{T}"/> from the required services.
         /// </summary>
-        public StorageLink(IStorageService storageService, IDispatcherService dispatcherService, ISerializationService serializationService)
+        public StorageLink(IStorageService storageService, IEnumerable<IDispatcher> dispatchers, ISerializationService serializationService)
         {
             StorageService = storageService;
-            DispatcherService = dispatcherService;
+            Dispatchers = dispatchers;
             SerializationService = serializationService;
         }
 
@@ -66,7 +66,7 @@ namespace BassClefStudio.AppModel.Helpers
                 }
                 else
                 {
-                    await DispatcherService.RunOnUIThreadAsync(() =>
+                    await Dispatchers.RunOnUIThreadAsync(() =>
                     {
                         item.Item = SerializationService.Deserialize<T>(json);
                     });

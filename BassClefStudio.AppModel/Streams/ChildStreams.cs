@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BassClefStudio.NET.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,9 @@ namespace BassClefStudio.AppModel.Streams
     public abstract class ChildStream<T1, T2> : IStream<T2>
     {
         /// <inheritdoc/>
+        public bool Started { get; private set; } = false;
+
+        /// <inheritdoc/>
         public event EventHandler<StreamValue<T2>> ValueEmitted;
 
         /// <summary>
@@ -22,10 +26,10 @@ namespace BassClefStudio.AppModel.Streams
         public IStream<T1> ParentStream { get; }
 
         /// <summary>
-        /// An asynchronous task that takes a <typeparamref name="T1"/> object and produces a <typeparamref name="T2"/> object.
+        /// A method that takes a <typeparamref name="T1"/> object and produces a <typeparamref name="T2"/> object.
         /// </summary>
         /// <param name="input">The input <typeparamref name="T1"/> from <see cref="ParentStream"/>.</param>
-        protected abstract Task<T2> ProduceValue(T1 input);
+        protected abstract T2 ProduceValue(T1 input);
 
         /// <summary>
         /// Creates a new <see cref="ChildStream{T1, T2}"/> from the 
@@ -34,46 +38,39 @@ namespace BassClefStudio.AppModel.Streams
         public ChildStream(IStream<T1> parent)
         {
             ParentStream = parent;
-            ParentStream.ValueEmitted += ParentValueEmitted;
         }
 
         /// <inheritdoc/>
         public void Start()
         {
-            ParentStream.Start();
+            if (!Started)
+            {
+                Started = true;
+                ParentStream.ValueEmitted += ParentValueEmitted;
+                ParentStream.Start();
+            }
         }
 
-        private Queue<StreamValue<T1>> incomingInputs = new Queue<StreamValue<T1>>();
         private void ParentValueEmitted(object sender, StreamValue<T1> e)
         {
-            incomingInputs.Enqueue(e);
-            _ = ProcessInputs();
-        }
-
-        private async Task ProcessInputs()
-        {
-            while (incomingInputs.Any())
+            if (e.DataType == StreamValueType.Completed)
             {
-                var current = incomingInputs.Dequeue();
-                if (current.DataType == StreamValueType.Completed)
+                ValueEmitted?.Invoke(this, new StreamValue<T2>());
+            }
+            else if (e.DataType == StreamValueType.Error)
+            {
+                ValueEmitted?.Invoke(this, new StreamValue<T2>(e.Error));
+            }
+            else if (e.DataType == StreamValueType.Result)
+            {
+                try
                 {
-                    ValueEmitted?.Invoke(this, new StreamValue<T2>());
+                    var output = ProduceValue(e.Result);
+                    ValueEmitted?.Invoke(this, new StreamValue<T2>(output));
                 }
-                else if (current.DataType == StreamValueType.Error)
+                catch (Exception ex)
                 {
-                    ValueEmitted?.Invoke(this, new StreamValue<T2>(current.Error));
-                }
-                else if (current.DataType == StreamValueType.Result)
-                {
-                    try
-                    {
-                        var output = await ProduceValue(current.Result);
-                        ValueEmitted?.Invoke(this, new StreamValue<T2>(output));
-                    }
-                    catch (Exception ex)
-                    {
-                        ValueEmitted?.Invoke(this, new StreamValue<T2>(ex));
-                    }
+                    ValueEmitted?.Invoke(this, new StreamValue<T2>(ex));
                 }
             }
         }
@@ -87,19 +84,9 @@ namespace BassClefStudio.AppModel.Streams
     public class MapStream<T1, T2> : ChildStream<T1, T2>
     {
         /// <summary>
-        /// The asynchronous function for converting each <typeparamref name="T1"/> item to its <typeparamref name="T2"/> representation.
+        /// The function for converting each <typeparamref name="T1"/> item to its <typeparamref name="T2"/> representation.
         /// </summary>
-        public Func<T1, Task<T2>> ProduceFunc { get; }
-
-        /// <summary>
-        /// Creates a new asynchronous <see cref="MapStream{T1, T2}"/>.
-        /// </summary>
-        /// <param name="parent">The parent <see cref="IStream{T}"/> producing <typeparamref name="T1"/> values.</param>
-        /// <param name="mapFunc">The asynchronous function for converting each <typeparamref name="T1"/> item to its <typeparamref name="T2"/> representation.</param>
-        public MapStream(IStream<T1> parent, Func<T1, Task<T2>> mapFunc) : base(parent)
-        {
-            ProduceFunc = mapFunc;
-        }
+        public Func<T1, T2> ProduceFunc { get; }
 
         /// <summary>
         /// Creates a new <see cref="MapStream{T1, T2}"/>.
@@ -108,13 +95,13 @@ namespace BassClefStudio.AppModel.Streams
         /// <param name="mapFunc">The function for converting each <typeparamref name="T1"/> item to its <typeparamref name="T2"/> representation.</param>
         public MapStream(IStream<T1> parent, Func<T1, T2> mapFunc) : base(parent)
         {
-            ProduceFunc = t1 => Task.FromResult(mapFunc(t1));
+            ProduceFunc = mapFunc;
         }
 
         /// <inheritdoc/>
-        protected override async Task<T2> ProduceValue(T1 input)
+        protected override T2 ProduceValue(T1 input)
         {
-            return await ProduceFunc(input);
+            return ProduceFunc(input);
         }
     }
 
@@ -131,21 +118,9 @@ namespace BassClefStudio.AppModel.Streams
         public T2 CurrentState { get; private set; }
 
         /// <summary>
-        /// The asynchronous function that returns a new <typeparamref name="T2"/> aggregate from the <see cref="CurrentState"/> and the next <typeparamref name="T1"/> input.
+        /// The function that returns a new <typeparamref name="T2"/> aggregate from the <see cref="CurrentState"/> and the next <typeparamref name="T1"/> input.
         /// </summary>
-        public Func<T2, T1, Task<T2>> AggregateFunc { get; }
-
-        /// <summary>
-        /// Creates a new asynchronous <see cref="AggregateStream{T1, T2}"/>.
-        /// </summary>
-        /// <param name="parent">The parent <see cref="IStream{T}"/> producing <typeparamref name="T1"/> values.</param>
-        /// <param name="aggregateFunc">The asynchronous function that returns a new <typeparamref name="T2"/> aggregate from the <see cref="CurrentState"/> and the next <typeparamref name="T1"/> input.</param>
-        /// <param name="initialState">The initial <typeparamref name="T2"/> aggregate to set the <see cref="CurrentState"/> to.</param>
-        public AggregateStream(IStream<T1> parent, Func<T2, T1, Task<T2>> aggregateFunc, T2 initialState = default(T2)) : base(parent)
-        {
-            AggregateFunc = aggregateFunc;
-            CurrentState = initialState;
-        }
+        public Func<T2, T1, T2> AggregateFunc { get; }
 
         /// <summary>
         /// Creates a new <see cref="AggregateStream{T1, T2}"/>.
@@ -155,14 +130,14 @@ namespace BassClefStudio.AppModel.Streams
         /// <param name="initialState">The initial <typeparamref name="T2"/> aggregate to set the <see cref="CurrentState"/> to.</param>
         public AggregateStream(IStream<T1> parent, Func<T2, T1, T2> aggregateFunc, T2 initialState = default(T2)) : base(parent)
         {
-            AggregateFunc = (state, item) => Task.FromResult(aggregateFunc(state, item));
+            AggregateFunc = aggregateFunc;
             CurrentState = initialState;
         }
 
         /// <inheritdoc/>
-        protected override async Task<T2> ProduceValue(T1 input)
+        protected override T2 ProduceValue(T1 input)
         {
-            CurrentState = await AggregateFunc(CurrentState, input);
+            CurrentState = AggregateFunc(CurrentState, input);
             return CurrentState;
         }
     }

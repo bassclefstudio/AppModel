@@ -28,25 +28,25 @@ namespace BassClefStudio.AppModel.Helpers
         public bool UseSerializer { get; }
 
         internal ISettingsService SettingsService { get; }
-        internal IDispatcherService DispatcherService { get; }
+        internal IEnumerable<IDispatcher> Dispatchers { get; }
         internal ISerializationService SerializationService { get; }
         /// <summary>
         /// Creates a new <see cref="SettingsLink{T}"/> from the required services.
         /// </summary>
-        public SettingsLink(ISettingsService settingsService, IDispatcherService dispatcherService)
+        public SettingsLink(ISettingsService settingsService, IEnumerable<IDispatcher> dispatchers)
         {
             SettingsService = settingsService;
-            DispatcherService = dispatcherService;
+            Dispatchers = dispatchers;
             UseSerializer = false;
         }
 
         /// <summary>
         /// Creates a new <see cref="SettingsLink{T}"/> from the required services and optional <see cref="ISerializationService"/>.
         /// </summary>
-        public SettingsLink(ISettingsService settingsService, IDispatcherService dispatcherService, ISerializationService serializationService)
+        public SettingsLink(ISettingsService settingsService, IEnumerable<IDispatcher> dispatchers, ISerializationService serializationService)
         {
             SettingsService = settingsService;
-            DispatcherService = dispatcherService;
+            Dispatchers = dispatchers;
             SerializationService = serializationService;
             UseSerializer = SerializationService.IsSerializable<T>();
         }
@@ -77,7 +77,7 @@ namespace BassClefStudio.AppModel.Helpers
 
         /// <inheritdoc/>
         public async Task<bool> UpdateAsync(ISyncItem<T> item)
-            => await DispatcherService.RunOnUIThreadAsync(() => UpdateAsyncInternal(item));
+            => await Dispatchers.RunOnUIThreadAsync(() => UpdateAsyncInternal(item));
 
         private async Task<bool> UpdateAsyncInternal(ISyncItem<T> item)
         {

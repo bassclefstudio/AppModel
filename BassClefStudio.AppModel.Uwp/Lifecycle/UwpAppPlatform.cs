@@ -26,7 +26,7 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .AsImplementedInterfaces();
             builder.RegisterType<UwpSettingsService>()
                 .AsImplementedInterfaces();
-            builder.RegisterType<UwpDispatcherService>()
+            builder.RegisterType<UwpDispatcher>()
                 .AsImplementedInterfaces();
             builder.RegisterType<UwpNotificationService>()
                 .AsImplementedInterfaces();

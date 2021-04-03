@@ -1,6 +1,7 @@
 ﻿using BassClefStudio.AppModel.Lifecycle;
 using BassClefStudio.AppModel.Navigation;
 using BassClefStudio.AppModel.Streams;
+using BassClefStudio.AppModel.Streams.Commands;
 using BassClefStudio.NET.Core;
 using System;
 using System.Collections.Generic;
@@ -27,14 +28,20 @@ namespace BassClefStudio.AppModel.Helpers
         protected abstract NavigationItem[] GetInitialItems();
 
         /// <summary>
-        /// A <see cref="SourceStream{T}"/> that emits selected <see cref="NavigationItem"/> items that have been selected in the UI.
+        /// An <see cref="ICommand{T}"/> for selecting <see cref="NavigationItem"/>s to navigate to.
         /// </summary>
-        public SourceStream<NavigationItem> NavigateStream { get; }
+        public ICommand<NavigationItem> NavigateCommand { get; }
 
         /// <summary>
-        /// A <see cref="SourceStream{T}"/> that emits <see cref="bool"/> values - any 'true' values recieved will trigger back navigation (if possible).
+        /// An <see cref="ICommand{T}"/> for triggering back navigation (if available).
         /// </summary>
-        public SourceStream<bool> BackStream { get; }
+        public ICommand<bool> BackCommand { get; }
+
+        private SourceStream<bool> backEnabledInternal;
+        /// <summary>
+        /// An <see cref="IStream{T}"/> that specifies whether back navigation is currently enabled/available, as a <see cref="bool"/>.
+        /// </summary>
+        public IStream<bool> BackEnabled { get; } 
 
         private NavigationItem selected;
         /// <summary>
@@ -55,12 +62,6 @@ namespace BassClefStudio.AppModel.Helpers
                 }
             }
         }
-
-        private bool backEnabled;
-        /// <summary>
-        /// A <see cref="bool"/> value indicating whether any 'back button' UI should be shown.
-        /// </summary>
-        public bool BackEnabled { get => backEnabled; private set => Set(ref backEnabled, value); }
 
         /// <summary>
         /// Sets the value of <see cref="SelectedItem"/> without triggering navigation.
@@ -91,22 +92,39 @@ namespace BassClefStudio.AppModel.Helpers
             NavigationItems = new ObservableCollection<NavigationItem>(GetInitialItems());
             MyApp = myApp;
             MyApp.Navigated += AppNavigated;
-            NavigateStream = new SourceStream<NavigationItem>();
-            NavigateStream.BindResult(Navigate);
-            BackStream = new SourceStream<bool>();
-            BackStream.BindResult(b =>
-            {
-                if (b && MyApp.CanGoBack)
+            NavigateCommand = new StreamCommand<NavigationItem>(
+                new CommandInfo()
                 {
-                    MyApp.GoBack();
-                    BackEnabled = MyApp.CanGoBack;
-                }
-            });
-            //// Starting an empty SourceStream doesn't actually *do* anything, but still...
-            NavigateStream.Start();
-            BackStream.Start();
+                    Id = "Shell/Navigate",
+                    FriendlyName = "Navigate",
+                    Description = "Navigate to the specified page."
+                });
+            NavigateCommand.BindResult(Navigate);
 
-            BackEnabled = MyApp.CanGoBack;
+            BackCommand = new StreamCommand<bool>(
+                new CommandInfo()
+                {
+                    Id = "Shell/Back",
+                    FriendlyName = "Go back",
+                    Description = "Return to the previously visited page."
+                },
+                new RecStream<bool>(() => BackEnabled));
+
+            backEnabledInternal = new SourceStream<bool>(MyApp.CanGoBack);
+            BackEnabled = backEnabledInternal.Join(
+                BackCommand.Select(b =>
+                {
+                    if (MyApp.CanGoBack)
+                    {
+                        MyApp.GoBack();
+                    }
+                    return MyApp.CanGoBack;
+                })).Unique();
+
+            //// Starting a stream more than once has no effect.
+            NavigateCommand.Start();
+            BackCommand.Start();
+            BackEnabled.Start();
         }
 
         /// <inheritdoc/>
@@ -116,7 +134,7 @@ namespace BassClefStudio.AppModel.Helpers
         {
             var viewModelType = e.NavigatedViewModel.GetType();
             SetSelected(NavigationItems.FirstOrDefault(i => i.ViewModelType == viewModelType && i.Parameter == e.Parameter));
-            BackEnabled = MyApp.CanGoBack;
+            backEnabledInternal.EmitValue(MyApp.CanGoBack);
         }
 
         /// <summary>
