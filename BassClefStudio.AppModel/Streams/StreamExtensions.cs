@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BassClefStudio.AppModel.Threading;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -59,27 +60,14 @@ namespace BassClefStudio.AppModel.Streams
         }
 
         /// <summary>
-        /// Creates an <see cref="IStream{T}"/> that maps the values of the given <see cref="IStream{T}"/> as <typeparamref name="T2"/> values.
+        /// Creates an <see cref="IStream{T}"/> that maps the values of the given <see cref="IStream{T}"/> asynchronously as <typeparamref name="T2"/> values.
         /// </summary>
         /// <typeparam name="T1">The type of values returned by the parent <see cref="IStream{T}"/>.</typeparam>
         /// <typeparam name="T2">The type of the values this <see cref="IStream{T}"/> returns.</typeparam>
         /// <param name="stream">The parent <see cref="IStream{T}"/> producing <typeparamref name="T1"/> values.</param>
         /// <param name="mapFunc">The asynchronous function for converting each <typeparamref name="T1"/> item to its <typeparamref name="T2"/> representation.</param>
-        /// <returns>An <see cref="IStream{T}"/> that returns resulting <typeparamref name="T2"/> values.</returns>
+        /// <returns>An <see cref="IStream{T}"/> that returns resulting <typeparamref name="T2"/> values as they're converted.</returns>        
         public static IStream<T2> Select<T1, T2>(this IStream<T1> stream, Func<T1, Task<T2>> mapFunc)
-        {
-            return new MapStream<T1, T2>(stream, mapFunc);
-        }
-
-        /// <summary>
-        /// Creates an <see cref="IStream{T}"/> that maps the values of the given <see cref="IStream{T}"/> as <typeparamref name="T2"/> values in parallel.
-        /// </summary>
-        /// <typeparam name="T1">The type of values returned by the parent <see cref="IStream{T}"/>.</typeparam>
-        /// <typeparam name="T2">The type of the values this <see cref="IStream{T}"/> returns.</typeparam>
-        /// <param name="stream">The parent <see cref="IStream{T}"/> producing <typeparamref name="T1"/> values.</param>
-        /// <param name="mapFunc">The asynchronous function for converting each <typeparamref name="T1"/> item to its <typeparamref name="T2"/> representation.</param>
-        /// <returns>An <see cref="IStream{T}"/> that returns resulting <typeparamref name="T2"/> values as they're converted.</returns>
-        public static IStream<T2> SelectParallel<T1, T2>(this IStream<T1> stream, Func<T1, Task<T2>> mapFunc)
         {
             return new ParallelMapStream<T1, T2>(stream, mapFunc);
         }
@@ -108,26 +96,79 @@ namespace BassClefStudio.AppModel.Streams
         /// <typeparam name="T1">The type of values returned by the parent <see cref="IStream{T}"/>.</typeparam>
         /// <typeparam name="T2">The type of the values this <see cref="IStream{T}"/> returns.</typeparam>
         /// <param name="stream">The parent <see cref="IStream{T}"/> producing <typeparamref name="T1"/> values.</param>
-        /// <param name="aggregateFunc">The asynchronous function that returns a new <typeparamref name="T2"/> aggregate from the current <typeparamref name="T2"/> state and the next <typeparamref name="T1"/> input.</param>
-        /// <param name="initialState">The initial <typeparamref name="T2"/> state.</param>
-        /// <returns>An <see cref="IStream{T}"/> that returns resulting <typeparamref name="T2"/> values.</returns>
-        public static IStream<T2> Aggregate<T1, T2>(this IStream<T1> stream, Func<T2, T1, Task<T2>> aggregateFunc, T2 initialState = default(T2))
-        {
-            return new AggregateStream<T1, T2>(stream, aggregateFunc);
-        }
-
-        /// <summary>
-        /// Creates an <see cref="IStream{T}"/> that aggregates the values of the given <see cref="IStream{T}"/> into a <typeparamref name="T2"/> returned state.
-        /// </summary>
-        /// <typeparam name="T1">The type of values returned by the parent <see cref="IStream{T}"/>.</typeparam>
-        /// <typeparam name="T2">The type of the values this <see cref="IStream{T}"/> returns.</typeparam>
-        /// <param name="stream">The parent <see cref="IStream{T}"/> producing <typeparamref name="T1"/> values.</param>
         /// <param name="aggregateFunc">The function that returns a new <typeparamref name="T2"/> aggregate from the current <typeparamref name="T2"/> state and the next <typeparamref name="T1"/> input.</param>
         /// <param name="initialState">The initial <typeparamref name="T2"/> state.</param>
         /// <returns>An <see cref="IStream{T}"/> that returns resulting <typeparamref name="T2"/> values.</returns>
         public static IStream<T2> Aggregate<T1, T2>(this IStream<T1> stream, Func<T2, T1, T2> aggregateFunc, T2 initialState = default(T2))
         {
-            return new AggregateStream<T1, T2>(stream, aggregateFunc);
+            return new AggregateStream<T1, T2>(stream, aggregateFunc, initialState);
+        }
+
+        /// <summary>
+        /// Creates an <see cref="IStream{T}"/> that aggregates the values of the given <see cref="IStream{T}"/> asynchronously into a <typeparamref name="T2"/> returned state.
+        /// </summary>
+        /// <typeparam name="T1">The type of values returned by the parent <see cref="IStream{T}"/>.</typeparam>
+        /// <typeparam name="T2">The type of the values this <see cref="IStream{T}"/> returns.</typeparam>
+        /// <param name="stream">The parent <see cref="IStream{T}"/> producing <typeparamref name="T1"/> values.</param>
+        /// <param name="aggregateFunc">The asynchronous function that returns a new <typeparamref name="T2"/> aggregate from the current <typeparamref name="T2"/> state and the next <typeparamref name="T1"/> input.</param>
+        /// <param name="initialState">The initial <typeparamref name="T2"/> state.</param>
+        /// <returns>An <see cref="IStream{T}"/> that returns resulting <typeparamref name="T2"/> values as they're produced.</returns>
+        public static IStream<T2> Aggregate<T1, T2>(this IStream<T1> stream, Func<T2, T1, Task<T2>> aggregateFunc, T2 initialState = default(T2))
+        {
+            return new ParallelAggregateStream<T1, T2>(stream, aggregateFunc, initialState);
+        }
+
+        #endregion
+        #region Join
+
+        /// <summary>
+        /// Joins an <see cref="IStream{T}"/> to an existing <see cref="IStream{T}"/> to create a concatenated <see cref="IStream{T}"/> with all of the output values of both existing streams.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="stream">The first <see cref="IStream{T}"/>.</param>
+        /// <param name="other">The <see cref="IStream{T}"/> to concatenate with <paramref name="stream"/>.</param>
+        /// <returns>An <see cref="IStream{T}"/> that emits all values recieved from both parent <see cref="IStream{T}"/>s.</returns>
+        public static IStream<T> Join<T>(this IStream<T> stream, IStream<T> other)
+        {
+            return new ConcatStream<T>(stream, other);
+        }
+
+        /// <summary>
+        /// Joins a collection of <see cref="IStream{T}"/>s to create a concatenated <see cref="IStream{T}"/> with all of the output values of both existing streams.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="streams">The parent <see cref="IStream{T}"/>s producing <typeparamref name="T"/> values.</param>
+        /// <returns>An <see cref="IStream{T}"/> that emits all values recieved from all parent <see cref="IStream{T}"/>s.</returns>
+        public static IStream<T> Join<T>(this IEnumerable<IStream<T>> streams)
+        {
+            return new ConcatStream<T>(streams);
+        }
+
+        /// <summary>
+        /// Merges a collection of <see cref="IStream{T}"/>s to produce output <typeparamref name="T2"/> values from their combined <typeparamref name="T1"/> emitted values.
+        /// </summary>
+        /// <param name="streams">The parent <see cref="IStream{T}"/>s producing <typeparamref name="T1"/> values.</param>
+        /// <param name="transformFunc">A <see cref="Func{T, TResult}"/> that produces a <typeparamref name="T2"/> result from the most recent <typeparamref name="T1"/> values produced by each of the parent <see cref="IStream{T}"/>s.</param>
+        /// <typeparam name="T1">The type of values returned by the parent <see cref="IStream{T}"/>s.</typeparam>
+        /// <typeparam name="T2">The type of the values this <see cref="IStream{T}"/> returns.</typeparam>
+        /// <returns>An <see cref="IStream{T}"/> that emits <typeparamref name="T2"/> transformed values every time a parent <see cref="IStream{T}"/> emits a new <typeparamref name="T1"/> input.</returns>
+        public static IStream<T2> Join<T1, T2>(this IEnumerable<IStream<T1>> streams, Func<T1[], T2> transformFunc)
+        {
+            return new MergeStream<T1, T2>(transformFunc, streams);
+        }
+
+        /// <summary>
+        /// Merges this <see cref="IStream{T}"/> with another <see cref="IStream{T}"/> to produce output <typeparamref name="T2"/> values from their combined <typeparamref name="T1"/> emitted values.
+        /// </summary>
+        /// <param name="stream">The first <see cref="IStream{T}"/>.</param>
+        /// <param name="other">The second/other <see cref="IStream{T}"/> which will merge with this <paramref name="stream"/>.</param>
+        /// <param name="transformFunc">A <see cref="Func{T, TResult}"/> that produces a <typeparamref name="T2"/> result from the most recent <typeparamref name="T1"/> values produced by the two parent <see cref="IStream{T}"/>s.</param>
+        /// <typeparam name="T1">The type of values returned by the parent <see cref="IStream{T}"/>s.</typeparam>
+        /// <typeparam name="T2">The type of the values this <see cref="IStream{T}"/> returns.</typeparam>
+        /// <returns>An <see cref="IStream{T}"/> that emits <typeparamref name="T2"/> transformed values every time a parent <see cref="IStream{T}"/> emits a new <typeparamref name="T1"/> input.</returns>
+        public static IStream<T2> Join<T1, T2>(this IStream<T1> stream, IStream<T1> other, Func<T1, T1, T2> transformFunc)
+        {
+            return new MergeStream<T1, T2>(ts => transformFunc(ts[0], ts[1]), stream, other);
         }
 
         #endregion
@@ -323,6 +364,20 @@ namespace BassClefStudio.AppModel.Streams
         public static IStream<T> BufferLast<T>(this IStream<T> stream, TimeSpan timeSpan)
         {
             return new BufferStream<T, T>(stream, timeSpan, ts => ts.LastOrDefault());
+        }
+
+        #endregion
+        #region Tasks
+
+        /// <summary>
+        /// Creates an <see cref="IStream{T}"/> that executes the <see cref="Task{TResult}"/>s of the parent <see cref="IStream{T}"/> asynchronously, and returns the results as they arrive.
+        /// </summary>
+        /// <typeparam name="T">The type of the values this <see cref="IStream{T}"/> returns.</typeparam>
+        /// <param name="stream">The parent <see cref="IStream{T}"/> producing <see cref="Task{TResult}"/> values.</param>
+        /// <returns>An <see cref="IStream{T}"/> that returns resulting <typeparamref name="T"/> outputs asynchronously.</returns>        
+        public static IStream<T> Await<T>(this IStream<Task<T>> stream)
+        {
+            return new ParallelMapStream<Task<T>, T>(stream, t => t);
         }
 
         #endregion

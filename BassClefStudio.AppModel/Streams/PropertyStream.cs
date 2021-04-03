@@ -14,6 +14,9 @@ namespace BassClefStudio.AppModel.Streams
     public class PropertyStream<T1, T2> : IStream<T2>
     {
         /// <inheritdoc/>
+        public bool Started { get; private set; } = false;
+
+        /// <inheritdoc/>
         public event EventHandler<StreamValue<T2>> ValueEmitted;
 
         /// <summary>
@@ -92,7 +95,11 @@ namespace BassClefStudio.AppModel.Streams
         /// <inheritdoc/>
         public void Start()
         {
-            ParentStream.Start();
+            if (!Started)
+            {
+                ParentStream.Start();
+                Started = true;
+            }
         }
 
         private void ParentValueEmitted(object sender, StreamValue<T1> e)

@@ -14,6 +14,9 @@ namespace BassClefStudio.AppModel.Streams
     /// <typeparam name="T2">The type of the transformed values this <see cref="IStream{T}"/> returns.</typeparam>
     public class BufferStream<T1,T2> : IStream<T2>
     {
+        /// <inheritdoc/>
+        public bool Started { get; private set; } = false;
+
         /// <summary>
         /// The parent <see cref="IStream{T}"/> that produces parent objects.
         /// </summary>
@@ -92,7 +95,11 @@ namespace BassClefStudio.AppModel.Streams
         /// <inheritdoc/>
         public void Start()
         {
-            ParentStream.Start();
+            if (!Started)
+            {
+                ParentStream.Start();
+                Started = true;
+            }
         }
     }
 }

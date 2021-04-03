@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BassClefStudio.AppModel.Threading;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -13,6 +14,9 @@ namespace BassClefStudio.AppModel.Streams
     /// <typeparam name="T">The type of output values this <see cref="IStream{T}"/> produces.</typeparam>
     public class SourceStream<T> : IStream<T>
     {
+        /// <inheritdoc/>
+        public bool Started { get; private set; } = false;
+
         /// <inheritdoc/>
         public event EventHandler<StreamValue<T>> ValueEmitted;
 
@@ -90,7 +94,11 @@ namespace BassClefStudio.AppModel.Streams
         /// <inheritdoc/>
         public void Start()
         {
-            EmitValues(StartInputs);
+            if (!Started)
+            {
+                EmitValues(StartInputs);
+                Started = true;
+            }
         }
 
         /// <summary>
