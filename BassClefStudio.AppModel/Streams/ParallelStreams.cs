@@ -37,7 +37,6 @@ namespace BassClefStudio.AppModel.Streams
         public ParallelStream(IStream<T1> parent)
         {
             ParentStream = parent;
-            ParentStream.ValueEmitted += ParentValueEmitted;
         }
 
         /// <inheritdoc/>
@@ -45,8 +44,9 @@ namespace BassClefStudio.AppModel.Streams
         {
             if (!Started)
             {
-                ParentStream.Start();
                 Started = true;
+                ParentStream.ValueEmitted += ParentValueEmitted;
+                ParentStream.Start();
             }
         }
 

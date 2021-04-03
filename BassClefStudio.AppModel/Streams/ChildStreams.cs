@@ -45,8 +45,8 @@ namespace BassClefStudio.AppModel.Streams
         {
             if (!Started)
             {
-                ParentStream.ValueEmitted += ParentValueEmitted;
                 Started = true;
+                ParentStream.ValueEmitted += ParentValueEmitted;
                 ParentStream.Start();
             }
         }

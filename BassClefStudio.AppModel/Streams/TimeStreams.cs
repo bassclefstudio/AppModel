@@ -53,7 +53,6 @@ namespace BassClefStudio.AppModel.Streams
             BufferFunc = bufferFunc;
             BufferTimer = new Timer(bufferTime.TotalMilliseconds);
             BufferTimer.Elapsed += TimerElapsed;
-            ParentStream.ValueEmitted += ParentValueEmitted;
         }
 
         List<T1> bufferedItems = new List<T1>();
@@ -97,8 +96,9 @@ namespace BassClefStudio.AppModel.Streams
         {
             if (!Started)
             {
-                ParentStream.Start();
                 Started = true;
+                ParentStream.ValueEmitted += ParentValueEmitted;
+                ParentStream.Start();
             }
         }
     }

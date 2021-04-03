@@ -56,6 +56,7 @@ namespace BassClefStudio.AppModel.Streams
             CachedValues = new T1[ParentStreams.Length];
             if (!Started)
             {
+                Started = true;
                 for (int i = 0; i < ParentStreams.Length; i++)
                 {
                     CachedValues[i] = default(T1);
@@ -66,8 +67,6 @@ namespace BassClefStudio.AppModel.Streams
                 {
                     parent.Start();
                 }
-
-                Started = true;
             }
         }
 
@@ -79,9 +78,16 @@ namespace BassClefStudio.AppModel.Streams
         {
             if (e.DataType == StreamValueType.Result)
             {
-                CachedValues[index] = e.Result;
-                var output = TransformFunc(CachedValues);
-                ValueEmitted?.Invoke(this, new StreamValue<T2>(output));
+                try
+                {
+                    CachedValues[index] = e.Result;
+                    var output = TransformFunc(CachedValues);
+                    ValueEmitted?.Invoke(this, new StreamValue<T2>(output));
+                }
+                catch(Exception ex)
+                {
+                    ValueEmitted?.Invoke(this, new StreamValue<T2>(ex));
+                }
             }
             else if(e.DataType == StreamValueType.Completed)
             {

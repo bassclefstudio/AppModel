@@ -45,6 +45,7 @@ namespace BassClefStudio.AppModel.Streams
         {
             if (!Started)
             {
+                Started = true;
                 foreach (var p in ParentStreams)
                 {
                     p.ValueEmitted += ParentValueEmitted;
@@ -54,7 +55,6 @@ namespace BassClefStudio.AppModel.Streams
                 {
                     p.Start();
                 }
-                Started = true;
             }
         }
 

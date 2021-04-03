@@ -89,7 +89,6 @@ namespace BassClefStudio.AppModel.Streams
             ParentStream = parent;
             GetProperty = getProperty;
             PropertyName = propertyName;
-            ParentStream.ValueEmitted += ParentValueEmitted;
         }
 
         /// <inheritdoc/>
@@ -97,8 +96,9 @@ namespace BassClefStudio.AppModel.Streams
         {
             if (!Started)
             {
-                ParentStream.Start();
                 Started = true;
+                ParentStream.ValueEmitted += ParentValueEmitted;
+                ParentStream.Start();
             }
         }
 

@@ -124,7 +124,7 @@ namespace BassClefStudio.AppModel.Streams
         /// <summary>
         /// Joins an <see cref="IStream{T}"/> to an existing <see cref="IStream{T}"/> to create a concatenated <see cref="IStream{T}"/> with all of the output values of both existing streams.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">The type of the values this <see cref="IStream{T}"/> returns.</typeparam>
         /// <param name="stream">The first <see cref="IStream{T}"/>.</param>
         /// <param name="other">The <see cref="IStream{T}"/> to concatenate with <paramref name="stream"/>.</param>
         /// <returns>An <see cref="IStream{T}"/> that emits all values recieved from both parent <see cref="IStream{T}"/>s.</returns>
@@ -136,7 +136,7 @@ namespace BassClefStudio.AppModel.Streams
         /// <summary>
         /// Joins a collection of <see cref="IStream{T}"/>s to create a concatenated <see cref="IStream{T}"/> with all of the output values of both existing streams.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">The type of the values this <see cref="IStream{T}"/> returns.</typeparam>
         /// <param name="streams">The parent <see cref="IStream{T}"/>s producing <typeparamref name="T"/> values.</param>
         /// <returns>An <see cref="IStream{T}"/> that emits all values recieved from all parent <see cref="IStream{T}"/>s.</returns>
         public static IStream<T> Join<T>(this IEnumerable<IStream<T>> streams)
@@ -172,6 +172,47 @@ namespace BassClefStudio.AppModel.Streams
         }
 
         #endregion
+        #region Distinct
+
+        /// <summary>
+        /// Creates an <see cref="IStream{T}"/> that only returns all consecutive unique output values.
+        /// </summary>
+        /// <typeparam name="T">The type of the values this <see cref="IStream{T}"/> returns.</typeparam>
+        /// <param name="stream">The parent <see cref="IStream{T}"/>.</param>
+        /// <returns>An <see cref="IStream{T}"/> returning (locally) unique <typeparamref name="T"/> outputs.</returns>
+        public static IStream<T> Unique<T>(this IStream<T> stream)
+        {
+            return new DistinctStream<T>(stream, (t1, t2) => !Equals(t1, t2));
+        }
+
+        /// <summary>
+        /// Creates an <see cref="IStream{T}"/> that only returns all consecutive unique output values, as determined by the <see cref="IEquatable{T}.Equals(T)"/> method.
+        /// </summary>
+        /// <typeparam name="T">The type of the values this <see cref="IStream{T}"/> returns.</typeparam>
+        /// <param name="stream">The parent <see cref="IStream{T}"/>.</param>
+        /// <returns>An <see cref="IStream{T}"/> returning (locally) unique <typeparamref name="T"/> outputs.</returns>
+        public static IStream<T> UniqueEq<T>(this IStream<T> stream) where T : IEquatable<T>
+        {
+           return new DistinctStream<T>(
+                stream, 
+                (t1, t2) => (!(t1 == null && t2 == null)
+                    && ((t1 == null && t2 != null)
+                    || !t1.Equals(t2))));
+        }
+
+        /// <summary>
+        /// Creates an <see cref="IStream{T}"/> that filters consecutive output values through a given function.
+        /// </summary>
+        /// <typeparam name="T">The type of the values this <see cref="IStream{T}"/> returns.</typeparam>
+        /// <param name="stream">The parent <see cref="IStream{T}"/>.</param>
+        /// <param name="includeFunc">A <see cref="Func{T1, T2, TResult}"/> that takes in the incoming and previous <typeparamref name="T"/> inputs and returns a <see cref="bool"/> indicating whether the incoming value should be emitted.</param>
+        /// <returns>An <see cref="IStream{T}"/> returning (locally) included <typeparamref name="T"/> outputs as per <paramref name="includeFunc"/>.</returns>
+        public static IStream<T> Distinct<T>(this IStream<T> stream, Func<T, T, bool> includeFunc)
+        {
+            return new DistinctStream<T>(stream, includeFunc);
+        }
+
+        #endregion
         #region Sum
 
         /// <summary>
@@ -204,8 +245,78 @@ namespace BassClefStudio.AppModel.Streams
             return new AggregateStream<float, float>(stream, (sum, val) => sum + val, 0);
         }
 
+        /// <summary>
+        /// Creates an <see cref="IStream{T}"/> that returns the count of values returned by the <see cref="IStream{T}"/> parent.
+        /// </summary>
+        /// <param name="stream">The parent <see cref="IStream{T}"/>.</param>
+        /// <returns>An <see cref="IStream{T}"/> that returns the resulting count.</returns>
+        public static IStream<int> Count<T>(this IStream<T> stream)
+        {
+            return new AggregateStream<T, int>(stream, (i, t) => i + 1, 0);
+        }
+
         #endregion
         #region Bind
+
+        /// <summary>
+        /// Binds the incoming <typeparamref name="T"/> results from an <see cref="IStream{T}"/> to a given <see cref="Action{T}"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of values emitted by this <see cref="IStream{T}"/>.</typeparam>
+        /// <typeparam name="TStream">The type of <see cref="IStream{T}"/> being bound to.</typeparam>
+        /// <param name="stream">The <see cref="IStream{T}"/> stream to bind to.</param>
+        /// <param name="action">An action that takes in an input <typeparamref name="T"/> value and will be executed every time the <paramref name="stream"/> emits a value of <see cref="StreamValueType.Result"/>.</param>
+        /// <returns>The input <see cref="IStream{T}"/> <paramref name="stream"/>.</returns>
+        public static TStream BindResult<T, TStream>(this TStream stream, Action<T> action) where TStream : IStream<T>
+        {
+            stream.ValueEmitted += (s, e) =>
+            {
+                if(e.DataType == StreamValueType.Result)
+                {
+                    action(e.Result);
+                }
+            };
+            return stream;
+        }
+
+        /// <summary>
+        /// Binds any incoming <see cref="Exception"/>s from an <see cref="IStream{T}"/> to a given <see cref="Action{T}"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of values emitted by this <see cref="IStream{T}"/>.</typeparam>
+        /// <typeparam name="TStream">The type of <see cref="IStream{T}"/> being bound to.</typeparam>
+        /// <param name="stream">The <see cref="IStream{T}"/> stream to bind to.</param>
+        /// <param name="action">An action that takes in an input <see cref="Exception"/> and will be executed every time the <paramref name="stream"/> emits a value of <see cref="StreamValueType.Error"/>.</param>
+        /// <returns>The input <see cref="IStream{T}"/> <paramref name="stream"/>.</returns>
+        public static TStream BindError<T, TStream>(this TStream stream, Action<Exception> action) where TStream : IStream<T>
+        {
+            stream.ValueEmitted += (s, e) =>
+            {
+                if (e.DataType == StreamValueType.Error)
+                {
+                    action(e.Error);
+                }
+            };
+            return stream;
+        }
+
+        /// <summary>
+        /// Binds the completion of an <see cref="IStream{T}"/> to a given <see cref="Action"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of values emitted by this <see cref="IStream{T}"/>.</typeparam>
+        /// <typeparam name="TStream">The type of <see cref="IStream{T}"/> being bound to.</typeparam>
+        /// <param name="stream">The <see cref="IStream{T}"/> stream to bind to.</param>
+        /// <param name="action">An action that will be executed every time the <paramref name="stream"/> emits a value of <see cref="StreamValueType.Completed"/>.</param>
+        /// <returns>The input <see cref="IStream{T}"/> <paramref name="stream"/>.</returns>
+        public static TStream BindComplete<T, TStream>(this TStream stream, Action action) where TStream : IStream<T>
+        {
+            stream.ValueEmitted += (s, e) =>
+            {
+                if (e.DataType == StreamValueType.Completed)
+                {
+                    action();
+                }
+            };
+            return stream;
+        }
 
         /// <summary>
         /// Binds the incoming <typeparamref name="T"/> results from an <see cref="IStream{T}"/> to a given <see cref="Action{T}"/>.
@@ -218,7 +329,7 @@ namespace BassClefStudio.AppModel.Streams
         {
             stream.ValueEmitted += (s, e) =>
             {
-                if(e.DataType == StreamValueType.Result)
+                if (e.DataType == StreamValueType.Result)
                 {
                     action(e.Result);
                 }
@@ -323,6 +434,17 @@ namespace BassClefStudio.AppModel.Streams
         public static IStream<T> AsStream<T>(this T value)
         {
             return new SourceStream<T>(value);
+        }
+
+        /// <summary>
+        /// Creates an <see cref="IStream{T}"/> that will lazily evaluate the provided <see cref="Func{TResult}"/> to find the parent <see cref="IStream{T}"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of output values this <see cref="IStream{T}"/> produces.</typeparam>
+        /// <param name="getStream">A <see cref="Func{TResult}"/> that will, when evaluated, return the parent <see cref="IStream{T}"/>.</param>
+        /// <returns>An <see cref="IStream{T}"/> that will resolve when <see cref="IStream{T}.Start"/> is called.</returns>
+        public static IStream<T> Rec<T>(this Func<IStream<T>> getStream)
+        {
+            return new RecStream<T>(getStream);
         }
 
         #endregion

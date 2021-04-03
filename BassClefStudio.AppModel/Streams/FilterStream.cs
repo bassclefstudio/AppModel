@@ -43,9 +43,9 @@ namespace BassClefStudio.AppModel.Streams
         {
             if (!Started)
             {
+                Started = true;
                 ParentStream.ValueEmitted += ParentValueEmitted;
                 ParentStream.Start();
-                Started = true;
             }
         }
 
@@ -53,9 +53,16 @@ namespace BassClefStudio.AppModel.Streams
         {
             if (value.DataType == StreamValueType.Result)
             {
-                if (Filter(value.Result))
+                try
                 {
-                    ValueEmitted?.Invoke(this, value);
+                    if (Filter(value.Result))
+                    {
+                        ValueEmitted?.Invoke(this, value);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    ValueEmitted?.Invoke(this, new StreamValue<T>(ex));
                 }
             }
             else

@@ -126,14 +126,12 @@ namespace BassClefStudio.AppModel.Tests
         {
             int length = 8;
             int number = 0;
-            bool complete = false;
             var source = SourceStream<string>.Repeat("Hello World!", length)
                 .Join(new SourceStream<string>(new StreamValue<string>()));
-            var stream = source.Aggregate<string, int>((n, s) => n + 1)
-                .BindResult(n => number = n)
-                .BindComplete(() => complete = true);
+            var stream = source
+                .Aggregate<string, int>((n, s) => n + 1)
+                .BindResult(n => number = n);
             stream.Start();
-            while (!complete) { }
             Assert.AreEqual(length, number, "Aggregate was not expected value.");
         }
 
@@ -150,17 +148,59 @@ namespace BassClefStudio.AppModel.Tests
         }
 
         [TestMethod]
+        public void TestCount()
+        {
+            int length = 8;
+            int number = 0;
+            var stream = SourceStream<string>.Repeat("Hello World!", length)
+                .Count()
+                .BindResult(n => number = n);
+            stream.Start();
+            Assert.AreEqual(length, number, "Count was not expected value.");
+        }
+
+        [TestMethod]
         public void TestJoin()
         {
             int length = 8;
             List<int> numbers = new List<int>();
             var streamA = SourceStream<int>.CountStream(1, length);
             var streamB = new SourceStream<int>(2);
-            IStream<int> join = streamB.Join(streamA, (i, s) => i + s)
+            IStream<int> join = streamB
+                .Join(streamA, (i, s) => i + s)
                 .BindResult(n => numbers.Add(n));
             join.Start();
             Assert.AreEqual(numbers.Count, length + 1, "Returned values were of an unexpected length");
             Assert.IsTrue(numbers.SequenceEqual(Enumerable.Range(2, length + 1)), "Sequence of returned values was unexpected.");
+        }
+
+        [TestMethod]
+        public void TestUnique()
+        {
+            int length = 8;
+            int number = 0;
+            var source = SourceStream<string>.Repeat("Hello World!", length)
+                .Join(new SourceStream<string>(new StreamValue<string>()));
+            var stream = source
+                .Unique()
+                .BindResult(n => number++);
+            stream.Start();
+            Assert.AreEqual(1, number, "Number of unique items was invalid.");
+        }
+
+        [TestMethod]
+        public void TestRec()
+        {
+            int length = 4;
+            int number = 0;
+            SourceStream<int> source = null;
+            Func<SourceStream<int>> recSource = () => source;
+            IStream<int> stream = recSource.Rec()
+                .Count()
+                .BindResult(n => number = n);
+            source = SourceStream<int>.Repeat(1, length);
+            stream.Start();
+            Assert.AreEqual(number, length, "Lazy stream evaluation returned the incorrect count.");
         }
 
         #endregion
