@@ -16,10 +16,27 @@ namespace BassClefStudio.AppModel.Storage
         public UwpFolder(Windows.Storage.IStorageFolder folder)
         {
             Folder = folder;
+            HasPath = Folder.Path != null;
         }
 
         /// <inheritdoc/>
         public string Name => Folder.Name;
+
+        /// <inheritdoc/>
+        public bool HasPath { get; }
+
+        /// <inheritdoc/>
+        public string GetPath()
+        {
+            if (HasPath)
+            {
+                return Folder.Path;
+            }
+            else
+            {
+                throw new StorageAccessException("The requested item does not have a file-system path associated with it.");
+            }
+        }
 
         /// <inheritdoc/>
         public async Task<IStorageFolder> GetFolderAsync(string relativePath)

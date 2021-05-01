@@ -17,6 +17,9 @@ namespace BassClefStudio.AppModel.Storage
         /// <inheritdoc/>
         public string Name => Directory.Name;
 
+        /// <inheritdoc/>
+        public bool HasPath { get; } = true;
+
         /// <summary>
         /// Creates a <see cref="BaseFolder"/> from the given directory.
         /// </summary>
@@ -29,6 +32,9 @@ namespace BassClefStudio.AppModel.Storage
                 Directory.Create();
             }
         }
+
+        /// <inheritdoc/>
+        public string GetPath() => Directory.FullName;
 
         /// <inheritdoc/>
         public async Task<IStorageFile> CreateFileAsync(string name, CollisionOptions options = CollisionOptions.OpenExisting)

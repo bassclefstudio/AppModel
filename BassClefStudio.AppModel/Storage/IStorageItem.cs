@@ -26,5 +26,17 @@ namespace BassClefStudio.AppModel.Storage
         /// <param name="desiredName">The desired <see cref="string"/> name (including extension, if applicable) of the <see cref="IStorageItem"/>.</param>
         /// <exception cref="StorageConflictException">The <paramref name="desiredName"/> is already used in the parent directory.</exception>
         Task RenameAsync(string desiredName);
+
+        /// <summary>
+        /// A <see cref="bool"/> indicating whether this <see cref="IStorageItem"/> is present on a filesystem with a file path. If true, the path for this item can be accessed using the <see cref="GetPath"/> method.
+        /// </summary>
+        bool HasPath { get; }
+
+        /// <summary>
+        /// Gets, if applicable, the path that can be used to reference this item in legacy libraries and other applications.
+        /// </summary>
+        /// <returns>A <see cref="string"/> full path leading to the item on the filesystem.</returns>
+        /// <exception cref="StorageAccessException">This <see cref="IStorageItem"/> exists in a filesystem where file paths do not exist, and cannot be located by using a file path.</exception>
+        string GetPath();
     }
 }
