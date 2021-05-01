@@ -19,6 +19,9 @@ namespace BassClefStudio.AppModel.Storage
         /// <inheritdoc/>
         public string FileType => File.Extension;
 
+        /// <inheritdoc/>
+        public bool HasPath { get; } = true;
+
         /// <summary>
         /// Creates a <see cref="BaseFile"/> from the given file.
         /// </summary>
@@ -31,6 +34,9 @@ namespace BassClefStudio.AppModel.Storage
                 File.Create().Dispose();
             }
         }
+
+        /// <inheritdoc/>
+        public string GetPath() => File.FullName;
 
         /// <inheritdoc/>
         public async Task<IFileContent> OpenFileAsync(FileOpenMode mode = FileOpenMode.Read)

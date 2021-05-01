@@ -16,6 +16,7 @@ namespace BassClefStudio.AppModel.Storage
         public UwpFile(Windows.Storage.IStorageFile file)
         {
             File = file;
+            HasPath = File.Path != null;
         }
 
         /// <inheritdoc/>
@@ -23,6 +24,22 @@ namespace BassClefStudio.AppModel.Storage
 
         /// <inheritdoc/>
         public string Name => File.Name;
+
+        /// <inheritdoc/>
+        public bool HasPath { get; }
+
+        /// <inheritdoc/>
+        public string GetPath()
+        {
+            if (HasPath)
+            {
+                return File.Path;
+            }
+            else
+            {
+                throw new StorageAccessException("The requested item does not have a file-system path associated with it.");
+            }
+        }
 
         /// <inheritdoc/>
         public async Task<IFileContent> OpenFileAsync(FileOpenMode mode = FileOpenMode.Read)
