@@ -41,10 +41,11 @@ namespace BassClefStudio.AppModel.Storage
         /// <param name="destination">The destination folder to copy the <see cref="IStorageFile"/> into.</param>
         /// <param name="collisionOptions">Overrides the <see cref="CollisionOptions"/> behavior when creating the new file in the <paramref name="destination"/> folder.</param>
         /// <param name="fileName">Overrides the name of the destination file (default is <see cref="IStorageItem.Name"/> of the source <paramref name="file"/>).</param>
-        public static async Task CopyToAsync(this IStorageFile file, IStorageFolder destination, CollisionOptions collisionOptions = CollisionOptions.RenameIfExists, string fileName = null)
+        public static async Task<IStorageFile> CopyToAsync(this IStorageFile file, IStorageFolder destination, CollisionOptions collisionOptions = CollisionOptions.RenameIfExists, string fileName = null)
         {
             IStorageFile destinationFile = await destination.CreateFileAsync(fileName ?? file.Name, collisionOptions);
             await CopyContentsAsync(file, destinationFile);
+            return destinationFile;
         }
 
         /// <summary>
@@ -54,11 +55,12 @@ namespace BassClefStudio.AppModel.Storage
         /// <param name="destination">The destination folder to copy the <see cref="IStorageFile"/> into.</param>
         /// <param name="collisionOptions">Overrides the <see cref="CollisionOptions"/> behavior when creating the new file in the <paramref name="destination"/> folder.</param>
         /// <param name="fileName">Overrides the name of the destination file (default is <see cref="IStorageItem.Name"/> of the source <paramref name="file"/>).</param>
-        public static async Task MoveToAsync(this IStorageFile file, IStorageFolder destination, CollisionOptions collisionOptions = CollisionOptions.RenameIfExists, string fileName = null)
+        public static async Task<IStorageFile> MoveToAsync(this IStorageFile file, IStorageFolder destination, CollisionOptions collisionOptions = CollisionOptions.RenameIfExists, string fileName = null)
         {
             IStorageFile destinationFile = await destination.CreateFileAsync(fileName ?? file.Name, collisionOptions);
             await CopyContentsAsync(file, destinationFile);
             await file.RemoveAsync();
+            return destinationFile;
         }
 
         /// <summary>
@@ -91,10 +93,11 @@ namespace BassClefStudio.AppModel.Storage
         /// <param name="destination">The destination folder to copy the <see cref="IStorageFile"/> into.</param>
         /// <param name="collisionOptions">Overrides the <see cref="CollisionOptions"/> behavior when creating the new file in the <paramref name="destination"/> folder.</param>
         /// <param name="folderName">Overrides the name of the destination file (default is <see cref="IStorageItem.Name"/> of the source <paramref name="folder"/>).</param>
-        public static async Task CopyToAsync(this IStorageFolder folder, IStorageFolder destination, CollisionOptions collisionOptions = CollisionOptions.RenameIfExists, string folderName = null)
+        public static async Task<IStorageFolder> CopyToAsync(this IStorageFolder folder, IStorageFolder destination, CollisionOptions collisionOptions = CollisionOptions.RenameIfExists, string folderName = null)
         {
             IStorageFolder destinationFolder = await destination.CreateFolderAsync(folderName ?? folder.Name, collisionOptions);
             await CopyContentsAsync(folder, destinationFolder);
+            return destinationFolder;
         }
 
         /// <summary>
@@ -104,11 +107,12 @@ namespace BassClefStudio.AppModel.Storage
         /// <param name="destination">The destination folder to copy the <see cref="IStorageFile"/> into.</param>
         /// <param name="collisionOptions">Overrides the <see cref="CollisionOptions"/> behavior when creating the new file in the <paramref name="destination"/> folder.</param>
         /// <param name="folderName">Overrides the name of the destination file (default is <see cref="IStorageItem.Name"/> of the source <paramref name="folder"/>).</param>
-        public static async Task MoveToAsync(this IStorageFolder folder, IStorageFolder destination, CollisionOptions collisionOptions = CollisionOptions.RenameIfExists, string folderName = null)
+        public static async Task<IStorageFolder> MoveToAsync(this IStorageFolder folder, IStorageFolder destination, CollisionOptions collisionOptions = CollisionOptions.RenameIfExists, string folderName = null)
         {
             IStorageFolder destinationFolder = await destination.CreateFolderAsync(folderName ?? folder.Name, collisionOptions);
             await CopyContentsAsync(folder, destinationFolder);
             await folder.RemoveAsync();
+            return destinationFolder;
         }
 
         /// <summary>
