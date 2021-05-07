@@ -1,8 +1,9 @@
-﻿using System;
+﻿using BassClefStudio.NET.Core.Streams;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BassClefStudio.AppModel.Streams.Commands
+namespace BassClefStudio.AppModel.Commands
 {
     /// <summary>
     /// Represents a basic <see cref="ICommand{T}"/> which uses <see cref="SourceStream{T}"/> for executing some action when the command is triggered.

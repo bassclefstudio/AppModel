@@ -1,9 +1,10 @@
 ﻿using BassClefStudio.NET.Core;
+using BassClefStudio.NET.Core.Streams;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BassClefStudio.AppModel.Streams.Commands
+namespace BassClefStudio.AppModel.Commands
 {
     /// <summary>
     /// Represents a UI command based on the <see cref="IStream{T}"/> interface that can be used to manage and trigger a specific action. 
