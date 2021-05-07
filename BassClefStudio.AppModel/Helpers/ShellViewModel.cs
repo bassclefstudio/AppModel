@@ -1,8 +1,8 @@
-﻿using BassClefStudio.AppModel.Lifecycle;
+﻿using BassClefStudio.AppModel.Commands;
+using BassClefStudio.AppModel.Lifecycle;
 using BassClefStudio.AppModel.Navigation;
-using BassClefStudio.AppModel.Streams;
-using BassClefStudio.AppModel.Streams.Commands;
 using BassClefStudio.NET.Core;
+using BassClefStudio.NET.Core.Streams;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
