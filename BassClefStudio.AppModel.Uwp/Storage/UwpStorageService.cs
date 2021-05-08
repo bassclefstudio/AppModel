@@ -17,6 +17,9 @@ namespace BassClefStudio.AppModel.Storage
         /// <inheritdoc/>
         public IStorageFolder AppDataFolder { get; } = new UwpFolder(ApplicationData.Current.LocalFolder);
 
+        /// <inheritdoc/>
+        public IStorageFolder TempFolder { get; } = new UwpFolder(ApplicationData.Current.TemporaryFolder);
+
         private IEnumerable<IDispatcher> Dispatchers { get; }
         public UwpStorageService(IEnumerable<IDispatcher> dispatchers)
         {

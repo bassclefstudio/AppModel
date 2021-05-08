@@ -18,17 +18,26 @@ namespace BassClefStudio.AppModel.Storage
         /// <inheritdoc/>
         public IStorageFolder AppDataFolder { get; }
 
+        /// <inheritdoc/>
+        public IStorageFolder TempFolder { get; }
+
         /// <summary>
         /// Creates a new <see cref="WpfStorageService"/> from the current <see cref="Lifecycle.App"/>
         /// </summary>
         /// <param name="packageInfo">The app's <see cref="IPackageInfo"/> provides information used to determine the location of the local folder.</param>
         public WpfStorageService(IPackageInfo packageInfo)
         {
+            var appDataPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                packageInfo.ApplicationName);
+
+            var tempPath = Path.Combine(appDataPath, "temp");
+
             AppDataFolder = new BaseFolder(
-                new System.IO.DirectoryInfo(
-                    Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                        packageInfo.ApplicationName)));
+                new DirectoryInfo(appDataPath));
+
+            TempFolder = new BaseFolder(
+                new DirectoryInfo(tempPath));
         }
 
         /// <inheritdoc/>

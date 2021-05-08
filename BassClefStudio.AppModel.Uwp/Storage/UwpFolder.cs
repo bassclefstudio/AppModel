@@ -11,7 +11,7 @@ namespace BassClefStudio.AppModel.Storage
     /// </summary>
     public class UwpFolder : IStorageFolder
     {
-        public Windows.Storage.IStorageFolder Folder { get; }
+        internal Windows.Storage.IStorageFolder Folder { get; }
 
         public UwpFolder(Windows.Storage.IStorageFolder folder)
         {

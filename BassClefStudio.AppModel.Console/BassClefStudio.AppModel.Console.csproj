@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>BassClefStudio.AppModel</RootNamespace>
-    <Version>1.12.0</Version>
+    <Version>1.12.1</Version>
     <Authors>BassClefStudio</Authors>
     <Description>An implementation of BassClefStudio.AppModel, providing services and application classes for running cross-platform MVVM applications in .NET Console applications.</Description>
     <PackageProjectUrl>https://github.com/bassclefstudio/AppModel</PackageProjectUrl>
