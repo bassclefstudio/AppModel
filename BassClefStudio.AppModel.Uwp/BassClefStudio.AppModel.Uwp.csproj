@@ -127,6 +127,7 @@
     <Compile Include="Helpers\TypeTemplateSelector.cs" />
     <Compile Include="Helpers\VisibilityConverter.cs" />
     <Compile Include="Lifecycle\UwpApplication.cs" />
+    <Compile Include="Lifecycle\UwpLauncher.cs" />
     <Compile Include="Navigation\UwpNavigationService.cs" />
     <Compile Include="Notifications\UwpNotificationService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

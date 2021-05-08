@@ -30,6 +30,8 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .AsImplementedInterfaces();
             builder.RegisterType<UwpNotificationService>()
                 .AsImplementedInterfaces();
+            builder.RegisterType<UwpLauncher>()
+                .AsImplementedInterfaces();
         }
     }
 }

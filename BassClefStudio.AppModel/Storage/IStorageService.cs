@@ -16,6 +16,11 @@ namespace BassClefStudio.AppModel.Storage
         IStorageFolder AppDataFolder { get; }
 
         /// <summary>
+        /// A reference to the <see cref="IStorageFolder"/> where an app can store temporary files/cache in the platform-specific file store. This folder may be periodically cleaned by the system.
+        /// </summary>
+        IStorageFolder TempFolder { get; }
+
+        /// <summary>
         /// Prompts the user to open a file from their local filesystem, and returns an <see cref="IStorageFile"/> reference to that file.
         /// </summary>
         /// <param name="settings">A <see cref="StorageDialogSettings"/> describing the appearance and filters of the storage dialog.</param>
