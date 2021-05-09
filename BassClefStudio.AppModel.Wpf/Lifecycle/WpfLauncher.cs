@@ -79,6 +79,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         public async Task<bool> OpenLinkAsync(Uri link)
         {
             Process.Start(link.ToString());
+            return true;
         }
     }
 }
