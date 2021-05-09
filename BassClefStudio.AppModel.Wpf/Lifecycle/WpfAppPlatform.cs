@@ -33,6 +33,8 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .AsImplementedInterfaces();
             //builder.RegisterType<WpfNotificationService>()
             //    .AsImplementedInterfaces();
+            builder.RegisterType<WpfLauncher>()
+                .AsImplementedInterfaces();
         }
     }
 }
