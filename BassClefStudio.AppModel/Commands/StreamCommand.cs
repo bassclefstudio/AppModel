@@ -25,7 +25,7 @@ namespace BassClefStudio.AppModel.Commands
         public CommandInfo Info { get; }
 
         /// <inheritdoc/>
-        public event EventHandler<StreamValue<T>> ValueEmitted;
+        public StreamBinding<T> ValueEmitted { get; }
 
         /// <summary>
         /// Creates a new <see cref="StreamCommand{T}"/>.
@@ -36,20 +36,15 @@ namespace BassClefStudio.AppModel.Commands
         {
             Info = info;
             TriggerStream = new SourceStream<T>();
+            ValueEmitted = TriggerStream.ValueEmitted;
             EnabledStream = enableStream ?? true.AsStream();
         }
 
         /// <inheritdoc/>
         public void Start()
         {
-            TriggerStream.ValueEmitted += CommandTriggered;
             TriggerStream.Start();
             EnabledStream.Start();
-        }
-
-        private void CommandTriggered(object sender, StreamValue<T> e)
-        {
-            ValueEmitted?.Invoke(this, e);
         }
 
         /// <inheritdoc/>
