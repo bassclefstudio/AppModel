@@ -2,8 +2,10 @@
 using BassClefStudio.AppModel.Lifecycle;
 using BassClefStudio.AppModel.Navigation;
 using BassClefStudio.NET.Core;
+using BassClefStudio.NET.Core.Streams;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace BassClefStudio.AppModel.Helpers
@@ -94,6 +96,113 @@ namespace BassClefStudio.AppModel.Helpers
             {
                 return false;
             }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// A generic implementation of <see cref="INavigationStack"/> that simply stores and traverses a linear history.
+    /// </summary>
+    public class NavigationStack : Observable, INavigationStack
+    {
+        #region Properties
+
+        /// <inheritdoc/>
+        public IStream<NavigationRequest> RequestStream { get; }
+
+        private bool canGoBack;
+        /// <inheritdoc/>
+        public bool CanGoBack { get => canGoBack; private set => Set(ref canGoBack, value); }
+
+        private bool canGoForward;
+        /// <inheritdoc/>
+        public bool CanGoForward { get => canGoForward; private set => Set(ref canGoForward, value); }
+
+        /// <summary>
+        /// The indexed position in <see cref="Requests"/> of the current history.
+        /// </summary>
+        protected int HistoryPosition { get; set; }
+
+        /// <summary>
+        /// A collection of all <see cref="NavigationRequest"/> previous requests.
+        /// </summary>
+        protected List<NavigationRequest> Requests { get; }
+
+        #endregion
+        #region Initialization
+        
+        /// <summary>
+        /// Creates a new <see cref="NavigationStack"/>.
+        /// </summary>
+        public NavigationStack()
+        {
+            Requests = new List<NavigationRequest>();
+            HistoryPosition = -1;
+            SetCanGo();
+        }
+
+        #endregion
+        #region Methods
+
+        /// <inheritdoc/>
+        public void AddRequest(NavigationRequest request)
+        {
+            if (!request.Mode.IgnoreHistory && request != Requests[HistoryPosition])
+            {
+                if (HistoryPosition + 1 != Requests.Count)
+                {
+                    Requests.RemoveRange(HistoryPosition + 1, Requests.Count - (HistoryPosition + 1));
+                }
+
+                Requests.Add(request);
+                HistoryPosition++;
+                SetCanGo();
+            }
+        }
+
+        /// <inheritdoc/>
+        public void Clear()
+        {
+            Requests.Clear();
+            SetCanGo();
+        }
+
+        /// <inheritdoc/>
+        public NavigationRequest GoBack()
+        {
+            if (CanGoBack)
+            {
+                HistoryPosition--;
+                return Requests[HistoryPosition];
+            }
+            else
+            {
+                throw new InvalidOperationException("Cannot currently go back in the navigation stack.");
+            }
+        }
+
+        /// <inheritdoc/>
+        public NavigationRequest GoForward()
+        {
+            if (CanGoForward)
+            {
+                HistoryPosition++;
+                return Requests[HistoryPosition];
+            }
+            else
+            {
+                throw new InvalidOperationException("Cannot currently go back in the navigation stack.");
+            }
+        }
+        
+        /// <summary>
+        /// Sets the <see cref="CanGoBack"/> and <see cref="CanGoForward"/> properties accordingly.
+        /// </summary>
+        protected void SetCanGo()
+        {
+            CanGoBack = HistoryPosition > 0;
+            CanGoForward = HistoryPosition + 1 < Requests.Count;
         }
 
         #endregion

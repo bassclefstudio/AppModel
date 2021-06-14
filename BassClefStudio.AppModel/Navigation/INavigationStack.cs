@@ -35,6 +35,7 @@ namespace BassClefStudio.AppModel.Navigation
         /// Navigates backwards in the <see cref="INavigationStack"/> history.
         /// </summary>
         /// <returns>A <see cref="NavigationRequest"/> describing the operation required to adjust the app's view to the requrested state.</returns>
+        /// <exception cref="InvalidOperationException">The <see cref="INavigationStack"/> cannot currently go back (see <see cref="CanGoBack"/>).</exception>
         NavigationRequest GoBack();
 
         /// <summary>
@@ -46,6 +47,7 @@ namespace BassClefStudio.AppModel.Navigation
         /// Navigates forwards in the <see cref="INavigationStack"/> history.
         /// </summary>
         /// <returns>A <see cref="NavigationRequest"/> describing the operation required to adjust the app's view to the requrested state.</returns>
+        /// <exception cref="InvalidOperationException">The <see cref="INavigationStack"/> cannot currently go forward (see <see cref="CanGoForward"/>).</exception>
         NavigationRequest GoForward();
     }
 }

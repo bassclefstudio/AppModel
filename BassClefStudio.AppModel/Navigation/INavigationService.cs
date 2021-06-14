@@ -79,15 +79,8 @@ namespace BassClefStudio.AppModel.Navigation
         /// <param name="stack">The <see cref="INavigationStack"/> to use for navigation history.</param>
         public static void GoBack(this INavigationService navigationService, INavigationStack stack)
         {
-            if (stack.CanGoBack)
-            {
-                var request = stack.GoBack();
-                navigationService.Navigate(request);
-            }
-            else
-            {
-                throw new InvalidOperationException("Cannot currently go back in the navigation stack.");
-            }
+            var request = stack.GoBack();
+            navigationService.Navigate(request);
         }
 
         /// <summary>
@@ -97,15 +90,8 @@ namespace BassClefStudio.AppModel.Navigation
         /// <param name="stack">The <see cref="INavigationStack"/> to use for navigation history.</param>
         public static void GoForward(this INavigationService navigationService, INavigationStack stack)
         {
-            if (stack.CanGoForward)
-            {
-                var request = stack.GoBack();
-                navigationService.Navigate(request);
-            }
-            else
-            {
-                throw new InvalidOperationException("Cannot currently go forward in the navigation stack.");
-            }
+            var request = stack.GoBack();
+            navigationService.Navigate(request);
         }
     }
 }
