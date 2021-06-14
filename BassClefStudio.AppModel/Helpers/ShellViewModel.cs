@@ -18,6 +18,11 @@ namespace BassClefStudio.AppModel.Helpers
     public abstract class ShellViewModel : Observable, IViewModel, IShellHandler
     {
         /// <summary>
+        /// A <see cref="SourceStream{T}"/> of requests to navigate to the settings page (see <see cref="SettingsItem"/>).
+        /// </summary>
+        public SourceStream<bool> SettingsStream { get; }
+
+        /// <summary>
         /// The collection of all <see cref="NavigationItem"/>s available to this <see cref="ShellViewModel"/>.
         /// </summary>
         public ObservableCollection<NavigationItem> NavigationItems { get; }
@@ -26,6 +31,11 @@ namespace BassClefStudio.AppModel.Helpers
         /// Retrieves an array of <see cref="NavigationItem"/>s that will be initially populated to the <see cref="NavigationItems"/> collection.
         /// </summary>
         protected abstract NavigationItem[] GetInitialItems();
+
+        /// <summary>
+        /// The <see cref="NavigationItem"/> for the settings page.
+        /// </summary>
+        public abstract NavigationItem SettingsItem { get; }
 
         /// <summary>
         /// An <see cref="ICommand{T}"/> for selecting <see cref="NavigationItem"/>s to navigate to.
@@ -76,12 +86,12 @@ namespace BassClefStudio.AppModel.Helpers
         /// <summary>
         /// The injected <see cref="INavigationService"/>.
         /// </summary>
-        private INavigationService NavigationService { get; }
+        protected INavigationService NavigationService { get; }
 
         /// <summary>
         /// The injected <see cref="INavigationStack"/>.
         /// </summary>
-        private INavigationStack NavigationStack { get; }
+        protected INavigationStack NavigationStack { get; }
 
         /// <summary>
         /// Creates a new <see cref="ShellViewModel"/>.
@@ -114,6 +124,9 @@ namespace BassClefStudio.AppModel.Helpers
 
             NavigationStack.RequestStream.BindResult(r =>
                 SetSelected(NavigationItems.FirstOrDefault(i => i.Request == r)));
+
+            SettingsStream = new SourceStream<bool>();
+            SettingsStream.BindResult(b => Navigate(SettingsItem));
         }
 
         /// <inheritdoc/>
