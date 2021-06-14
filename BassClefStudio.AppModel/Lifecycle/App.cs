@@ -25,11 +25,6 @@ namespace BassClefStudio.AppModel.Lifecycle
         public ILifetimeScope Services { get; set; }
 
         /// <summary>
-        /// An event fired when the <see cref="App"/> completes successful navigation to a new <see cref="IViewModel"/> and its associated <see cref="IView"/>.
-        /// </summary>
-        public event EventHandler<NavigatedEventArgs> Navigated;
-
-        /// <summary>
         /// Configures any app-specific services, such as registering of views, view-models, and app-specific behaviors and services.
         /// </summary>
         /// <param name="builder">The <see cref="ContainerBuilder"/> for the dependency injection container.</param>
@@ -92,8 +87,7 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .AssignableTo<IPlatformModule>()
                 .SingleInstance();
             this.ConfigureServices(builder);
-            //// Resister this app instance to all view-models, etc.
-            builder.RegisterInstance<App>(this);
+            //// Register 
             //// If all a service needs is app information (such as name), the IPackageInfo is registered separately.
             builder.RegisterInstance<IPackageInfo>(this.PackageInfo);
             builder.RegisterViews(assemblies);
@@ -115,7 +109,7 @@ namespace BassClefStudio.AppModel.Lifecycle
             var inits = Services.Resolve<IEnumerable<IInitializationHandler>>();
             foreach (var i in inits)
             {
-                i.Initialize(this);
+                i.Initialize();
             }
         }
 
@@ -144,6 +138,18 @@ namespace BassClefStudio.AppModel.Lifecycle
                 SynchronousTask registerTask = new SynchronousTask(RegisterBackgroundTasks);
                 registerTask.RunTask();
                 ActivateForeground(args);
+            }
+        }
+
+        /// <summary>
+        /// Finishes any tasks to save data and ensure a graceful close of the application (or move to a background process).
+        /// </summary>
+        public void Suspend()
+        {
+            var handlers = Services.Resolve<IEnumerable<ISuspendingHandler>>();
+            foreach (var h in handlers)
+            {
+                h.Suspend();
             }
         }
 
@@ -212,21 +218,21 @@ namespace BassClefStudio.AppModel.Lifecycle
 
         private void ActivateForeground(IActivatedEventArgs args)
         {
-            ViewProvider = Services.Resolve<IViewProvider>();
-            ViewProvider.InitializeNavigation();
+            var navigationService = Services.Resolve<INavigationService>();
 
             var shellHandler = Services.ResolveOptional<IShellHandler>();
             if (shellHandler != null)
             {
-                NavigateReflection(shellHandler);
+                //// TODO: Decide how to deal with this mess - identifying types vs. instances in the DI container...
+                //navigationService.Navigate(shellHandler);
             }
 
             var activationHandlers = Services.Resolve<IEnumerable<IActivationHandler>>();
             var activateViewModel = activationHandlers.FirstOrDefault(h => h.CanHandle(args));
             if (activateViewModel != null)
             {
-                activateViewModel.Activate(args);
-                NavigateReflection(activateViewModel);
+                //activateViewModel.Activate(args);
+                //NavigateReflection(activateViewModel);
             }
             else
             {
@@ -238,83 +244,6 @@ namespace BassClefStudio.AppModel.Lifecycle
         #endregion
         #region Navigation
 
-        private IViewProvider ViewProvider { get; set; }
-
-        /// <summary>
-        /// Resolves the given <see cref="IViewModel"/>'s view dependencies for the platform and navigates to a new view.
-        /// </summary>
-        /// <typeparam name="T">The type of <see cref="IViewModel"/> context to navigate to.</typeparam>
-        /// <param name="parameter">A parameter passed to the view-model when this <see cref="IViewModel"/> is navigated to.</param>
-        public void Navigate<T>(object parameter = null) where T : IViewModel
-        {
-            var viewModel = Services.Resolve<T>();
-            Navigate(viewModel, parameter);
-        }
-
-        /// <summary>
-        /// Resolves the given <see cref="IViewModel"/>'s view dependencies for the platform and navigates to a new view.
-        /// </summary>
-        /// <typeparam name="T">The type of <see cref="IViewModel"/> context to navigate to.</typeparam>
-        /// <param name="viewModel">A <typeparamref name="T"/> instance of the <see cref="IViewModel"/> to set as the <see cref="IView"/>'s context.</param>
-        /// <param name="parameter">A parameter passed to the view-model when this <see cref="IViewModel"/> is navigated to.</param>
-        public void Navigate<T>(T viewModel, object parameter = null) where T : IViewModel
-        {
-            var view = Services.Resolve<IView<T>>();
-            ViewProvider.SetView(view);
-            view.ViewModel = viewModel;
-            NavigatedInitialize(viewModel, view, parameter);
-        }
-
-        /// <summary>
-        /// Resolves the given <see cref="IViewModel"/>'s view dependencies for the platform and navigates to a new view. Uses reflection to find the <see cref="IView"/> and <see cref="IViewModel"/> types.
-        /// </summary>
-        /// <param name="viewModelType">The type of the <see cref="IViewModel"/> to set as the <see cref="IView"/>'s context.</param>
-        /// <param name="parameter">A parameter passed to the view-model when this <see cref="IViewModel"/> is navigated to.</param>
-        public void NavigateReflection(Type viewModelType, object parameter = null)
-        {
-            var viewType = typeof(IView<>).MakeGenericType(viewModelType);
-            var viewModel = (IViewModel)Services.Resolve(viewModelType);
-            var view = (IView)Services.Resolve(viewType);
-            ViewProvider.SetView(view);
-            viewType.GetProperty("ViewModel").SetValue(view, viewModel);
-            NavigatedInitialize(viewModel, view, parameter);
-        }
-
-        /// <summary>
-        /// Resolves the given <see cref="IViewModel"/>'s view dependencies for the platform and navigates to a new view. Uses reflection to find the <see cref="IView"/> and <see cref="IViewModel"/> types.
-        /// </summary>
-        /// <param name="viewModel">An instance of the <see cref="IViewModel"/> to set as the <see cref="IView"/>'s context.</param>
-        /// <param name="parameter">A parameter passed to the view-model when this <see cref="IViewModel"/> is navigated to.</param>
-        public void NavigateReflection(IViewModel viewModel, object parameter = null)
-        {
-            var viewType = typeof(IView<>).MakeGenericType(viewModel.GetType());
-            var view = (IView)Services.Resolve(viewType);
-            viewType.GetProperty("ViewModel").SetValue(view, viewModel);
-            ViewProvider.SetView(view);
-            NavigatedInitialize(viewModel, view, parameter);
-        }
-
-        private void NavigatedInitialize(IViewModel viewModel, IView view, object parameter)
-        {
-            SynchronousTask initViewModelTask =
-                new SynchronousTask(() => viewModel.InitializeAsync(parameter));
-            initViewModelTask.RunTask();
-            view.Initialize();
-            var args = new NavigatedEventArgs(view, viewModel, parameter);
-            Navigated?.Invoke(this, args);
-        }
-
-        /// <summary>
-        /// Finishes any tasks to save data and ensure a graceful close of the application (or move to a background process).
-        /// </summary>
-        public void Suspend()
-        {
-            var handlers = Services.Resolve<IEnumerable<ISuspendingHandler>>();
-            foreach (var h in handlers)
-            {
-                h.Suspend(this);
-            }
-        }
 
         #endregion
         #endregion
@@ -377,40 +306,6 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .AssignableTo<IBackgroundTask>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
-        }
-    }
-
-    /// <summary>
-    /// Event information showing the resolved <see cref="IViewModel"/> and <see cref="IView"/> of a successful navigation.
-    /// </summary>
-    public class NavigatedEventArgs : EventArgs
-    {
-        /// <summary>
-        /// The navigated <see cref="IView"/> view.
-        /// </summary>
-        public IView NavigatedView { get; }
-
-        /// <summary>
-        /// The navigated <see cref="IViewModel"/> view-model.
-        /// </summary>
-        public IViewModel NavigatedViewModel { get; }
-
-        /// <summary>
-        /// The contextual <see cref="object"/> parameter passed to the <see cref="IViewModel"/>'s <see cref="IViewModel.InitializeAsync(object)"/> method.
-        /// </summary>
-        public object Parameter { get; }
-
-        /// <summary>
-        /// Creates a new <see cref="NavigatedEventArgs"/>.
-        /// </summary>
-        /// <param name="view">The navigated <see cref="IView"/> view.</param>
-        /// <param name="viewModel">The navigated <see cref="IViewModel"/> view-model.</param>
-        /// <param name="parameter">The contextual <see cref="object"/> parameter passed to the <see cref="IViewModel"/>'s <see cref="IViewModel.InitializeAsync(object)"/> method.</param>
-        public NavigatedEventArgs(IView view, IViewModel viewModel, object parameter)
-        {
-            NavigatedView = view;
-            NavigatedViewModel = viewModel;
-            Parameter = parameter;
         }
     }
 }

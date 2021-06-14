@@ -38,7 +38,7 @@ namespace BassClefStudio.AppModel.Navigation
         { }
 
         /// <inheritdoc/>
-        public override void InitializeNavigation()
+        public override void StartUI()
         {
             var myWindow = new Window();
             Application.Current.MainWindow = myWindow;

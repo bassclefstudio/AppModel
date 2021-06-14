@@ -24,7 +24,7 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        public override void InitializeNavigation()
+        public override void StartUI()
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"{AppName} v{Version}");

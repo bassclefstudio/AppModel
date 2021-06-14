@@ -82,7 +82,7 @@ namespace BassClefStudio.AppModel.Helpers
         /// <summary>
         /// The injected <see cref="IViewProvider"/>, which can be queried to setup the shell view settings for a given platform.
         /// </summary>
-        public IViewProvider NavigationService { get; set; }
+        public INavigationService NavigationService { get; set; }
 
         /// <summary>
         /// Creates a new <see cref="ShellViewModel"/>.
@@ -91,7 +91,6 @@ namespace BassClefStudio.AppModel.Helpers
         {
             NavigationItems = new ObservableCollection<NavigationItem>(GetInitialItems());
             MyApp = myApp;
-            MyApp.Navigated += AppNavigated;
             NavigateCommand = new StreamCommand<NavigationItem>(
                 new CommandInfo()
                 {
@@ -130,12 +129,12 @@ namespace BassClefStudio.AppModel.Helpers
         /// <inheritdoc/>
         public abstract Task InitializeAsync(object parameter = null);
 
-        private void AppNavigated(object sender, NavigatedEventArgs e)
-        {
-            var viewModelType = e.NavigatedViewModel.GetType();
-            SetSelected(NavigationItems.FirstOrDefault(i => i.ViewModelType == viewModelType && i.Parameter == e.Parameter));
-            backEnabledInternal.EmitValue(MyApp.CanGoBack);
-        }
+        //private void AppNavigated(object sender, NavigatedEventArgs e)
+        //{
+        //    var viewModelType = e.NavigatedViewModel.GetType();
+        //    SetSelected(NavigationItems.FirstOrDefault(i => i.ViewModelType == viewModelType && i.Parameter == e.Parameter));
+        //    backEnabledInternal.EmitValue(MyApp.CanGoBack);
+        //}
 
         /// <summary>
         /// Navigates the <see cref="App"/> to the specified page (sets the <see cref="SelectedItem"/> property).

@@ -40,7 +40,7 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        public override void InitializeNavigation()
+        public override void StartUI()
         {
             Frame rootFrame = Window.Current.Content as Frame;
 

@@ -15,7 +15,7 @@ namespace BassClefStudio.AppModel.Navigation
         /// <summary>
         /// Called when the app has been activated with UI, this method should enable the UI, build windows, and start this <see cref="IViewProvider"/>'s navigation context.
         /// </summary>
-        void InitializeNavigation();
+        void StartUI();
 
         /// <summary>
         /// Sets the content of the app to an <see cref="IView"/> view.
@@ -31,7 +31,7 @@ namespace BassClefStudio.AppModel.Navigation
     public abstract class ViewProvider<T> : IViewProvider
     {
         /// <inheritdoc/>
-        public abstract void InitializeNavigation();
+        public abstract void StartUI();
 
         /// <summary>
         /// Internally sets the content of the app to an <typeparamref name="T"/> view.

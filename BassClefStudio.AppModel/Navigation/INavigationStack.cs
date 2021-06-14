@@ -9,5 +9,37 @@ namespace BassClefStudio.AppModel.Navigation
     /// </summary>
     public interface INavigationStack
     {
+        /// <summary>
+        /// Handles the new <see cref="NavigationRequest"/> request that has been sent by the app, adding it to history.
+        /// </summary>
+        /// <param name="request">The <see cref="NavigationRequest"/> describing the location and behavior of the most recent navigation operation.</param>
+        void AddRequest(NavigationRequest request);
+
+        /// <summary>
+        /// Clears the entire <see cref="INavigationStack"/>'s history.
+        /// </summary>
+        void Clear();
+
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="INavigationStack"/> has items in the current back history.
+        /// </summary>
+        bool CanGoBack { get; }
+
+        /// <summary>
+        /// Navigates backwards in the <see cref="INavigationStack"/> history.
+        /// </summary>
+        /// <returns>A <see cref="NavigationRequest"/> describing the operation required to adjust the app's view to the requrested state.</returns>
+        NavigationRequest GoBack();
+
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="INavigationStack"/> has items in the current forward history.
+        /// </summary>
+        bool CanGoForward { get; }
+
+        /// <summary>
+        /// Navigates forwards in the <see cref="INavigationStack"/> history.
+        /// </summary>
+        /// <returns>A <see cref="NavigationRequest"/> describing the operation required to adjust the app's view to the requrested state.</returns>
+        NavigationRequest GoForward();
     }
 }
