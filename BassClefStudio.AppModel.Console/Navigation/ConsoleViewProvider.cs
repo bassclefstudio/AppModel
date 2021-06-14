@@ -7,17 +7,17 @@ using System.Text;
 namespace BassClefStudio.AppModel.Navigation
 {
     /// <summary>
-    /// An <see cref="INavigationService"/> built on the <see cref="ConsoleView{T}"/> abstract class.
+    /// An <see cref="IViewProvider"/> built on the <see cref="ConsoleView{T}"/> abstract class.
     /// </summary>
-    public class ConsoleNavigationService : NavigationService<IConsoleView>, INavigationService
+    public class ConsoleViewProvider : ViewProvider<IConsoleView>, IViewProvider
     {
         private string AppName { get; }
         private Version Version { get; }
         /// <summary>
-        /// Creates a new <see cref="ConsoleNavigationService"/>.
+        /// Creates a new <see cref="ConsoleViewProvider"/>.
         /// </summary>
-        /// <param name="packageInfo">The <see cref="IPackageInfo"/> this <see cref="ConsoleNavigationService"/> uses to get <see cref="AppName"/> and <see cref="Version"/> info.</param>
-        public ConsoleNavigationService(IPackageInfo packageInfo)
+        /// <param name="packageInfo">The <see cref="IPackageInfo"/> this <see cref="ConsoleViewProvider"/> uses to get <see cref="AppName"/> and <see cref="Version"/> info.</param>
+        public ConsoleViewProvider(IPackageInfo packageInfo)
         {
             AppName = packageInfo.ApplicationName;
             Version = packageInfo.Version;
@@ -32,12 +32,11 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        protected override bool NavigateInternal(IConsoleView view)
+        protected override void SetViewInternal(IConsoleView view)
         {
             SynchronousTask syncTask = new SynchronousTask(
                     () => view.ShowView());
             syncTask.RunTask();
-            return true;
         }
     }
 }

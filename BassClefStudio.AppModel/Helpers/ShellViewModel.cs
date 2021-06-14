@@ -80,9 +80,9 @@ namespace BassClefStudio.AppModel.Helpers
         public App MyApp { get; set; }
 
         /// <summary>
-        /// The injected <see cref="INavigationService"/>, which can be queried to setup the shell view settings for a given platform.
+        /// The injected <see cref="IViewProvider"/>, which can be queried to setup the shell view settings for a given platform.
         /// </summary>
-        public INavigationService NavigationService { get; set; }
+        public IViewProvider NavigationService { get; set; }
 
         /// <summary>
         /// Creates a new <see cref="ShellViewModel"/>.

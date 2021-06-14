@@ -11,9 +11,9 @@ using System.Windows.Controls;
 namespace BassClefStudio.AppModel.Navigation
 {
     /// <summary>
-    /// An <see cref="INavigationService"/> built on the WPF's <see cref="ContentControl"/> and <see cref="Window"/> classes.
+    /// An <see cref="IViewProvider"/> built on the WPF's <see cref="ContentControl"/> and <see cref="Window"/> classes.
     /// </summary>
-    public class WpfNavigationService : NavigationService<UIElement>, INavigationService
+    public class WpfViewProvider : ViewProvider<UIElement>, IViewProvider
     {
         private ContentControl currentFrame;
         /// <summary>
@@ -27,15 +27,14 @@ namespace BassClefStudio.AppModel.Navigation
                 if (currentFrame != value)
                 {
                     currentFrame = value;
-                    NavigationStack.Clear();
                 }
             }
         }
 
         /// <summary>
-        /// Creates a new <see cref="WpfNavigationService"/>.
+        /// Creates a new <see cref="WpfViewProvider"/>.
         /// </summary>
-        public WpfNavigationService()
+        public WpfViewProvider()
         { }
 
         /// <inheritdoc/>
@@ -48,17 +47,15 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        protected override bool NavigateInternal(UIElement element)
+        protected override void SetViewInternal(UIElement element)
         {
             if (element is Window window)
             {
                 window.Show();
-                return false;
             }
             else
             {
                 CurrentFrame.Content = element;
-                return true;
             }
         }
     }

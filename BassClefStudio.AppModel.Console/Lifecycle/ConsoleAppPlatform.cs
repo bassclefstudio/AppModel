@@ -17,7 +17,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// <inheritdoc/>
         public void ConfigureServices(ContainerBuilder builder)
         {
-            builder.RegisterType<ConsoleNavigationService>()
+            builder.RegisterType<ConsoleViewProvider>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
             //builder.RegisterType<ConsoleBackgroundService>()

@@ -9,18 +9,18 @@ using System.Threading.Tasks;
 namespace BassClefStudio.AppModel.Navigation
 {
     /// <summary>
-    /// Represents a <see cref="BlazorNavigationService"/> that navigates to URLs in the Blazor SPA and provides the current view information for components to retrieve their <see cref="IViewModel"/>.
+    /// Represents a <see cref="BlazorViewProvider"/> that navigates to URLs in the Blazor SPA and provides the current view information for components to retrieve their <see cref="IViewModel"/>.
     /// </summary>
-    public class BlazorNavigationService : NavigationService<BlazorView>, INavigationService
+    public class BlazorViewProvider : ViewProvider<BlazorView>, IViewProvider
     {
-        private IBlazorViewProvider ViewProvider { get; }
+        private IBlazorViewInfo ViewProvider { get; }
         private NavigationManager NavigationManager { get; }
         /// <summary>
-        /// Creates a new <see cref="BlazorNavigationService"/> from the required Blazor dependencies.
+        /// Creates a new <see cref="BlazorViewProvider"/> from the required Blazor dependencies.
         /// </summary>
         /// <param name="navigationManager">The Blazor platform <see cref="Microsoft.AspNetCore.Components.NavigationManager"/>.</param>
-        /// <param name="viewProvider">The <see cref="IBlazorViewProvider"/> that the <see cref="BlazorNavigationService"/> can inform about navigation events.</param>
-        public BlazorNavigationService(NavigationManager navigationManager, IBlazorViewProvider viewProvider)
+        /// <param name="viewProvider">The <see cref="IBlazorViewInfo"/> that the <see cref="BlazorViewProvider"/> can inform about navigation events.</param>
+        public BlazorViewProvider(NavigationManager navigationManager, IBlazorViewInfo viewProvider)
         {
             NavigationManager = navigationManager;
             ViewProvider = viewProvider;
@@ -31,12 +31,11 @@ namespace BassClefStudio.AppModel.Navigation
         { }
 
         /// <inheritdoc/>
-        protected override bool NavigateInternal(BlazorView view)
+        protected override void SetViewInternal(BlazorView view)
         {
             Console.WriteLine($"Navigate {view.ViewPath}.");
             ViewProvider.CurrentView = view;
             NavigationManager.NavigateTo($"{NavigationManager.BaseUri}{view.ViewPath}");
-            return true;
         }
     }
 }

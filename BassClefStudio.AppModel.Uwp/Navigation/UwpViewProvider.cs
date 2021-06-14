@@ -10,9 +10,9 @@ using Windows.UI.Xaml.Controls;
 namespace BassClefStudio.AppModel.Navigation
 {
     /// <summary>
-    /// An <see cref="INavigationService"/> built on the UWP's <see cref="ContentControl"/> and <see cref="Window"/> classes.
+    /// An <see cref="IViewProvider"/> built on the UWP's <see cref="ContentControl"/> and <see cref="Window"/> classes.
     /// </summary>
-    public class UwpNavigationService : NavigationService<UIElement>, INavigationService
+    public class UwpViewProvider : ViewProvider<UIElement>, IViewProvider
     {
         private ContentControl currentFrame;
         /// <summary>
@@ -26,16 +26,15 @@ namespace BassClefStudio.AppModel.Navigation
                 if(currentFrame != value)
                 {
                     currentFrame = value;
-                    NavigationStack.Clear();
                 }
             }
         }
 
         private IEnumerable<IDispatcher> Dispatchers { get; }
         /// <summary>
-        /// Creates a new <see cref="UwpNavigationService"/>.
+        /// Creates a new <see cref="UwpViewProvider"/>.
         /// </summary>
-        public UwpNavigationService(IEnumerable<IDispatcher> dispatchers)
+        public UwpViewProvider(IEnumerable<IDispatcher> dispatchers)
         {
             Dispatchers = dispatchers;
         }
@@ -61,7 +60,7 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        protected override bool NavigateInternal(UIElement element)
+        protected override void SetViewInternal(UIElement element)
         {
             if (element is ContentDialog dialog)
             {
@@ -69,13 +68,10 @@ namespace BassClefStudio.AppModel.Navigation
                     () => Dispatchers.RunOnUIThreadAsync(
                         () => ShowDialogTask(dialog)));
                 showTask.RunTask();
-                //// Because dialogs must be closed first, before any other pages can be navigated to, they should be added to the back stack in UWP.
-                return true;
             }
             else
             {
                 CurrentFrame.Content = element;
-                return true;
             }
         }
 

@@ -212,8 +212,8 @@ namespace BassClefStudio.AppModel.Lifecycle
 
         private void ActivateForeground(IActivatedEventArgs args)
         {
-            NavigationService = Services.Resolve<INavigationService>();
-            NavigationService.InitializeNavigation();
+            ViewProvider = Services.Resolve<IViewProvider>();
+            ViewProvider.InitializeNavigation();
 
             var shellHandler = Services.ResolveOptional<IShellHandler>();
             if (shellHandler != null)
@@ -238,7 +238,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         #endregion
         #region Navigation
 
-        private INavigationService NavigationService { get; set; }
+        private IViewProvider ViewProvider { get; set; }
 
         /// <summary>
         /// Resolves the given <see cref="IViewModel"/>'s view dependencies for the platform and navigates to a new view.
@@ -260,9 +260,9 @@ namespace BassClefStudio.AppModel.Lifecycle
         public void Navigate<T>(T viewModel, object parameter = null) where T : IViewModel
         {
             var view = Services.Resolve<IView<T>>();
-            bool triggerEvent = NavigationService.Navigate(view);
+            ViewProvider.SetView(view);
             view.ViewModel = viewModel;
-            NavigatedInitialize(viewModel, view, parameter, triggerEvent);
+            NavigatedInitialize(viewModel, view, parameter);
         }
 
         /// <summary>
@@ -275,9 +275,9 @@ namespace BassClefStudio.AppModel.Lifecycle
             var viewType = typeof(IView<>).MakeGenericType(viewModelType);
             var viewModel = (IViewModel)Services.Resolve(viewModelType);
             var view = (IView)Services.Resolve(viewType);
-            bool triggerEvent = NavigationService.Navigate(view);
+            ViewProvider.SetView(view);
             viewType.GetProperty("ViewModel").SetValue(view, viewModel);
-            NavigatedInitialize(viewModel, view, parameter, triggerEvent);
+            NavigatedInitialize(viewModel, view, parameter);
         }
 
         /// <summary>
@@ -290,22 +290,18 @@ namespace BassClefStudio.AppModel.Lifecycle
             var viewType = typeof(IView<>).MakeGenericType(viewModel.GetType());
             var view = (IView)Services.Resolve(viewType);
             viewType.GetProperty("ViewModel").SetValue(view, viewModel);
-            bool triggerEvent = NavigationService.Navigate(view);
-            NavigatedInitialize(viewModel, view, parameter, triggerEvent);
+            ViewProvider.SetView(view);
+            NavigatedInitialize(viewModel, view, parameter);
         }
 
-        private void NavigatedInitialize(IViewModel viewModel, IView view, object parameter, bool triggerEvent = true)
+        private void NavigatedInitialize(IViewModel viewModel, IView view, object parameter)
         {
             SynchronousTask initViewModelTask =
                 new SynchronousTask(() => viewModel.InitializeAsync(parameter));
             initViewModelTask.RunTask();
             view.Initialize();
-            if (triggerEvent)
-            {
-                var args = new NavigatedEventArgs(view, viewModel, parameter);
-                PreviousNavigations.Add(args);
-                Navigated?.Invoke(this, args);
-            }
+            var args = new NavigatedEventArgs(view, viewModel, parameter);
+            Navigated?.Invoke(this, args);
         }
 
         /// <summary>
@@ -317,34 +313,6 @@ namespace BassClefStudio.AppModel.Lifecycle
             foreach (var h in handlers)
             {
                 h.Suspend(this);
-            }
-        }
-
-        /// <summary>
-        /// A <see cref="bool"/> indicating whether the <see cref="App"/> can initiate back navigation - trigger this by calling the <see cref="GoBack"/> navigation method.
-        /// </summary>
-        public bool CanGoBack => NavigationService.CanGoBack;
-
-        /// <summary>
-        /// A list of all previous <see cref="NavigatedEventArgs"/>, used for finding the correct arguments to send when the <see cref="GoBack"/> method is called.
-        /// </summary>
-        private List<NavigatedEventArgs> PreviousNavigations { get; } = new List<NavigatedEventArgs>();
-
-        /// <summary>
-        /// Initiates a request to return to the last saved state of the application (i.e. a back button was pressed or gesture detected).
-        /// </summary>
-        public void GoBack()
-        {
-            IView view = NavigationService.GoBack();
-            NavigatedEventArgs args = PreviousNavigations.FirstOrDefault(a => a.NavigatedView == view);
-            if (args != null)
-            {
-                //// Resend the Navigated event for the previously navigated page.
-                Navigated?.Invoke(this, args);
-            }
-            else
-            {
-                throw new InvalidOperationException($"Back navigation was attempted to an IView that appears not to have been previously navigated to. View: \"{view}\"");
             }
         }
 

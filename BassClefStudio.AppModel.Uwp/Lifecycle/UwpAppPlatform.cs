@@ -16,7 +16,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// <inheritdoc/>
         public void ConfigureServices(ContainerBuilder builder)
         {
-            builder.RegisterType<UwpNavigationService>()
+            builder.RegisterType<UwpViewProvider>()
                 .SingleInstance()
                 .AsImplementedInterfaces();
             builder.RegisterType<UwpBackgroundService>()
