@@ -76,23 +76,27 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// <param name="assemblies">The assemblies for this platform that contain any <see cref="IView"/>s or <see cref="IPlatformModule"/>s that the <see cref="App"/> requires.</param>
         public void SetupContainer(ContainerBuilder builder, IAppPlatform platform, params Assembly[] assemblies)
         {
+            Assembly[] fullAssemblies = assemblies
+                .Concat(new Assembly[] { typeof(App).Assembly })
+                .ToArray();
+
             platform.ConfigureServices(builder);
             //// Register any internal services that deal with lifecycle of the app.
-            builder.RegisterAssemblyTypes(typeof(App).Assembly)
+            builder.RegisterAssemblyTypes(fullAssemblies)
                 .AssignableTo<ILifecycleHandler>()
                 .AsImplementedInterfaces();
             //// Register any IPlatformModules as both modules and types.
-            builder.RegisterAssemblyModules<IPlatformModule>(assemblies);
-            builder.RegisterAssemblyTypes(assemblies)
+            builder.RegisterAssemblyModules<IPlatformModule>(fullAssemblies);
+            builder.RegisterAssemblyTypes(fullAssemblies)
                 .AssignableTo<IPlatformModule>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
             //// Register required navigation components.
-            builder.RegisterAssemblyTypes(assemblies)
+            builder.RegisterAssemblyTypes(fullAssemblies)
                 .AssignableTo<INavigationService>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
-            builder.RegisterAssemblyTypes(assemblies)
+            builder.RegisterAssemblyTypes(fullAssemblies)
                 .AssignableTo<INavigationStack>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
