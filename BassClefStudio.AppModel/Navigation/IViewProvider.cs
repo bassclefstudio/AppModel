@@ -8,7 +8,7 @@ using System.Text;
 namespace BassClefStudio.AppModel.Navigation
 {
     /// <summary>
-    /// Represents a service that can set the <see cref="IView{T}"/> content of the app in a platform-specific way. This interface is generally for internal use, and for most navigation apps should use the methods available on the <see cref="INavaigationService"/> interface instead, as they provide additional functionality.
+    /// Represents a service that can set the <see cref="IView{T}"/> content of the app in a platform-specific way. This interface is generally for internal use, and for most navigation apps should use the methods available on the <see cref="INavigationService"/> interface instead, as it provides additional functionality.
     /// </summary>
     public interface IViewProvider
     {
@@ -21,7 +21,8 @@ namespace BassClefStudio.AppModel.Navigation
         /// Sets the content of the app to an <see cref="IView"/> view.
         /// </summary>
         /// <param name="view">The instance of the <see cref="IView"/> to navigate to.</param>
-        void SetView(IView view);
+        /// <param name="mode">A <see cref="NavigationMode"/> value describing how the navigated view should be presented.</param>
+        void SetView(IView view, NavigationMode mode);
     }
 
     /// <summary>
@@ -36,15 +37,16 @@ namespace BassClefStudio.AppModel.Navigation
         /// <summary>
         /// Internally sets the content of the app to an <typeparamref name="T"/> view.
         /// </summary>
-        /// <param name="view"></param>
-        protected abstract void SetViewInternal(T view);
+        /// <param name="view">The instance of the <see cref="IView"/> to navigate to.</param>
+        /// <param name="mode">A <see cref="NavigationMode"/> value describing how the navigated view should be presented.</param>
+        protected abstract void SetViewInternal(T view , NavigationMode mode);
 
         /// <inheritdoc/>
-        public void SetView(IView view)
+        public void SetView(IView view, NavigationMode mode)
         {
             if(view is T tView)
             {
-                SetViewInternal(tView);
+                SetViewInternal(tView, mode);
             }
             else
             {

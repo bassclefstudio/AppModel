@@ -31,11 +31,18 @@ namespace BassClefStudio.AppModel.Navigation
         { }
 
         /// <inheritdoc/>
-        protected override void SetViewInternal(BlazorView view)
+        protected override void SetViewInternal(BlazorView view, NavigationMode mode)
         {
-            Console.WriteLine($"Navigate {view.ViewPath}.");
-            ViewProvider.CurrentView = view;
-            NavigationManager.NavigateTo($"{NavigationManager.BaseUri}{view.ViewPath}");
+            if (mode.OverlayMode == NavigationOverlay.Page)
+            {
+                Console.WriteLine($"Navigate {view.ViewPath}.");
+                ViewProvider.CurrentView = view;
+                NavigationManager.NavigateTo($"{NavigationManager.BaseUri}{view.ViewPath}");
+            }
+            else
+            {
+                throw new ArgumentException($"Blazor apps currently do not have support for the given OverlayMode {mode.OverlayMode}.");
+            }
         }
     }
 }

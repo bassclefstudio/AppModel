@@ -24,7 +24,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         public bool Enabled { get; } = true;
 
         /// <inheritdoc/>
-        public bool Initialize(App app)
+        public bool Initialize()
         {
             CompletionSource = new TaskCompletionSource<bool>();
             ApplicationTask = CompletionSource.Task;
@@ -32,7 +32,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         }
 
         /// <inheritdoc/>
-        public bool Suspend(App app)
+        public bool Suspend()
         {
             CompletionSource.SetResult(true);
             return true;

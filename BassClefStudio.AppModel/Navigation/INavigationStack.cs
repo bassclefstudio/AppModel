@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BassClefStudio.NET.Core.Streams;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,6 +10,11 @@ namespace BassClefStudio.AppModel.Navigation
     /// </summary>
     public interface INavigationStack
     {
+        /// <summary>
+        /// An <see cref="IStream{T}"/> that represents all of the <see cref="NavigationRequest"/> requests this <see cref="INavigationStack"/> handles.
+        /// </summary>
+        IStream<NavigationRequest> RequestStream { get; }
+
         /// <summary>
         /// Handles the new <see cref="NavigationRequest"/> request that has been sent by the app, adding it to history.
         /// </summary>

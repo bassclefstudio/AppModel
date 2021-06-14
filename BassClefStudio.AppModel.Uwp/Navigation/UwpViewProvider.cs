@@ -59,11 +59,42 @@ namespace BassClefStudio.AppModel.Navigation
             Window.Current.Activate();
         }
 
+        private ContentDialog currentDialog;
+
         /// <inheritdoc/>
-        protected override void SetViewInternal(UIElement element)
+        protected override void SetViewInternal(UIElement element, NavigationMode mode)
         {
-            if (element is ContentDialog dialog)
+            if(currentDialog != null)
             {
+                currentDialog.Hide();
+                currentDialog = null;
+            }
+
+            if(mode.OverlayMode == NavigationOverlay.Override)
+            {
+                if(Window.Current.Content is ContentControl rootContent)
+                {
+                    rootContent.Content = element;
+                }
+                else
+                {
+                    throw new InvalidOperationException("Attempted to set root window content, but the Window.Current.Content of the window was not a ContentControl.");
+                }
+            }
+            else if (mode.OverlayMode == NavigationOverlay.Page)
+            {
+                CurrentFrame.Content = element;
+            }
+            else if(mode.OverlayMode == NavigationOverlay.Modal)
+            {
+                ContentDialog dialog = new ContentDialog()
+                {
+                    Title = null,
+                    CloseButtonText = null,
+                    Content = element
+                };
+                currentDialog = dialog;
+
                 SynchronousTask showTask = new SynchronousTask(
                     () => Dispatchers.RunOnUIThreadAsync(
                         () => ShowDialogTask(dialog)));
@@ -71,7 +102,7 @@ namespace BassClefStudio.AppModel.Navigation
             }
             else
             {
-                CurrentFrame.Content = element;
+                throw new ArgumentException($"UWP apps currently do not have support for the given OverlayMode {mode.OverlayMode}.");
             }
         }
 

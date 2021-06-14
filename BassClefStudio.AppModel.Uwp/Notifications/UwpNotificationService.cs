@@ -20,11 +20,6 @@ namespace BassClefStudio.AppModel.Notifications
             ToastNotifier = ToastNotificationManager.CreateToastNotifier();
         }
 
-        //public ScheduledToastNotification[] GetScheduledNotifications()
-        //{
-        //    return ToastNotifier.GetScheduledToastNotifications().ToArray();
-        //}
-
         /// <inheritdoc/>
         public async Task<string> ShowAlarmAsync(NotificationContent content, DateTimeOffset showTime)
         {

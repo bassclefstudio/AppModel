@@ -32,11 +32,18 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        protected override void SetViewInternal(IConsoleView view)
+        protected override void SetViewInternal(IConsoleView view, NavigationMode mode)
         {
-            SynchronousTask syncTask = new SynchronousTask(
-                    () => view.ShowView());
-            syncTask.RunTask();
+            if (mode.OverlayMode == NavigationOverlay.Page)
+            {
+                SynchronousTask syncTask = new SynchronousTask(
+                        () => view.ShowView());
+                syncTask.RunTask();
+            }
+            else
+            {
+                throw new ArgumentException($"Console apps currently do not have support for the given OverlayMode {mode.OverlayMode}.");
+            }
         }
     }
 }

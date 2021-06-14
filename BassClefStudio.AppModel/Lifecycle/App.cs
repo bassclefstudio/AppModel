@@ -81,16 +81,28 @@ namespace BassClefStudio.AppModel.Lifecycle
             builder.RegisterAssemblyTypes(typeof(App).Assembly)
                 .AssignableTo<ILifecycleHandler>()
                 .AsImplementedInterfaces();
-            //// Register any IPlatformModules as both modules and types 
+            //// Register any IPlatformModules as both modules and types.
             builder.RegisterAssemblyModules<IPlatformModule>(assemblies);
             builder.RegisterAssemblyTypes(assemblies)
                 .AssignableTo<IPlatformModule>()
+                .AsImplementedInterfaces()
                 .SingleInstance();
-            this.ConfigureServices(builder);
-            //// Register 
+            //// Register required navigation components.
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<INavigationService>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<INavigationStack>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
             //// If all a service needs is app information (such as name), the IPackageInfo is registered separately.
             builder.RegisterInstance<IPackageInfo>(this.PackageInfo);
+            //// Registers required views.
             builder.RegisterViews(assemblies);
+
+            //// Calls App-specific configuration.
+            this.ConfigureServices(builder);
         }
 
         /// <summary>
@@ -121,7 +133,7 @@ namespace BassClefStudio.AppModel.Lifecycle
 
         #endregion
         #region Methods
-        #region Activation
+        #region Lifecycle
 
         /// <summary>
         /// Starts the <see cref="App"/>, activating the needed services and the UI/view-models.
@@ -151,6 +163,15 @@ namespace BassClefStudio.AppModel.Lifecycle
             {
                 h.Suspend();
             }
+        }
+
+        /// <summary>
+        /// Gracefully requests back navigation from the default registered <see cref="IBackHandler"/>.
+        /// </summary>
+        public void GoBack()
+        {
+            var backHandler = Services.Resolve<IBackHandler>();
+            backHandler.GoBack();
         }
 
         #region Background
@@ -218,21 +239,19 @@ namespace BassClefStudio.AppModel.Lifecycle
 
         private void ActivateForeground(IActivatedEventArgs args)
         {
-            var navigationService = Services.Resolve<INavigationService>();
-
+            INavigationService navigationService = Services.Resolve<INavigationService>();
             var shellHandler = Services.ResolveOptional<IShellHandler>();
             if (shellHandler != null)
             {
-                //// TODO: Decide how to deal with this mess - identifying types vs. instances in the DI container...
-                //navigationService.Navigate(shellHandler);
+                navigationService.Navigate(shellHandler, NavigationMode.Shell);
             }
 
             var activationHandlers = Services.Resolve<IEnumerable<IActivationHandler>>();
             var activateViewModel = activationHandlers.FirstOrDefault(h => h.CanHandle(args));
             if (activateViewModel != null)
             {
-                //activateViewModel.Activate(args);
-                //NavigateReflection(activateViewModel);
+                activateViewModel.Activate(args);
+                navigationService.Navigate(activateViewModel);
             }
             else
             {
@@ -291,8 +310,8 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .PropertiesAutowired();
             builder.RegisterAssemblyTypes(assemblies)
                 .AssignableTo<IViewModel>()
-                .AsImplementedInterfaces()
-                .PropertiesAutowired();
+                .PropertiesAutowired()
+                .AsImplementedInterfaces();
         }
 
         /// <summary>

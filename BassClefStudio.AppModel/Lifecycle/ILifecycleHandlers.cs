@@ -31,6 +31,18 @@ namespace BassClefStudio.AppModel.Lifecycle
     }
 
     /// <summary>
+    /// Represents a service that can manage system requests to return to a previous state (i.e. a software or hardware back button, for example).
+    /// </summary>
+    public interface IBackHandler : ILifecycleHandler
+    {
+        /// <summary>
+        /// A method that is called whenever system back navigation is requested.
+        /// </summary>
+        /// <returns>A <see cref="bool"/> value indicating whether any action was performed successfully.</returns>
+        bool GoBack();
+    }
+
+    /// <summary>
     /// Represents a view-model that can manage an <see cref="App"/>'s foreground activation.
     /// </summary>
     public interface IActivationHandler : ILifecycleHandler, IViewModel

@@ -37,7 +37,6 @@ namespace BassClefStudio.AppModel.Helpers
         /// </summary>
         public ICommand<bool> BackCommand { get; }
 
-        private SourceStream<bool> backEnabledInternal;
         /// <summary>
         /// An <see cref="IStream{T}"/> that specifies whether back navigation is currently enabled/available, as a <see cref="bool"/>.
         /// </summary>
@@ -75,22 +74,24 @@ namespace BassClefStudio.AppModel.Helpers
         }
 
         /// <summary>
-        /// The injected <see cref="App"/>.
+        /// The injected <see cref="INavigationService"/>.
         /// </summary>
-        public App MyApp { get; set; }
+        private INavigationService NavigationService { get; }
 
         /// <summary>
-        /// The injected <see cref="IViewProvider"/>, which can be queried to setup the shell view settings for a given platform.
+        /// The injected <see cref="INavigationStack"/>.
         /// </summary>
-        public INavigationService NavigationService { get; set; }
+        private INavigationStack NavigationStack { get; }
 
         /// <summary>
         /// Creates a new <see cref="ShellViewModel"/>.
         /// </summary>
-        public ShellViewModel(App myApp)
+        public ShellViewModel(INavigationService navService, INavigationStack navStack)
         {
+            NavigationService = navService;
+            NavigationStack = navStack;
+
             NavigationItems = new ObservableCollection<NavigationItem>(GetInitialItems());
-            MyApp = myApp;
             NavigateCommand = new StreamCommand<NavigationItem>(
                 new CommandInfo()
                 {
@@ -100,6 +101,7 @@ namespace BassClefStudio.AppModel.Helpers
                 });
             NavigateCommand.BindResult(Navigate);
 
+            BackEnabled = NavigationStack.AsStream().Property(s => s.CanGoBack);
             BackCommand = new StreamCommand<bool>(
                 new CommandInfo()
                 {
@@ -107,34 +109,15 @@ namespace BassClefStudio.AppModel.Helpers
                     FriendlyName = "Go back",
                     Description = "Return to the previously visited page."
                 },
-                new RecStream<bool>(() => BackEnabled));
+                BackEnabled);
+            BackCommand.BindResult(b => NavigationService.GoBack(NavigationStack));
 
-            backEnabledInternal = new SourceStream<bool>(MyApp.CanGoBack);
-            BackEnabled = backEnabledInternal.Join(
-                BackCommand.Select(b =>
-                {
-                    if (MyApp.CanGoBack)
-                    {
-                        MyApp.GoBack();
-                    }
-                    return MyApp.CanGoBack;
-                })).Unique();
-
-            //// Starting a stream more than once has no effect.
-            NavigateCommand.Start();
-            BackCommand.Start();
-            BackEnabled.Start();
+            NavigationStack.RequestStream.BindResult(r =>
+                SetSelected(NavigationItems.FirstOrDefault(i => i.Request == r)));
         }
 
         /// <inheritdoc/>
         public abstract Task InitializeAsync(object parameter = null);
-
-        //private void AppNavigated(object sender, NavigatedEventArgs e)
-        //{
-        //    var viewModelType = e.NavigatedViewModel.GetType();
-        //    SetSelected(NavigationItems.FirstOrDefault(i => i.ViewModelType == viewModelType && i.Parameter == e.Parameter));
-        //    backEnabledInternal.EmitValue(MyApp.CanGoBack);
-        //}
 
         /// <summary>
         /// Navigates the <see cref="App"/> to the specified page (sets the <see cref="SelectedItem"/> property).
@@ -149,7 +132,7 @@ namespace BassClefStudio.AppModel.Helpers
         /// </summary>
         public void Navigate()
         {
-            MyApp.NavigateReflection(SelectedItem.ViewModelType, SelectedItem.Parameter);
+            NavigationService.Navigate(SelectedItem.Request);
         }
     }
 
@@ -164,33 +147,26 @@ namespace BassClefStudio.AppModel.Helpers
         public string Name { get; }
 
         /// <summary>
-        /// The type of the view-model (<see cref="IViewModel"/>) that this <see cref="NavigationItem"/> refers to.
-        /// </summary>
-        public Type ViewModelType { get; }
-
-        /// <summary>
         /// A <see cref="char"/> that represents the icon of this <see cref="NavigationItem"/>.
         /// </summary>
         public char Icon { get; }
 
         /// <summary>
-        /// An optional <see cref="object"/> parameter to pass to the navigation service when navigating to the specified page.
+        /// The <see cref="NavigationRequest"/> request associated with thi <see cref="NavigationItem"/>.
         /// </summary>
-        public object Parameter { get; }
+        public NavigationRequest Request { get; }
 
         /// <summary>
         /// Creates a new <see cref="NavigationItem"/>.
         /// </summary>
         /// <param name="name">The display name of the <see cref="NavigationItem"/>.</param>
-        /// <param name="viewModelType">The type of the view-model (<see cref="IViewModel"/>) that this <see cref="NavigationItem"/> refers to.</param>
+        /// <param name="request">The <see cref="NavigationRequest"/> request associated with thi <see cref="NavigationItem"/>.</param>
         /// <param name="icon">A <see cref="char"/> that represents the icon of this <see cref="NavigationItem"/>.</param>
-        /// <param name="param">An optional <see cref="object"/> parameter to pass to the navigation service when navigating to the specified page.</param>
-        public NavigationItem(string name, Type viewModelType, char icon, object param = null)
+        public NavigationItem(string name, NavigationRequest request, char icon)
         {
             Name = name;
-            ViewModelType = viewModelType;
+            Request = request;
             Icon = icon;
-            Parameter = param;
         }
     }
 }

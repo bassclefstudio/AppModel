@@ -46,17 +46,64 @@ namespace BassClefStudio.AppModel.Navigation
             myWindow.Show();
         }
 
+        private Window currentDialog = null;
+        private bool dialogDisplaying = false;
+
         /// <inheritdoc/>
-        protected override void SetViewInternal(UIElement element)
+        protected override void SetViewInternal(UIElement element, NavigationMode mode)
         {
-            if (element is Window window)
+            if(currentDialog != null)
             {
+                dialogDisplaying = false;
+                currentDialog.Close();
+                currentDialog = null;
+            }
+
+            if (mode.OverlayMode == NavigationOverlay.Override)
+            {
+                Application.Current.MainWindow.Content = element;
+            }
+            else if (mode.OverlayMode == NavigationOverlay.Page)
+            {
+                CurrentFrame.Content = element;
+            }
+            else if (mode.OverlayMode == NavigationOverlay.Modal)
+            {
+                var window = new Window()
+                {
+                    Content = element,
+                    WindowStyle = WindowStyle.None,
+                    ShowInTaskbar = false,
+                    MinHeight = 200,
+                    MinWidth = 300,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    ResizeMode = ResizeMode.NoResize,
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner
+                };
+
+                dialogDisplaying = true;
+                currentDialog = window;
+                window.Closing += DialogClosing;
+                window.ShowDialog();
+            }
+            else if (mode.OverlayMode == NavigationOverlay.Window)
+            {
+                var window = new Window()
+                {
+                    Content = element,
+                };
+
                 window.Show();
             }
             else
             {
-                CurrentFrame.Content = element;
+                throw new ArgumentException($"UWP apps currently do not have support for the given OverlayMode {mode.OverlayMode}.");
             }
+        }
+
+        private void DialogClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = dialogDisplaying;
         }
     }
 }
