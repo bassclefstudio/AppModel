@@ -19,7 +19,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// <inheritdoc/>
         public void ConfigureServices(ContainerBuilder builder)
         {
-            builder.RegisterType<WpfNavigationService>()
+            builder.RegisterType<WpfViewProvider>()
                 .SingleInstance()
                 .AsImplementedInterfaces();
             //builder.RegisterType<WpfBackgroundService>()

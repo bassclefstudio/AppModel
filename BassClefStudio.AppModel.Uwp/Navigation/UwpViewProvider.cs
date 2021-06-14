@@ -10,9 +10,9 @@ using Windows.UI.Xaml.Controls;
 namespace BassClefStudio.AppModel.Navigation
 {
     /// <summary>
-    /// An <see cref="INavigationService"/> built on the UWP's <see cref="ContentControl"/> and <see cref="Window"/> classes.
+    /// An <see cref="IViewProvider"/> built on the UWP's <see cref="ContentControl"/> and <see cref="Window"/> classes.
     /// </summary>
-    public class UwpNavigationService : NavigationService<UIElement>, INavigationService
+    public class UwpViewProvider : ViewProvider<UIElement>, IViewProvider
     {
         private ContentControl currentFrame;
         /// <summary>
@@ -26,22 +26,21 @@ namespace BassClefStudio.AppModel.Navigation
                 if(currentFrame != value)
                 {
                     currentFrame = value;
-                    NavigationStack.Clear();
                 }
             }
         }
 
         private IEnumerable<IDispatcher> Dispatchers { get; }
         /// <summary>
-        /// Creates a new <see cref="UwpNavigationService"/>.
+        /// Creates a new <see cref="UwpViewProvider"/>.
         /// </summary>
-        public UwpNavigationService(IEnumerable<IDispatcher> dispatchers)
+        public UwpViewProvider(IEnumerable<IDispatcher> dispatchers)
         {
             Dispatchers = dispatchers;
         }
 
         /// <inheritdoc/>
-        public override void InitializeNavigation()
+        public override void StartUI()
         {
             Frame rootFrame = Window.Current.Content as Frame;
 
@@ -60,22 +59,50 @@ namespace BassClefStudio.AppModel.Navigation
             Window.Current.Activate();
         }
 
+        private ContentDialog currentDialog;
+
         /// <inheritdoc/>
-        protected override bool NavigateInternal(UIElement element)
+        protected override void SetViewInternal(UIElement element, NavigationMode mode)
         {
-            if (element is ContentDialog dialog)
+            if(currentDialog != null)
             {
+                currentDialog.Hide();
+                currentDialog = null;
+            }
+
+            if(mode.OverlayMode == NavigationOverlay.Override)
+            {
+                if(Window.Current.Content is ContentControl rootContent)
+                {
+                    rootContent.Content = element;
+                }
+                else
+                {
+                    throw new InvalidOperationException("Attempted to set root window content, but the Window.Current.Content of the window was not a ContentControl.");
+                }
+            }
+            else if (mode.OverlayMode == NavigationOverlay.Page)
+            {
+                CurrentFrame.Content = element;
+            }
+            else if(mode.OverlayMode == NavigationOverlay.Modal)
+            {
+                ContentDialog dialog = new ContentDialog()
+                {
+                    Title = null,
+                    CloseButtonText = null,
+                    Content = element
+                };
+                currentDialog = dialog;
+
                 SynchronousTask showTask = new SynchronousTask(
                     () => Dispatchers.RunOnUIThreadAsync(
                         () => ShowDialogTask(dialog)));
                 showTask.RunTask();
-                //// Because dialogs must be closed first, before any other pages can be navigated to, they should be added to the back stack in UWP.
-                return true;
             }
             else
             {
-                CurrentFrame.Content = element;
-                return true;
+                throw new ArgumentException($"UWP apps currently do not have support for the given OverlayMode {mode.OverlayMode}.");
             }
         }
 

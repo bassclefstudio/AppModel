@@ -14,9 +14,8 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// <summary>
         /// A method that is called when the <see cref="App"/> initializes.
         /// </summary>
-        /// <param name="app">The app's <see cref="App"/> object.</param>
         /// <returns>A <see cref="bool"/> value indicating whether any action was performed successfully.</returns>
-        bool Initialize(App app);
+        bool Initialize();
     }
 
     /// <summary>
@@ -27,9 +26,20 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// <summary>
         /// A method that is called whenever a foreground-activated <see cref="App"/> is closing or returning to the background. Here, the <see cref="ILifecycleHandler"/> can dispose or broker resources before the <see cref="App"/> has fully closed.
         /// </summary>
-        /// <param name="app">The app's <see cref="App"/> object.</param>
         /// <returns>A <see cref="bool"/> value indicating whether any action was performed successfully.</returns>
-        bool Suspend(App app);
+        bool Suspend();
+    }
+
+    /// <summary>
+    /// Represents a service that can manage system requests to return to a previous state (i.e. a software or hardware back button, for example).
+    /// </summary>
+    public interface IBackHandler : ILifecycleHandler
+    {
+        /// <summary>
+        /// A method that is called whenever system back navigation is requested.
+        /// </summary>
+        /// <returns>A <see cref="bool"/> value indicating whether any action was performed successfully.</returns>
+        bool GoBack();
     }
 
     /// <summary>

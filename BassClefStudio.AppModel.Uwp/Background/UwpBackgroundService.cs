@@ -32,7 +32,7 @@ namespace BassClefStudio.AppModel.Background
         { }
 
         /// <inheritdoc/>
-        public bool Initialize(App app)
+        public bool Initialize()
         {
             Registrations = new List<IBackgroundTaskRegistration>(BackgroundTaskRegistration.AllTasks.Values);
             return true;

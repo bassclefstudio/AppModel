@@ -9,7 +9,7 @@ namespace BassClefStudio.AppModel.Navigation
     /// <summary>
     /// A service that provides information about the currently navigated <see cref="BlazorView"/>.
     /// </summary>
-    public interface IBlazorViewProvider
+    public interface IBlazorViewInfo
     {
         /// <summary>
         /// The current <see cref="BlazorView"/> view.
@@ -23,9 +23,9 @@ namespace BassClefStudio.AppModel.Navigation
     }
 
     /// <summary>
-    /// A default implementation of <see cref="IBlazorViewProvider"/>.
+    /// A default implementation of <see cref="IBlazorViewInfo"/>.
     /// </summary>
-    public class BlazorViewProvider : IBlazorViewProvider
+    public class BlazorViewInfo : IBlazorViewInfo
     {
         private BlazorView currentView;
         /// <inheritdoc/>

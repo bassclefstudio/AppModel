@@ -1,108 +1,97 @@
-﻿using Autofac;
-using BassClefStudio.AppModel.Lifecycle;
+﻿using BassClefStudio.AppModel.Lifecycle;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 
 namespace BassClefStudio.AppModel.Navigation
 {
     /// <summary>
-    /// Represents a service that can navigate between <see cref="IView{T}"/>s in a platform-specific way. This interface is generally for internal use, and for most navigation apps should use the methods available on the <see cref="App"/> class instead, as they provide additional functionality.
+    /// An extension to the <see cref="App"/> DI container that produces and manages navigating between <see cref="IViewModel"/>s.
     /// </summary>
-    public interface INavigationService
+    public interface INavigationService : IInitializationHandler
     {
         /// <summary>
-        /// Called when the app has been activated with UI, this method should enable the UI, build windows, and start this <see cref="INavigationService"/>'s navigation context.
+        /// Navigates to a <see cref="IViewModel"/> using the given <see cref="NavigationRequest"/>.
         /// </summary>
-        void InitializeNavigation();
-
-        /// <summary>
-        /// Navigates to the given <see cref="IView"/> view, displaying its content to the user.
-        /// </summary>
-        /// <param name="view">The instance of the <see cref="IView"/> to navigate to.</param>
-        /// <returns>A <see cref="bool"/> indicating whether the <see cref="IView"/> overlays or replaces existing content. If 'false', another window or dialog was launched to show the <see cref="IView"/> instead.</returns>
-        bool Navigate(IView view);
-
-        /// <summary>
-        /// A <see cref="bool"/> indicating whether this <see cref="INavigationService"/> supports back navigation in its current state. 
-        /// </summary>
-        bool CanGoBack { get; }
-
-        /// <summary>
-        /// Initiate back navigation and navigate to the previously visited <see cref="IView"/> view.
-        /// </summary>
-        /// <returns>The <see cref="IView"/> that has been navigated to.</returns>
-        IView GoBack();
+        void Navigate(NavigationRequest request);
     }
 
     /// <summary>
-    /// Represents a base <see cref="INavigationService"/> that navigates between views of type <typeparamref name="T"/> and implements stack-based back navigation.
+    /// Provides extension methods for the <see cref="INavigationService"/> interface.
     /// </summary>
-    /// <typeparam name="T">The type of views this <see cref="NavigationService{T}"/> navigates between.</typeparam>
-    public abstract class NavigationService<T> : INavigationService
+    public static class NavigationServiceExtensions
     {
-        /// <inheritdoc/>
-        public bool CanGoBack => NavigationStack.Count > 1;
+        /// <summary>
+        /// Navigates to a <see cref="IViewModel"/> of the given <see cref="Type"/>.
+        /// </summary>
+        /// <param name="navigationService">The <see cref="INavigationService"/> performing the navigation operation.</param>
+        /// <param name="viewModelType">The <see cref="Type"/> of the <see cref="IViewModel"/> being navigated to.</param>
+        /// <param name="parameter">An <see cref="object"/> parameter being passed to the <see cref="IViewModel.InitializeAsync(object)"/> task when navigation occurs.</param>
+        public static void Navigate(this INavigationService navigationService, Type viewModelType, object parameter = null) => navigationService.Navigate(viewModelType, NavigationMode.Default, parameter);
 
         /// <summary>
-        /// The <see cref="Stack{T}"/> containing back navigation information.
+        /// Navigates to a <see cref="IViewModel"/> of the given <see cref="Type"/>.
         /// </summary>
-        protected Stack<T> NavigationStack { get; }
+        /// <param name="navigationService">The <see cref="INavigationService"/> performing the navigation operation.</param>
+        /// <param name="viewModelType">The <see cref="Type"/> of the <see cref="IViewModel"/> being navigated to.</param>
+        /// <param name="navigationMode">The <see cref="NavigationMode"/> describing the behavior of the navigation operation.</param>
+        /// <param name="parameter">An <see cref="object"/> parameter being passed to the <see cref="IViewModel.InitializeAsync(object)"/> task when navigation occurs.</param>
+        public static void Navigate(this INavigationService navigationService, Type viewModelType, NavigationMode navigationMode, object parameter = null) => navigationService.Navigate(new NavigationRequest(viewModelType, navigationMode, parameter));
 
         /// <summary>
-        /// Creates a new <see cref="NavigationService{T}"/>.
+        /// Navigates to a <see cref="IViewModel"/> of type <typeparamref name="T"/>.
         /// </summary>
-        public NavigationService()
+        /// <param name="navigationService">The <see cref="INavigationService"/> performing the navigation operation.</param>
+        /// <typeparam name="T">The type of the <see cref="IViewModel"/> being navigated to.</typeparam>
+        /// <param name="parameter">An <see cref="object"/> parameter being passed to the <see cref="IViewModel.InitializeAsync(object)"/> task when navigation occurs.</param>
+        public static void Navigate<T>(this INavigationService navigationService, object parameter = null) => navigationService.Navigate(typeof(T), NavigationMode.Default, parameter);
+
+        /// <summary>
+        /// Navigates to a <see cref="IViewModel"/> of type <typeparamref name="T"/>.
+        /// </summary>
+        /// <param name="navigationService">The <see cref="INavigationService"/> performing the navigation operation.</param>
+        /// <typeparam name="T">The type of the <see cref="IViewModel"/> being navigated to.</typeparam>
+        /// <param name="navigationMode">The <see cref="NavigationMode"/> describing the behavior of the navigation operation.</param>
+        /// <param name="parameter">An <see cref="object"/> parameter being passed to the <see cref="IViewModel.InitializeAsync(object)"/> task when navigation occurs.</param>
+        public static void Navigate<T>(this INavigationService navigationService, NavigationMode navigationMode, object parameter = null) => navigationService.Navigate(new NavigationRequest(typeof(T), navigationMode, parameter));
+
+        /// <summary>
+        /// Navigates to an <see cref="IViewModel"/> instance.
+        /// </summary>
+        /// <param name="navigationService">The <see cref="INavigationService"/> performing the navigation operation.</param>
+        /// <param name="viewModel">The instance of the <see cref="IViewModel"/> to navigate to.</param>
+        /// <param name="parameter">An <see cref="object"/> parameter being passed to the <see cref="IViewModel.InitializeAsync(object)"/> task when navigation occurs.</param>
+        public static void Navigate(this INavigationService navigationService, IViewModel viewModel, object parameter = null) => navigationService.Navigate(viewModel, NavigationMode.Default, parameter);
+
+        /// <summary>
+        /// Navigates to an <see cref="IViewModel"/> instance.
+        /// </summary>
+        /// <param name="navigationService">The <see cref="INavigationService"/> performing the navigation operation.</param>
+        /// <param name="viewModel">The instance of the <see cref="IViewModel"/> to navigate to.</param>
+        /// <param name="navigationMode">The <see cref="NavigationMode"/> describing the behavior of the navigation operation.</param>
+        /// <param name="parameter">An <see cref="object"/> parameter being passed to the <see cref="IViewModel.InitializeAsync(object)"/> task when navigation occurs.</param>
+        public static void Navigate(this INavigationService navigationService, IViewModel viewModel, NavigationMode navigationMode, object parameter = null) => navigationService.Navigate(new NavigationRequest(viewModel, navigationMode, parameter));
+
+        /// <summary>
+        /// <see cref="INavigationService.Navigate(NavigationRequest)"/>s backwards using the <see cref="INavigationStack.GoBack"/> navigation request.
+        /// </summary>
+        /// <param name="navigationService">The <see cref="INavigationService"/> performing the navigation operation.</param>
+        /// <param name="stack">The <see cref="INavigationStack"/> to use for navigation history.</param>
+        public static void GoBack(this INavigationService navigationService, INavigationStack stack)
         {
-            NavigationStack = new Stack<T>();
+            var request = stack.GoBack();
+            navigationService.Navigate(request);
         }
 
-        /// <inheritdoc/>
-        public abstract void InitializeNavigation();
-
         /// <summary>
-        /// Navigates to a <typeparamref name="T"/> view internally, using the platform-specific navigation APIs.
+        /// <see cref="INavigationService.Navigate(NavigationRequest)"/>s forwards using the <see cref="INavigationStack.GoForward"/> navigation request.
         /// </summary>
-        /// <param name="view">The <see cref="IView"/> and <typeparamref name="T"/> to navigate to.</param>
-        protected abstract bool NavigateInternal(T view);
-
-        /// <inheritdoc/>
-        public bool Navigate(IView view)
+        /// <param name="navigationService">The <see cref="INavigationService"/> performing the navigation operation.</param>
+        /// <param name="stack">The <see cref="INavigationStack"/> to use for navigation history.</param>
+        public static void GoForward(this INavigationService navigationService, INavigationStack stack)
         {
-            if(view is T tView)
-            {
-                bool isPage = NavigateInternal(tView);
-                if (isPage)
-                {
-                    NavigationStack.Push(tView);
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                throw new ArgumentException($"Navigation only supports views of type \"{typeof(T).Name}\"; view is of type \"{view?.GetType().Name}\".");
-            }
-        }
-
-        /// <inheritdoc/>
-        public IView GoBack()
-        {
-            if (CanGoBack)
-            {
-                NavigationStack.Pop();
-                var view = NavigationStack.Peek();
-                NavigateInternal(view);
-                return (view as IView);
-            }
-            else
-            {
-                throw new InvalidOperationException("Cannot initiate back navigation - CanGoBack is currently 'false'.");
-            }
+            var request = stack.GoBack();
+            navigationService.Navigate(request);
         }
     }
 }

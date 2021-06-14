@@ -72,10 +72,7 @@ namespace BassClefStudio.AppModel.Lifecycle
 
         private void BackRequested(object sender, BackRequestedEventArgs e)
         {
-            if (CurrentApp.CanGoBack)
-            {
-                CurrentApp.GoBack();
-            }
+            CurrentApp.GoBack();
             e.Handled = true;
         }
 

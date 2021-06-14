@@ -18,10 +18,10 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// <inheritdoc/>
         public void ConfigureServices(ContainerBuilder builder)
         {
-            builder.RegisterType<BlazorNavigationService>()
+            builder.RegisterType<BlazorViewProvider>()
                 .SingleInstance()
                 .AsImplementedInterfaces();
-            builder.RegisterType<BlazorViewProvider>()
+            builder.RegisterType<BlazorViewInfo>()
                 .SingleInstance()
                 .AsImplementedInterfaces();
             //builder.RegisterType<BlazorBackgroundService>()
