@@ -244,6 +244,10 @@ namespace BassClefStudio.AppModel.Lifecycle
         private void ActivateForeground(IActivatedEventArgs args)
         {
             INavigationService navigationService = Services.Resolve<INavigationService>();
+            
+            IViewProvider viewProvider = Services.Resolve<IViewProvider>();
+            viewProvider.StartUI();
+
             var shellHandler = Services.ResolveOptional<IShellHandler>();
             if (shellHandler != null)
             {

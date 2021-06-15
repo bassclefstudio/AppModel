@@ -8,7 +8,7 @@ namespace BassClefStudio.AppModel.Navigation
     /// <summary>
     /// An extension to the <see cref="App"/> DI container that produces and manages navigating between <see cref="IViewModel"/>s.
     /// </summary>
-    public interface INavigationService : IInitializationHandler
+    public interface INavigationService
     {
         /// <summary>
         /// Navigates to a <see cref="IViewModel"/> using the given <see cref="NavigationRequest"/>.
