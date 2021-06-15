@@ -46,14 +46,6 @@ namespace BassClefStudio.AppModel.Helpers
         #region Methods
 
         /// <inheritdoc/>
-        public bool Initialize()
-        {
-            ViewProvider.StartUI();
-            Stack.Clear();
-            return true;
-        }
-
-        /// <inheritdoc/>
         public void Navigate(NavigationRequest request)
         {
             IViewModel viewModel = null;
@@ -165,6 +157,7 @@ namespace BassClefStudio.AppModel.Helpers
         public void Clear()
         {
             Requests.Clear();
+            HistoryPosition = -1;
             SetCanGo();
         }
 
