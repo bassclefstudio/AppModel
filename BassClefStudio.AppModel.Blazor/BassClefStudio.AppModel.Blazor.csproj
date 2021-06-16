@@ -5,7 +5,7 @@
     <Description>An implementation of BassClefStudio.AppModel, providing services and application classes for running cross-platform MVVM applications on .NET 5 with Blazor.</Description>
     <PackageProjectUrl>https://github.com/bassclefstudio/AppModel</PackageProjectUrl>
     <RepositoryUrl>https://github.com/bassclefstudio/AppModel.git</RepositoryUrl>
-    <Version>2.0.0-beta1</Version>
+    <Version>2.0.0-beta4</Version>
     <RootNamespace>BassClefStudio.AppModel</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>

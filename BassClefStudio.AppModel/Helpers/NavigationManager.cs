@@ -100,8 +100,9 @@ namespace BassClefStudio.AppModel.Helpers
     {
         #region Properties
 
+        private SourceStream<NavigationRequest> requestStream;
         /// <inheritdoc/>
-        public IStream<NavigationRequest> RequestStream { get; }
+        public IStream<NavigationRequest> RequestStream => requestStream;
 
         private bool canGoBack;
         /// <inheritdoc/>
@@ -130,6 +131,7 @@ namespace BassClefStudio.AppModel.Helpers
         public NavigationStack()
         {
             Requests = new List<NavigationRequest>();
+            requestStream = new SourceStream<NavigationRequest>();
             HistoryPosition = -1;
             SetCanGo();
         }
@@ -140,7 +142,7 @@ namespace BassClefStudio.AppModel.Helpers
         /// <inheritdoc/>
         public void AddRequest(NavigationRequest request)
         {
-            if (!request.Mode.IgnoreHistory && request != Requests[HistoryPosition])
+            if (!request.Mode.IgnoreHistory && HistoryPosition >= 0 && request != Requests[HistoryPosition])
             {
                 if (HistoryPosition + 1 != Requests.Count)
                 {
@@ -150,6 +152,7 @@ namespace BassClefStudio.AppModel.Helpers
                 Requests.Add(request);
                 HistoryPosition++;
                 SetCanGo();
+                requestStream.EmitValue(request);
             }
         }
 
