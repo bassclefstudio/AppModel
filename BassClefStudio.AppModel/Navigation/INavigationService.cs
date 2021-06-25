@@ -1,4 +1,5 @@
-﻿using BassClefStudio.AppModel.Lifecycle;
+﻿using BassClefStudio.AppModel.Commands;
+using BassClefStudio.AppModel.Lifecycle;
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -17,6 +17,34 @@ namespace BassClefStudio.AppModel.Helpers
     /// </summary>
     public abstract class ShellViewModel : Observable, IViewModel, IShellHandler
     {
+        #region Commands
+
+        /// <summary>
+        /// A command for selecting <see cref="NavigationItem"/>s to navigate to.
+        /// </summary>
+        public static CommandInfo NavigateCommand { get; } = new CommandInfo()
+        {
+            Id = "Shell/Navigate",
+            FriendlyName = "Navigate",
+            Description = "Navigate to the specified page."
+        };
+
+        /// <summary>
+        /// A command for triggering available back navigation.
+        /// </summary>
+        public static CommandInfo BackCommand { get; } = new CommandInfo()
+        {
+            Id = "Shell/Back",
+            FriendlyName = "Go back",
+            Description = "Return to the previously visited page."
+        };
+
+        /// <inheritdoc/>
+        public ICommand[] Commands { get; }
+
+        #endregion
+        #region Properties
+
         /// <summary>
         /// A <see cref="SourceStream{T}"/> of requests to navigate to the settings page (see <see cref="SettingsItem"/>).
         /// </summary>
@@ -36,16 +64,6 @@ namespace BassClefStudio.AppModel.Helpers
         /// The <see cref="NavigationItem"/> for the settings page.
         /// </summary>
         public abstract NavigationItem SettingsItem { get; }
-
-        /// <summary>
-        /// An <see cref="ICommand{T}"/> for selecting <see cref="NavigationItem"/>s to navigate to.
-        /// </summary>
-        public ICommand<NavigationItem> NavigateCommand { get; }
-
-        /// <summary>
-        /// An <see cref="ICommand{T}"/> for triggering back navigation (if available).
-        /// </summary>
-        public ICommand<bool> BackCommand { get; }
 
         /// <summary>
         /// An <see cref="IStream{T}"/> that specifies whether back navigation is currently enabled/available, as a <see cref="bool"/>.
@@ -83,6 +101,9 @@ namespace BassClefStudio.AppModel.Helpers
             }
         }
 
+        #endregion
+        #region Initialize
+
         /// <summary>
         /// The injected <see cref="INavigationService"/>.
         /// </summary>
@@ -102,25 +123,16 @@ namespace BassClefStudio.AppModel.Helpers
             NavigationStack = navStack;
 
             NavigationItems = new ObservableCollection<NavigationItem>(GetInitialItems());
-            NavigateCommand = new StreamCommand<NavigationItem>(
-                new CommandInfo()
-                {
-                    Id = "Shell/Navigate",
-                    FriendlyName = "Navigate",
-                    Description = "Navigate to the specified page."
-                });
-            NavigateCommand.BindResult(Navigate);
+            
+            var navigate = new StreamCommand(ShellViewModel.NavigateCommand);
+            navigate.OfType<object, NavigationItem>().BindResult(Navigate);
 
             BackEnabled = NavigationStack.AsStream().Property(s => s.CanGoBack);
-            BackCommand = new StreamCommand<bool>(
-                new CommandInfo()
-                {
-                    Id = "Shell/Back",
-                    FriendlyName = "Go back",
-                    Description = "Return to the previously visited page."
-                },
-                BackEnabled);
-            BackCommand.BindResult(b => NavigationService.GoBack(NavigationStack));
+            
+            var back = new StreamCommand(ShellViewModel.BackCommand, BackEnabled);
+            back.OfType<object, bool>().BindResult(b => NavigationService.GoBack(NavigationStack));
+
+            Commands = new ICommand[] { navigate, back };
 
             NavigationStack.RequestStream.BindResult(r =>
                 SetSelected(NavigationItems.FirstOrDefault(i => i.Request == r)));
@@ -131,6 +143,9 @@ namespace BassClefStudio.AppModel.Helpers
 
         /// <inheritdoc/>
         public abstract Task InitializeAsync(object parameter = null);
+
+        #endregion
+        #region Actions
 
         /// <summary>
         /// Navigates the <see cref="App"/> to the specified page (sets the <see cref="SelectedItem"/> property).
@@ -147,6 +162,8 @@ namespace BassClefStudio.AppModel.Helpers
         {
             NavigationService.Navigate(SelectedItem.Request);
         }
+
+        #endregion
     }
 
     /// <summary>

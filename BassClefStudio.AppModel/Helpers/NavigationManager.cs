@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using BassClefStudio.AppModel.Commands;
 using BassClefStudio.AppModel.Lifecycle;
 using BassClefStudio.AppModel.Navigation;
 using BassClefStudio.NET.Core;
@@ -11,7 +12,7 @@ using System.Text;
 namespace BassClefStudio.AppModel.Helpers
 {
     /// <summary>
-    /// A default implementation of <see cref="INavigationService"/>/<see cref="IBackHandler"/> that extends the <see cref="App"/>'s <see cref="ILifetimeScope"/>.
+    /// A default implementation of <see cref="INavigationService"/>/<see cref="IBackHandler"/> that extends the <see cref="App"/>'s <see cref="ILifetimeScope"/>, as well as using the <see cref="IViewModel"/>s navigated to as the basis for the <see cref="ICommandRouter"/> command routing.
     /// </summary>
     public class NavigationManager : INavigationService, IBackHandler
     {
@@ -33,13 +34,19 @@ namespace BassClefStudio.AppModel.Helpers
         protected ILifetimeScope LifetimeScope { get; }
 
         /// <summary>
+        /// The injected <see cref="ICommandRouter"/> for setting active <see cref="IViewModel"/>s.
+        /// </summary>
+        protected ICommandRouter CommandRouter { get; }
+
+        /// <summary>
         /// Creates a new <see cref="NavigationManager"/> from the provided services.
         /// </summary>
-        public NavigationManager(IViewProvider viewProvider, INavigationStack stack, ILifetimeScope scope)
+        public NavigationManager(IViewProvider viewProvider, INavigationStack stack, ILifetimeScope scope, ICommandRouter router)
         {
             ViewProvider = viewProvider;
             Stack = stack;
             LifetimeScope = scope;
+            CommandRouter = router;
         }
 
         #endregion
@@ -67,6 +74,10 @@ namespace BassClefStudio.AppModel.Helpers
 
             viewType.GetProperty("ViewModel").SetValue(view, viewModel);
             ViewProvider.SetView(view, request.Mode);
+
+            //// Sets ICommandRouter to manage active view-model.
+            CommandRouter.ActiveCommandHandlers.Clear();
+            CommandRouter.ActiveCommandHandlers.Add(viewModel);
 
             //// Initializes the view-model and view.
             view.Initialize();
