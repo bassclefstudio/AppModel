@@ -1,4 +1,5 @@
 ﻿using BassClefStudio.AppModel.Navigation;
+using BassClefStudio.NET.Core.Streams;
 using System;
 using System.Collections.Generic;
 using System.Linq;

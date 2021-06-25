@@ -9,6 +9,7 @@ using System.Linq;
 using System.Diagnostics;
 using BassClefStudio.AppModel.Background;
 using System.Threading.Tasks;
+using BassClefStudio.AppModel.Commands;
 
 namespace BassClefStudio.AppModel.Lifecycle
 {
@@ -91,13 +92,32 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .AssignableTo<IPlatformModule>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
-            //// Register required navigation components.
-            builder.RegisterAssemblyTypes(fullAssemblies)
+            //// Register default navigation components.
+            builder.RegisterAssemblyTypes(typeof(App).Assembly)
                 .AssignableTo<INavigationService>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
-            builder.RegisterAssemblyTypes(fullAssemblies)
+            builder.RegisterAssemblyTypes(typeof(App).Assembly)
                 .AssignableTo<INavigationStack>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+            //// Register external navigation components.
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<INavigationService>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<INavigationStack>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+            //// Register default commanding components.
+            builder.RegisterAssemblyTypes(typeof(App).Assembly)
+                .AssignableTo<ICommandRouter>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+            //// Register external commanding components.
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<ICommandRouter>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
             //// If all a service needs is app information (such as name), the IPackageInfo is registered separately.

@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using BassClefStudio.AppModel.Background;
+using BassClefStudio.AppModel.Commands;
 using BassClefStudio.AppModel.Lifecycle;
 using BassClefStudio.AppModel.Navigation;
 using BassClefStudio.AppModel.Notifications;
@@ -51,8 +52,9 @@ namespace BassClefStudio.AppModel.Tests
         public void CheckDefaultServices()
         {
             DefaultApp.Initialize(AppPlatform);
-            CheckSingleResolved<INavigationService>();
-            CheckSingleResolved<INavigationStack>();
+            CheckSingleResolved<INavigationService>("Default navigation service");
+            CheckSingleResolved<INavigationStack>("Default navigation stack");
+            CheckSingleResolved<ICommandRouter>("Default command router");
             var package = CheckSingleResolved<IPackageInfo>("TestingApp package info");
             Assert.AreEqual(DefaultApp.PackageInfo, package, "Returned package info is not equivalent to the app's package info.");
             CheckResolved<ILifetimeScope>("DI container");
