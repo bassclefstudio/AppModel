@@ -7,9 +7,9 @@ using System.Text;
 namespace BassClefStudio.AppModel.Commands
 {
     /// <summary>
-    /// Represents a UI command that can be used to manage and trigger a specific action. 
+    /// Represents a UI command based on <see cref="IStream{T}"/> that can be used to manage and trigger a specific action. 
     /// </summary>
-    public interface ICommand
+    public interface ICommand : IStream<object>
     {
         /// <summary>
         /// An <see cref="IStream{T}"/> that emits <see cref="bool"/> values indicating whether this <see cref="ICommand"/> should be enabled or not.
@@ -23,26 +23,13 @@ namespace BassClefStudio.AppModel.Commands
         void InitiateCommand(object input = null);
 
         /// <summary>
-        /// A <see cref="CommandInfo"/> object which contains documentation and identifying info for the action this <see cref="ICommand{T}"/> provides.
+        /// A <see cref="CommandInfo"/> object which contains documentation and identifying info for the action this <see cref="ICommand"/> provides.
         /// </summary>
         CommandInfo Info { get; }
     }
 
     /// <summary>
-    /// Represents a UI command based on the <see cref="IStream{T}"/> interface that can be used to manage and trigger a specific action. 
-    /// </summary>
-    /// <typeparam name="T">The strongly-typed input values this <see cref="ICommand{T}"/> accepts.</typeparam>
-    public interface ICommand<T> : ICommand, IStream<T>
-    {
-        /// <summary>
-        /// Calls the <see cref="ICommand{T}"/> and executes its associated action.
-        /// </summary>
-        /// <param name="input">The <typeparamref name="T"/> input passed from the caller to the <see cref="ICommand{T}"/>.</param>
-        void InitiateCommand(T input = default(T));
-    }
-
-    /// <summary>
-    /// Basic information about a specific <see cref="ICommand{T}"/> the the UI can initiate.
+    /// Basic information about a specific <see cref="ICommand"/> the the UI can initiate.
     /// </summary>
     public struct CommandInfo : IIdentifiable<string>, IEquatable<CommandInfo>
     {
@@ -79,6 +66,16 @@ namespace BassClefStudio.AppModel.Commands
             return Id == other.Id &&
                    FriendlyName == other.FriendlyName &&
                    Description == other.Description;
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            int hashCode = -1805587026;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Id);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FriendlyName);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Description);
+            return hashCode;
         }
 
         /// <inheritdoc/>
