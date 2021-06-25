@@ -15,6 +15,12 @@ namespace BassClefStudio.AppModel.Helpers
     /// </summary>
     public class NavigationManager : INavigationService, IBackHandler
     {
+        #region Properties
+
+        /// <inheritdoc/>
+        public IEnumerable<IViewModel> ActiveViewModels { get; private set; }
+
+        #endregion
         #region Initialization
 
         /// <summary>
@@ -40,6 +46,8 @@ namespace BassClefStudio.AppModel.Helpers
             ViewProvider = viewProvider;
             Stack = stack;
             LifetimeScope = scope;
+
+            ActiveViewModels = Array.Empty<IViewModel>();
         }
 
         #endregion
@@ -67,6 +75,9 @@ namespace BassClefStudio.AppModel.Helpers
 
             viewType.GetProperty("ViewModel").SetValue(view, viewModel);
             ViewProvider.SetView(view, request.Mode);
+
+            //// Sets active view-model.
+            ActiveViewModels = new IViewModel[] { viewModel };
 
             //// Initializes the view-model and view.
             view.Initialize();

@@ -1,4 +1,5 @@
-﻿using BassClefStudio.AppModel.Lifecycle;
+﻿using BassClefStudio.AppModel.Commands;
+using BassClefStudio.AppModel.Lifecycle;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,6 +15,11 @@ namespace BassClefStudio.AppModel.Navigation
         /// Navigates to a <see cref="IViewModel"/> using the given <see cref="NavigationRequest"/>.
         /// </summary>
         void Navigate(NavigationRequest request);
+
+        /// <summary>
+        /// Gets the collection of currently active (navigated) <see cref="IViewModel"/> instances, which can be used for things such as <see cref="ICommandHandler"/> resolution.
+        /// </summary>
+        IEnumerable<IViewModel> ActiveViewModels { get; }
     }
 
     /// <summary>
