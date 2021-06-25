@@ -48,6 +48,18 @@ namespace BassClefStudio.AppModel.Commands
         }
 
         /// <inheritdoc/>
+        public void InitiateCommand(object input = null)
+        {
+            if (input is T tInput)
+            {
+                InitiateCommand(tInput);
+            }
+            else
+            {
+                throw new ArgumentException($"StreamCommand expects inputs of type {typeof(T).Name} (received type: {input?.GetType().Name})", "input");
+            }
+        }
+        /// <inheritdoc/>
         public void InitiateCommand(T input = default(T))
         {
             TriggerStream.EmitValue(input);
