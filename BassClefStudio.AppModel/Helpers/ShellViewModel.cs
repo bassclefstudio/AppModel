@@ -15,7 +15,7 @@ namespace BassClefStudio.AppModel.Helpers
     /// <summary>
     /// An <see cref="IViewModel"/>/<see cref="IShellHandler"/> view-model that deals with managing navigation between pages.
     /// </summary>
-    public abstract class ShellViewModel : Observable, IViewModel, IShellHandler
+    public abstract class ShellViewModel : Observable, IViewModel, IShellHandler, ICommandHandler
     {
         #region Commands
 
@@ -44,11 +44,6 @@ namespace BassClefStudio.AppModel.Helpers
 
         #endregion
         #region Properties
-
-        /// <summary>
-        /// A <see cref="SourceStream{T}"/> of requests to navigate to the settings page (see <see cref="SettingsItem"/>).
-        /// </summary>
-        public SourceStream<bool> SettingsStream { get; }
 
         /// <summary>
         /// The collection of all <see cref="NavigationItem"/>s available to this <see cref="ShellViewModel"/>.
@@ -126,6 +121,7 @@ namespace BassClefStudio.AppModel.Helpers
             
             var navigate = new StreamCommand(ShellViewModel.NavigateCommand);
             navigate.OfType<object, NavigationItem>().BindResult(Navigate);
+            navigate.Where(o => !(o is NavigationItem)).BindResult(b => Navigate(SettingsItem));
 
             BackEnabled = NavigationStack.AsStream().Property(s => s.CanGoBack);
             
@@ -136,9 +132,6 @@ namespace BassClefStudio.AppModel.Helpers
 
             NavigationStack.RequestStream.BindResult(r =>
                 SetSelected(NavigationItems.FirstOrDefault(i => i.Request == r)));
-
-            SettingsStream = new SourceStream<bool>();
-            SettingsStream.BindResult(b => Navigate(SettingsItem));
         }
 
         /// <inheritdoc/>

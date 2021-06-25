@@ -77,7 +77,10 @@ namespace BassClefStudio.AppModel.Helpers
 
             //// Sets ICommandRouter to manage active view-model.
             CommandRouter.ActiveCommandHandlers.Clear();
-            CommandRouter.ActiveCommandHandlers.Add(viewModel);
+            if (viewModel is ICommandHandler handler)
+            {
+                CommandRouter.ActiveCommandHandlers.Add(handler);
+            }
 
             //// Initializes the view-model and view.
             view.Initialize();

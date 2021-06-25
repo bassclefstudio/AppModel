@@ -7,7 +7,7 @@
     <Description>A .NET Standard, platform-agnostic library for creating cross-platform view-models and applications for various .NET platforms.</Description>
     <PackageProjectUrl>https://github.com/bassclefstudio/AppModel</PackageProjectUrl>
     <RepositoryUrl>https://github.com/bassclefstudio/AppModel.git</RepositoryUrl>
-    <Version>2.0.0-beta5</Version>
+    <Version>2.0.0-beta6</Version>
     <AssemblyName>BassClefStudio.AppModel</AssemblyName>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
