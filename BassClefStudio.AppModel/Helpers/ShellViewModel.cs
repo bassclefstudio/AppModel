@@ -46,11 +46,6 @@ namespace BassClefStudio.AppModel.Helpers
         #region Properties
 
         /// <summary>
-        /// A <see cref="SourceStream{T}"/> of requests to navigate to the settings page (see <see cref="SettingsItem"/>).
-        /// </summary>
-        public SourceStream<bool> SettingsStream { get; }
-
-        /// <summary>
         /// The collection of all <see cref="NavigationItem"/>s available to this <see cref="ShellViewModel"/>.
         /// </summary>
         public ObservableCollection<NavigationItem> NavigationItems { get; }
@@ -126,6 +121,7 @@ namespace BassClefStudio.AppModel.Helpers
             
             var navigate = new StreamCommand(ShellViewModel.NavigateCommand);
             navigate.OfType<object, NavigationItem>().BindResult(Navigate);
+            navigate.Where(o => !(o is NavigationItem)).BindResult(b => Navigate(SettingsItem));
 
             BackEnabled = NavigationStack.AsStream().Property(s => s.CanGoBack);
             
@@ -136,9 +132,6 @@ namespace BassClefStudio.AppModel.Helpers
 
             NavigationStack.RequestStream.BindResult(r =>
                 SetSelected(NavigationItems.FirstOrDefault(i => i.Request == r)));
-
-            SettingsStream = new SourceStream<bool>();
-            SettingsStream.BindResult(b => Navigate(SettingsItem));
         }
 
         /// <inheritdoc/>
