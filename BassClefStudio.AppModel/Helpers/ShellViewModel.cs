@@ -15,7 +15,7 @@ namespace BassClefStudio.AppModel.Helpers
     /// <summary>
     /// An <see cref="IViewModel"/>/<see cref="IShellHandler"/> view-model that deals with managing navigation between pages.
     /// </summary>
-    public abstract class ShellViewModel : Observable, IViewModel, IShellHandler
+    public abstract class ShellViewModel : Observable, IViewModel, IShellHandler, ICommandHandler
     {
         #region Commands
 

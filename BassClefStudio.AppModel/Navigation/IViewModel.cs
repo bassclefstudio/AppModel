@@ -9,7 +9,7 @@ namespace BassClefStudio.AppModel.Navigation
     /// <summary>
     /// Represents a view-model, providing data for a view, in the MVVM framework.
     /// </summary>
-    public interface IViewModel : ICommandHandler
+    public interface IViewModel
     {
         /// <summary>
         /// Called asynchnously after all dependencies that this <see cref="IViewModel"/> requires have been resolved through dependency injection.
