@@ -20,7 +20,7 @@ namespace BassClefStudio.AppModel.Navigation
         public IViewModel ViewModelInstance { get; }
 
         /// <summary>
-        /// A <see cref="bool"/> that, if set to 'true', indicates that a <see cref="ViewModelInstance"/> instead of a <see cref="ViewModelType"/> has been specified for this navigation operation.
+        /// A <see cref="bool"/> that, if set to 'true', indicates that a <see cref="ViewModelInstance"/> has been specified for this navigation operation.
         /// </summary>
         public bool ContainsInstance => ViewModelInstance != null;
 
@@ -196,7 +196,7 @@ namespace BassClefStudio.AppModel.Navigation
         /// </summary>
         Page = 0,
         /// <summary>
-        /// Fully replaces the existing content with the navigated content.
+        /// Fully replaces the existing content with the navigated content. Mainly used for setting shell (navigation) content.
         /// </summary>
         Override = 1,
         /// <summary>

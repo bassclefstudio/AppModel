@@ -101,6 +101,10 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .AssignableTo<INavigationStack>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
+            builder.RegisterAssemblyTypes(typeof(App).Assembly)
+                .AssignableTo<INavigationActiveHandler>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
             //// Register external navigation components.
             builder.RegisterAssemblyTypes(assemblies)
                 .AssignableTo<INavigationService>()
@@ -108,6 +112,10 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .SingleInstance();
             builder.RegisterAssemblyTypes(assemblies)
                 .AssignableTo<INavigationStack>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<INavigationActiveHandler>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
             //// Register default commanding components.
