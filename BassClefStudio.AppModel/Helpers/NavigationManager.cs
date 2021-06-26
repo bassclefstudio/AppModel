@@ -14,7 +14,7 @@ namespace BassClefStudio.AppModel.Helpers
     /// <summary>
     /// A default implementation of <see cref="INavigationService"/>/<see cref="IBackHandler"/> that extends the <see cref="App"/>'s <see cref="ILifetimeScope"/>, as well as using the <see cref="IViewModel"/>s navigated to as the basis for the <see cref="ICommandRouter"/> command routing.
     /// </summary>
-    public class NavigationManager : INavigationService, IBackHandler
+    public class NavigationService : INavigationService, IBackHandler
     {
         #region Initialization
 
@@ -29,24 +29,24 @@ namespace BassClefStudio.AppModel.Helpers
         protected INavigationStack Stack { get; }
 
         /// <summary>
-        /// The <see cref="ILifetimeScope"/> delegated by the <see cref="App"/> to the <see cref="NavigationManager"/> to resolve view and view-model instances.
+        /// The injected <see cref="INavigationActiveHandler"/> for managing active view-models.
+        /// </summary>
+        protected INavigationActiveHandler ActiveHandler { get; }
+
+        /// <summary>
+        /// The <see cref="ILifetimeScope"/> delegated by the <see cref="App"/> to the <see cref="NavigationService"/> to resolve view and view-model instances.
         /// </summary>
         protected ILifetimeScope LifetimeScope { get; }
 
         /// <summary>
-        /// The injected <see cref="ICommandRouter"/> for setting active <see cref="IViewModel"/>s.
+        /// Creates a new <see cref="NavigationService"/> from the provided services.
         /// </summary>
-        protected ICommandRouter CommandRouter { get; }
-
-        /// <summary>
-        /// Creates a new <see cref="NavigationManager"/> from the provided services.
-        /// </summary>
-        public NavigationManager(IViewProvider viewProvider, INavigationStack stack, ILifetimeScope scope, ICommandRouter router)
+        public NavigationService(IViewProvider viewProvider, INavigationStack stack, INavigationActiveHandler activeHandler, ILifetimeScope scope)
         {
             ViewProvider = viewProvider;
             Stack = stack;
+            ActiveHandler = activeHandler;
             LifetimeScope = scope;
-            CommandRouter = router;
         }
 
         #endregion
@@ -75,12 +75,7 @@ namespace BassClefStudio.AppModel.Helpers
             viewType.GetProperty("ViewModel").SetValue(view, viewModel);
             ViewProvider.SetView(view, request.Mode);
 
-            //// Sets ICommandRouter to manage active view-model.
-            CommandRouter.ActiveCommandHandlers.Clear();
-            if (viewModel is ICommandHandler handler)
-            {
-                CommandRouter.ActiveCommandHandlers.Add(handler);
-            }
+            ActiveHandler.Add(viewModel, request.Mode);
 
             //// Initializes the view-model and view.
             view.Initialize();
@@ -108,7 +103,7 @@ namespace BassClefStudio.AppModel.Helpers
     }
 
     /// <summary>
-    /// A generic implementation of <see cref="INavigationStack"/> that simply stores and traverses a linear history.
+    /// A default implementation of <see cref="INavigationStack"/> that simply stores and traverses a linear history.
     /// </summary>
     public class NavigationStack : Observable, INavigationStack
     {
@@ -156,7 +151,7 @@ namespace BassClefStudio.AppModel.Helpers
         /// <inheritdoc/>
         public void AddRequest(NavigationRequest request)
         {
-            if (!request.Mode.IgnoreHistory && HistoryPosition >= 0 && request != Requests[HistoryPosition])
+            if (!request.Mode.IgnoreHistory && (HistoryPosition < 0 || request != Requests[HistoryPosition]))
             {
                 if (HistoryPosition + 1 != Requests.Count)
                 {
@@ -166,8 +161,9 @@ namespace BassClefStudio.AppModel.Helpers
                 Requests.Add(request);
                 HistoryPosition++;
                 SetCanGo();
-                requestStream.EmitValue(request);
             }
+
+            requestStream.EmitValue(request);
         }
 
         /// <inheritdoc/>
@@ -216,5 +212,48 @@ namespace BassClefStudio.AppModel.Helpers
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// A default implementation of <see cref="INavigationActiveHandler"/> that manages the <see cref="ActiveViewModels"/> using the expected behaviors of each <see cref="NavigationMode"/>.
+    /// </summary>
+    public class NavigationActiveHandler : INavigationActiveHandler
+    {
+        /// <inheritdoc/>
+        public IEnumerable<IViewModel> ActiveViewModels
+            => WindowViewModels.Concat(new IViewModel[] { ShellViewModel, PageViewModel }).Where(v => v != null);
+
+        private IViewModel ShellViewModel { get; set; }
+
+        private IViewModel PageViewModel { get; set; }
+
+        private List<IViewModel> WindowViewModels { get; }
+
+        /// <summary>
+        /// Creates a new <see cref="NavigationActiveHandler"/>.
+        /// </summary>
+        public NavigationActiveHandler()
+        {
+            WindowViewModels = new List<IViewModel>();
+        }
+
+        /// <inheritdoc/>
+        public void Add(IViewModel viewModel, NavigationMode mode)
+        {
+            if(mode.OverlayMode == NavigationOverlay.Override)
+            {
+                ShellViewModel = viewModel;
+            }
+            else if(mode.OverlayMode == NavigationOverlay.Page || mode.OverlayMode == NavigationOverlay.Modal)
+            {
+                //// TODO: Support possibly having both page *and* modal dialog active.
+                PageViewModel = viewModel;
+            }
+            else if(mode.OverlayMode == NavigationOverlay.Window)
+            {
+                //// TODO: Support for when windows are closed by the user, and how that's handled in navigation.
+                WindowViewModels.Add(viewModel);
+            }
+        }
     }
 }
