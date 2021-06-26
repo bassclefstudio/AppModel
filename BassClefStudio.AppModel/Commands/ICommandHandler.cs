@@ -24,69 +24,47 @@ namespace BassClefStudio.AppModel.Commands
     public static class CommandHandlerExtensions
     {
         /// <summary>
-        /// Attempts to execute the <see cref="ICommand"/> matching the <see cref="CommandInfo"/> with the provided input.
+        /// Gets the <see cref="ICommand"/> matching the <see cref="CommandInfo"/>.
         /// </summary>
         /// <param name="handlers">The <see cref="ICommandHandler"/>s containing the collection of available commands.</param>
         /// <param name="info">The <see cref="CommandInfo"/> info to match.</param>
-        /// <param name="input">The optional <see cref="object"/> input to pass to the command.</param>
-        public static void ExecuteCommand(this IEnumerable<ICommandHandler> handlers, CommandInfo info, object input = null) => ExecuteCommand(handlers.SelectMany(h => h.Commands), info, input);
+        public static ICommand GetCommand(this IEnumerable<ICommandHandler> handlers, CommandInfo info) => GetCommand(handlers.SelectMany(h => h.Commands), info);
         /// <summary>
-        /// Attempts to execute the <see cref="ICommand"/> matching the <see cref="CommandInfo"/> with the provided input.
+        /// Gets the <see cref="ICommand"/> matching the <see cref="CommandInfo"/>.
         /// </summary>
         /// <param name="handler">The <see cref="ICommandHandler"/> containing the collection of available commands.</param>
         /// <param name="info">The <see cref="CommandInfo"/> info to match.</param>
-        /// <param name="input">The optional <see cref="object"/> input to pass to the command.</param>
-        public static void ExecuteCommand(this ICommandHandler handler, CommandInfo info, object input = null) => ExecuteCommand(handler.Commands, info, input);
+        public static ICommand GetCommand(this ICommandHandler handler, CommandInfo info) => GetCommand(handler.Commands, info);
         /// <summary>
-        /// Attempts to execute the <see cref="ICommand"/> matching the <see cref="CommandInfo"/> with the provided input.
+        /// Gets the <see cref="ICommand"/> matching the <see cref="CommandInfo"/>.
         /// </summary>
         /// <param name="commands">The collection of available commands.</param>
         /// <param name="info">The <see cref="CommandInfo"/> info to match.</param>
-        /// <param name="input">The optional <see cref="object"/> input to pass to the command.</param>
-        public static void ExecuteCommand(this IEnumerable<ICommand> commands, CommandInfo info, object input = null)
+        public static ICommand GetCommand(this IEnumerable<ICommand> commands, CommandInfo info)
         {
-            var command = commands.FirstOrDefault(c => c.Info == info);
-            if(command != null)
-            {
-                command.InitiateCommand(input);
-            }
-            else
-            {
-                throw new ArgumentException($"Command matching {info} was not found.", "info");
-            }
+            return commands.FirstOrDefault(c => c.Info == info);
         }
 
         /// <summary>
-        /// Attempts to execute the <see cref="ICommand"/> matching the <see cref="string"/> ID with the provided input.
+        /// Gets the <see cref="ICommand"/> matching the <see cref="string"/> ID.
         /// </summary>
         /// <param name="handlers">The <see cref="ICommandHandler"/>s containing the collection of available commands.</param>
         /// <param name="id">The <see cref="string"/> desired ID of the command.</param>
-        /// <param name="input">The optional <see cref="object"/> input to pass to the command.</param>
-        public static void ExecuteCommand(this IEnumerable<ICommandHandler> handlers, string id, object input = null) => ExecuteCommand(handlers.SelectMany(h => h.Commands), id, input);
+        public static ICommand GetCommand(this IEnumerable<ICommandHandler> handlers, string id) => GetCommand(handlers.SelectMany(h => h.Commands), id);
         /// <summary>
-        /// Attempts to execute the <see cref="ICommand"/> matching the <see cref="string"/> ID with the provided input.
+        /// Gets the <see cref="ICommand"/> matching the <see cref="string"/> ID.
         /// </summary>
         /// <param name="handler">The <see cref="ICommandHandler"/> containing the collection of available commands.</param>
         /// <param name="id">The <see cref="string"/> desired ID of the command.</param>
-        /// <param name="input">The optional <see cref="object"/> input to pass to the command.</param>
-        public static void ExecuteCommand(this ICommandHandler handler, string id, object input = null) => ExecuteCommand(handler.Commands, id, input);
+        public static ICommand GetCommand(this ICommandHandler handler, string id) => GetCommand(handler.Commands, id);
         /// <summary>
-        /// Attempts to execute the <see cref="ICommand"/> matching the <see cref="string"/> ID with the provided input.
+        /// Gets the <see cref="ICommand"/> matching the <see cref="string"/> ID.
         /// </summary>
         /// <param name="commands">The collection of available commands.</param>
         /// <param name="id">The <see cref="string"/> desired ID of the command.</param>
-        /// <param name="input">The optional <see cref="object"/> input to pass to the command.</param>
-        public static void ExecuteCommand(this IEnumerable<ICommand> commands, string id, object input = null)
+        public static ICommand GetCommand(this IEnumerable<ICommand> commands, string id)
         {
-            var command = commands.FirstOrDefault(c => c.Info.Id == id);
-            if (command != null)
-            {
-                command.InitiateCommand(input);
-            }
-            else
-            {
-                throw new ArgumentException($"Command matching {id} was not found.", "id");
-            }
+            return commands.FirstOrDefault(c => c.Info.Id == id);
         }
     }
 }

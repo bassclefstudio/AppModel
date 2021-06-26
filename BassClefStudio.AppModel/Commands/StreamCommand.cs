@@ -48,7 +48,7 @@ namespace BassClefStudio.AppModel.Commands
         }
 
         /// <inheritdoc/>
-        public void InitiateCommand(object input = null)
+        public void Execute(object input = null)
         {
             TriggerStream.EmitValue(input);
         }

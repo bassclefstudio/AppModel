@@ -1,37 +1,68 @@
 ﻿using BassClefStudio.AppModel.Commands;
+using BassClefStudio.AppModel.Lifecycle;
 using BassClefStudio.NET.Core.Streams;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 
 namespace BassClefStudio.AppModel.Helpers
 {
     /// <summary>
-    /// Provides command routing and a static <see cref="SourceStream{T}"/> which is used by default by the <see cref="ICommandRouter"/> when routing <see cref="CommandRequest"/>s.
+    /// Provides a singleton <see cref="ICommandRouter"/> instance to views and controls.
     /// </summary>
-    public class CommandRouter : ICommandRouter
+    public class CommandRouter : IInitializationHandler
     {
         /// <summary>
-        /// A <see cref="SourceStream{T}"/> that emits <see cref="CommandRequest"/> command requests from the app.
+        /// The currently exposed <see cref="ICommandRouter"/> router.
         /// </summary>
-        public static SourceStream<CommandRequest> RequestStream { get; } = new SourceStream<CommandRequest>();
-        
-        /// <inheritdoc/>
-        public List<ICommandHandler> ActiveCommandHandlers { get; }
+        public static ICommandRouter Instance { get; internal set; }
+
+        /// <inheritdoc cref="CommandRouterExtensions.Execute(ICommandRouter, CommandRequest)"/>
+        public static void Execute(CommandRequest request) => Instance.Execute(request);
 
         /// <summary>
-        /// Creates a new <see cref="CommandRouter"/> instance.
+        /// Uses the <see cref="ICommandRouter"/> to route a given <see cref="CommandRequest"/> to the corresponding <see cref="ICommand"/>.
         /// </summary>
-        public CommandRouter()
+        /// <param name="command">The <see cref="CommandInfo"/> command to execute.</param>
+        /// <param name="parameter">An optional input to pass to the command.</param>
+        public static void Execute(CommandInfo command, object parameter = null) => Instance.Execute(new CommandRequest() { Command = command, Parameter = parameter });
+
+        /// <inheritdoc cref="CommandRouterExtensions.GetEnabled(ICommandRouter, CommandInfo)"/>
+        public static IStream<bool> GetEnabled(CommandInfo command) => Instance.GetEnabled(command);
+
+        /// <summary>
+        /// Creates a new <see cref="CommandRouter"/> with the desired <see cref="ICommandRouter"/> singleton.
+        /// </summary>
+        public CommandRouter(ICommandRouter instance)
         {
-            ActiveCommandHandlers = new List<ICommandHandler>();
-            RouteRequests(RequestStream);
+            Instance = instance;
         }
 
         /// <inheritdoc/>
-        public void RouteRequests(IStream<CommandRequest> requestStream)
+        public bool Initialize()
         {
-            requestStream.BindResult(r => ActiveCommandHandlers.ExecuteCommand(r.Command, r.Parameter));
+            return Instance != null;
         }
+    }
+
+    /// <summary>
+    /// Represents a basic <see cref="ICommandRouter"/> that implements the default behaviors.
+    /// </summary>
+    public class BaseCommandRouter : ICommandRouter
+    {
+        /// <inheritdoc/>
+        public IList<ICommandHandler> ActiveCommandHandlers { get; }
+
+        /// <summary>
+        /// Creates a new <see cref="BaseCommandRouter"/>.
+        /// </summary>
+        public BaseCommandRouter()
+        {
+            ActiveCommandHandlers = new ObservableCollection<ICommandHandler>();
+        }
+
+        /// <inheritdoc/>
+        public ICommand GetCommand(CommandInfo command) => ActiveCommandHandlers.GetCommand(command);
     }
 }
