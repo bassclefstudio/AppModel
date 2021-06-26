@@ -45,11 +45,7 @@ namespace BassClefStudio.AppModel.Helpers
         {
             if (Command.HasValue)
             {
-                CommandRouter.RequestStream.EmitValue(new CommandRequest()
-                {
-                    Parameter = this.Parameter,
-                    Command = this.Command.Value
-                });
+                CommandRouter.Execute(this.Command.Value, this.Parameter);
             }
         }
     }

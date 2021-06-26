@@ -20,7 +20,7 @@ namespace BassClefStudio.AppModel.Commands
         /// Calls the <see cref="ICommand"/> and executes its associated action.
         /// </summary>
         /// <param name="input">The <see cref="object"/> input passed from the caller to the <see cref="ICommand"/>.</param>
-        void InitiateCommand(object input = null);
+        void Execute(object input = null);
 
         /// <summary>
         /// A <see cref="CommandInfo"/> object which contains documentation and identifying info for the action this <see cref="ICommand"/> provides.
