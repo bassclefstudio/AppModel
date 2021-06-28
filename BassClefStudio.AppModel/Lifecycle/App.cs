@@ -315,7 +315,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         }
 
         /// <summary>
-        /// Registers the <see cref="IViewModel"/>s in the given <see cref="Assembly"/> instances.
+        /// Registers the <see cref="IViewModel"/>s and <see cref="ICommandProvider"/>s in the given <see cref="Assembly"/> instances.
         /// </summary>
         /// <param name="builder">The <see cref="ContainerBuilder"/> to add services to.</param>
         /// <param name="assemblies">The <see cref="Assembly"/> objects to find the <see cref="App"/>'s <see cref="IViewModel"/>s.</param>
@@ -326,6 +326,10 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .PropertiesAutowired();
             builder.RegisterAssemblyTypes(assemblies)
                 .AssignableTo<IViewModel>()
+                .PropertiesAutowired()
+                .AsImplementedInterfaces();
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<ICommandProvider>()
                 .PropertiesAutowired()
                 .AsImplementedInterfaces();
         }

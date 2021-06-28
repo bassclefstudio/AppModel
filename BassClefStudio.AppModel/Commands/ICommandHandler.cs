@@ -8,7 +8,7 @@ using System.Text;
 namespace BassClefStudio.AppModel.Commands
 {
     /// <summary>
-    /// A service (usually an <see cref="IViewModel"/>) that provides a set of <see cref="ICommand"/> commands that it handles.
+    /// Any service that provides a set of <see cref="ICommand"/> commands that it handles.
     /// </summary>
     public interface ICommandHandler
     {
@@ -17,6 +17,12 @@ namespace BassClefStudio.AppModel.Commands
         /// </summary>
         ICommand[] Commands { get; }
     }
+
+    /// <summary>
+    /// An <see cref="ICommandHandler"/> that's not attached to an active view-model, but instad provides app-wide command definitions.
+    /// </summary>
+    public interface ICommandProvider : ICommandHandler
+    { }
 
     /// <summary>
     /// Provides extension methods for the <see cref="ICommandHandler"/> interface.
