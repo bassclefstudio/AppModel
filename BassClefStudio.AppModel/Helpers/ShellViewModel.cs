@@ -40,7 +40,7 @@ namespace BassClefStudio.AppModel.Helpers
         };
 
         /// <inheritdoc/>
-        public ICommand[] Commands { get; }
+        public IList<ICommand> Commands { get; }
 
         #endregion
         #region Properties
@@ -122,8 +122,8 @@ namespace BassClefStudio.AppModel.Helpers
             var back = new StreamCommand(ShellViewModel.BackCommand, BackEnabled);
             back.OfType<object, bool>().BindResult(b => NavigationService.GoBack());
 
-            Commands = new ICommand[] { navigate, back };
-
+            Commands = new List<ICommand>() { navigate, back };
+            
             NavigationService.History.RequestStream
                 .Select(r => NavigationService.History.GetActiveViewModelType())
                 .BindResult(t => SetSelected(NavigationItems.FirstOrDefault(i => i.Request.ViewModelType == t)));

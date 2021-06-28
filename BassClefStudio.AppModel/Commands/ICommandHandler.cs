@@ -15,7 +15,7 @@ namespace BassClefStudio.AppModel.Commands
         /// <summary>
         /// The collection of <see cref="ICommand"/>s that this <see cref="ICommandHandler"/> provides.
         /// </summary>
-        ICommand[] Commands { get; }
+        IList<ICommand> Commands { get; }
     }
 
     /// <summary>
