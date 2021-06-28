@@ -377,5 +377,17 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .AsImplementedInterfaces()
                 .SingleInstance();
         }
+
+        /// <summary>
+        /// Registers any <see cref="IActivationHandler"/>s to the DI container.
+        /// </summary>
+        /// <param name="builder">The <see cref="ContainerBuilder"/> to add services to.</param>
+        /// <param name="assemblies">The <see cref="Assembly"/> objects to search for <see cref="IActivationHandler"/>s.</param>
+        public static void RegisterActivation(this ContainerBuilder builder, params Assembly[] assemblies)
+        {
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<IActivationHandler>()
+                .AsImplementedInterfaces();
+        }
     }
 }
