@@ -115,12 +115,17 @@ namespace BassClefStudio.AppModel.Navigation
         /// <summary>
         /// The default <see cref="NavigationProperties"/> for navigating between pages.
         /// </summary>
-        public static NavigationProperties Default { get; } = new NavigationProperties(LayerBehavior.Default, HistoryBehavior.Default);
+        public static readonly NavigationProperties Default = new NavigationProperties(LayerBehavior.Default, HistoryBehavior.Default);
 
         /// <summary>
         /// The default <see cref="NavigationProperties"/> for setting up a shell page (navigation UI).
         /// </summary>
-        public static NavigationProperties Shell { get; } = new NavigationProperties(LayerBehavior.Shell, HistoryBehavior.Block);
+        public static readonly NavigationProperties Shell = new NavigationProperties(LayerBehavior.Shell, HistoryBehavior.Block);
+
+        /// <summary>
+        /// The default <see cref="NavigationProperties"/> for opening a modal dialog in a new navigation layer.
+        /// </summary>
+        public static readonly NavigationProperties Dialog = new NavigationProperties(LayerBehavior.Modal, HistoryBehavior.Default);
 
         #endregion
 
