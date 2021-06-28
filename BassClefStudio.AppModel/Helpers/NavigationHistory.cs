@@ -103,7 +103,6 @@ namespace BassClefStudio.AppModel.Helpers
         /// <inheritdoc/>
         public void HandleNavigation(NavigationRequest request, IViewModel viewModel)
         {
-            requestStream.EmitValue(request);
             if (request.IsCloseRequest)
             {
                 //// Do nothing - this is a close request, which is not stored in history.
@@ -126,6 +125,8 @@ namespace BassClefStudio.AppModel.Helpers
             {
                 throw new ArgumentException($"Request contained unknown LayerBehavior {request.Properties.LayerMode}", nameof(request));
             }
+
+            requestStream.EmitValue(request);
         }
     }
 
