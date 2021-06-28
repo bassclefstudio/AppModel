@@ -124,8 +124,9 @@ namespace BassClefStudio.AppModel.Helpers
 
             Commands = new ICommand[] { navigate, back };
 
-            NavigationService.History.RequestStream.BindResult(r =>
-                SetSelected(NavigationItems.FirstOrDefault(i => i.Request == r)));
+            NavigationService.History.RequestStream
+                .Select(r => NavigationService.History.GetActiveViewModelType())
+                .BindResult(t => SetSelected(NavigationItems.FirstOrDefault(i => i.Request.ViewModelType == t)));
         }
 
         /// <inheritdoc/>
