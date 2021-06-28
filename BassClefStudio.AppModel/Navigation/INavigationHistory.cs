@@ -20,6 +20,11 @@ namespace BassClefStudio.AppModel.Navigation
         /// The collection of all <see cref="INavigationLayer"/> layers in the full navigation history.
         /// </summary>
         IEnumerable<INavigationLayer> Layers { get; }
+
+        /// <summary>
+        /// The current <see cref="INavigationLayer"/> from <see cref="Layers"/> that the <see cref="INavigationHistory"/> is currently located at. Usually the last ('top') layer.
+        /// </summary>
+        INavigationLayer CurrentLayer { get; }
     }
 
     /// <summary>
@@ -93,6 +98,16 @@ namespace BassClefStudio.AppModel.Navigation
         public static IEnumerable<IViewModel> GetActiveViewModels(this INavigationHistory history)
         {
             return history.Layers.Select(l => l.CurrentViewModel).Where(v => v != null);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="Type"/> of the view-model active in the current <see cref="INavigationLayer"/> of the navigation history.
+        /// </summary>
+        /// <param name="history">The <see cref="INavigationHistory"/> being queried.</param>
+        /// <returns>The <see cref="Type"/> of the currently active view-model, or 'null' if no active view-model was found.</returns>
+        public static Type GetActiveViewModelType(this INavigationHistory history)
+        {
+            return history.CurrentLayer.CurrentViewModel?.GetType();
         }
     }
 

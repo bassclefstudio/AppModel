@@ -24,10 +24,8 @@ namespace BassClefStudio.AppModel.Helpers
         /// <inheritdoc/>
         public IEnumerable<INavigationLayer> Layers => layers.AsEnumerable();
 
-        /// <summary>
-        /// Gets the current value at the top of <see cref="layers"/>.
-        /// </summary>
-        private INavigationLayer CurrentLayer => layers[layers.Count - 1];
+        /// <inheritdoc/>
+        public INavigationLayer CurrentLayer => layers[layers.Count - 1];
 
         /// <summary>
         /// An injected function for creating new <see cref="INavigationLayer"/>s.
