@@ -12,7 +12,7 @@ namespace BassClefStudio.AppModel.Helpers
     /// <summary>
     /// A default implementation of <see cref="INavigationService"/> that extends the <see cref="App"/>'s <see cref="ILifetimeScope"/>.
     /// </summary>
-    public class ViewResolver : INavigationService
+    public class NavigationService : INavigationService
     {
         #region Initialization
 
@@ -25,14 +25,14 @@ namespace BassClefStudio.AppModel.Helpers
         public INavigationHistory History { get; }
 
         /// <summary>
-        /// The <see cref="ILifetimeScope"/> delegated by the <see cref="App"/> to the <see cref="ViewResolver"/> to resolve view and view-model instances.
+        /// The <see cref="ILifetimeScope"/> delegated by the <see cref="App"/> to the <see cref="NavigationService"/> to resolve view and view-model instances.
         /// </summary>
         protected ILifetimeScope LifetimeScope { get; }
 
         /// <summary>
-        /// Creates a new <see cref="ViewResolver"/> from the provided services.
+        /// Creates a new <see cref="NavigationService"/> from the provided services.
         /// </summary>
-        public ViewResolver(IViewProvider viewProvider, INavigationHistory history, ILifetimeScope scope)
+        public NavigationService(IViewProvider viewProvider, INavigationHistory history, ILifetimeScope scope)
         {
             ViewProvider = viewProvider;
             History = history;
