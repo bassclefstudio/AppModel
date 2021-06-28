@@ -20,15 +20,15 @@ namespace BassClefStudio.AppModel.Navigation
         /// <summary>
         /// Sets the content of the app to an <see cref="IView"/> view.
         /// </summary>
+        /// <param name="request">The <see cref="NavigationRequest"/> request detailing what navigation has occurred.</param>
         /// <param name="view">The instance of the <see cref="IView"/> to navigate to.</param>
-        /// <param name="mode">A <see cref="NavigationMode"/> value describing how the navigated view should be presented.</param>
-        void SetView(IView view, NavigationMode mode);
+        void SetView(NavigationRequest request, IView view);
     }
 
     /// <summary>
     /// A default implementation of <see cref="IViewProvider"/> that manages <typeparamref name="T"/> views.
     /// </summary>
-    /// <typeparam name="T">The type of all <see cref="IView"/>s that thi s<see cref="ViewProvider{T}"/> supports.</typeparam>
+    /// <typeparam name="T">The type of all <see cref="IView"/>s that this <see cref="ViewProvider{T}"/> supports.</typeparam>
     public abstract class ViewProvider<T> : IViewProvider
     {
         /// <inheritdoc/>
@@ -37,20 +37,20 @@ namespace BassClefStudio.AppModel.Navigation
         /// <summary>
         /// Internally sets the content of the app to an <typeparamref name="T"/> view.
         /// </summary>
+        /// <param name="request">The <see cref="NavigationRequest"/> request detailing what navigation has occurred.</param>
         /// <param name="view">The instance of the <see cref="IView"/> to navigate to.</param>
-        /// <param name="mode">A <see cref="NavigationMode"/> value describing how the navigated view should be presented.</param>
-        protected abstract void SetViewInternal(T view , NavigationMode mode);
+        protected abstract void SetViewInternal(NavigationRequest request, T view);
 
         /// <inheritdoc/>
-        public void SetView(IView view, NavigationMode mode)
+        public void SetView(NavigationRequest request, IView view)
         {
             if(view is T tView)
             {
-                SetViewInternal(tView, mode);
+                SetViewInternal(request, tView);
             }
             else
             {
-                throw new ArgumentException($"This ViewProvider does not support setting views of type {view?.GetType()}.", "view");
+                throw new ArgumentException($"This ViewProvider does not support setting views of type {view?.GetType()}.", nameof(view));
             }
         }
     }

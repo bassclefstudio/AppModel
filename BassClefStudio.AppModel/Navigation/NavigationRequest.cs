@@ -5,24 +5,23 @@ using System.Text;
 namespace BassClefStudio.AppModel.Navigation
 {
     /// <summary>
-    /// A description of how to navigate to a specific state in the app, used by <see cref="INavigationService"/> and stored in the <see cref="INavigationStack"/>'s history.
+    /// A description of how to navigate to a specific state in the app, used by <see cref="INavigationService"/> and related services.
     /// </summary>
     public struct NavigationRequest : IEquatable<NavigationRequest>
     {
+        #region Defaults
+
+        /// <summary>
+        /// The default <see cref="NavigationRequest"/> for requesting a <see cref="INavigationLayer"/> close/collapse.
+        /// </summary>
+        public static NavigationRequest Close { get; } = new NavigationRequest(new NavigationProperties(LayerBehavior.Default, HistoryBehavior.Skip));
+
+        #endregion
+
         /// <summary>
         /// The <see cref="Type"/> of the <see cref="IViewModel"/> being navigated to.
         /// </summary>
         public Type ViewModelType { get; }
-
-        /// <summary>
-        /// An instance of an <see cref="IViewModel"/> to navigate to.
-        /// </summary>
-        public IViewModel ViewModelInstance { get; }
-
-        /// <summary>
-        /// A <see cref="bool"/> that, if set to 'true', indicates that a <see cref="ViewModelInstance"/> has been specified for this navigation operation.
-        /// </summary>
-        public bool ContainsInstance => ViewModelInstance != null;
 
         /// <summary>
         /// An <see cref="object"/> parameter being passed to the <see cref="IViewModel.InitializeAsync(object)"/> task when navigation occurs.
@@ -30,36 +29,39 @@ namespace BassClefStudio.AppModel.Navigation
         public object Parameter { get; }
 
         /// <summary>
-        /// The <see cref="NavigationMode"/> describing the behavior of the navigation operation.
+        /// The <see cref="NavigationProperties"/> describing the behavior of the navigation operation.
         /// </summary>
-        public NavigationMode Mode { get; }
+        public NavigationProperties Properties { get; }
+
+        /// <summary>
+        /// A <see cref="bool"/> indicating whether this is a 'close request'. If set to 'true', no new navigation will occur, but existing controls and layers will be requested to close.
+        /// </summary>
+        public bool IsCloseRequest { get; }
 
         /// <summary>
         /// Creates a new <see cref="NavigationRequest"/>.
         /// </summary>
         /// <param name="viewModelType">The <see cref="Type"/> of the <see cref="IViewModel"/> being navigated to.</param>
-        /// <param name="mode">The <see cref="NavigationMode"/> describing the behavior of the navigation operation.</param>
+        /// <param name="properties">The <see cref="NavigationProperties"/> describing the behavior of the navigation operation.</param>
         /// <param name="parameter">An <see cref="object"/> parameter being passed to the <see cref="IViewModel.InitializeAsync(object)"/> task when navigation occurs.</param>
-        public NavigationRequest(Type viewModelType, NavigationMode mode, object parameter = null)
+        public NavigationRequest(Type viewModelType, NavigationProperties properties, object parameter = null)
         {
             ViewModelType = viewModelType;
-            ViewModelInstance = null;
-            Mode = mode;
+            Properties = properties;
             Parameter = parameter;
+            IsCloseRequest = false;
         }
 
         /// <summary>
-        /// Creates a new instance-based <see cref="NavigationRequest"/>.
+        /// Creates a new close <see cref="NavigationRequest"/>.
         /// </summary>
-        /// <param name="viewModel">An instance of an <see cref="IViewModel"/> to navigate to.</param>
-        /// <param name="mode">The <see cref="NavigationMode"/> describing the behavior of the navigation operation.</param>
-        /// <param name="parameter">An <see cref="object"/> parameter being passed to the <see cref="IViewModel.InitializeAsync(object)"/> task when navigation occurs.</param>
-        public NavigationRequest(IViewModel viewModel, NavigationMode mode, object parameter = null)
+        /// <param name="properties">The <see cref="NavigationProperties"/> describing the behavior of the navigation operation.</param>
+        public NavigationRequest(NavigationProperties properties)
         {
             ViewModelType = null;
-            ViewModelInstance = viewModel;
-            Mode = mode;
-            Parameter = parameter;
+            Properties = properties;
+            Parameter = null;
+            IsCloseRequest = true;
         }
 
         #region Operators
@@ -74,10 +76,8 @@ namespace BassClefStudio.AppModel.Navigation
         public bool Equals(NavigationRequest other)
         {
             return EqualityComparer<Type>.Default.Equals(ViewModelType, other.ViewModelType) &&
-                   EqualityComparer<IViewModel>.Default.Equals(ViewModelInstance, other.ViewModelInstance) &&
-                   ContainsInstance == other.ContainsInstance &&
                    EqualityComparer<object>.Default.Equals(Parameter, other.Parameter) &&
-                   EqualityComparer<NavigationMode>.Default.Equals(Mode, other.Mode);
+                   EqualityComparer<NavigationProperties>.Default.Equals(Properties, other.Properties);
         }
 
         /// <inheritdoc/>
@@ -85,10 +85,8 @@ namespace BassClefStudio.AppModel.Navigation
         {
             int hashCode = -15731548;
             hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(ViewModelType);
-            hashCode = hashCode * -1521134295 + EqualityComparer<IViewModel>.Default.GetHashCode(ViewModelInstance);
-            hashCode = hashCode * -1521134295 + ContainsInstance.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<object>.Default.GetHashCode(Parameter);
-            hashCode = hashCode * -1521134295 + Mode.GetHashCode();
+            hashCode = hashCode * -1521134295 + Properties.GetHashCode();
             return hashCode;
         }
 
@@ -110,41 +108,41 @@ namespace BassClefStudio.AppModel.Navigation
     /// <summary>
     /// Provides information about exactly how a navigation event should occur.
     /// </summary>
-    public struct NavigationMode : IEquatable<NavigationMode>
+    public struct NavigationProperties : IEquatable<NavigationProperties>
     {
         #region Defaults
 
         /// <summary>
-        /// The default <see cref="NavigationMode"/> for navigating between pages.
+        /// The default <see cref="NavigationProperties"/> for navigating between pages.
         /// </summary>
-        public static NavigationMode Default { get; } = new NavigationMode(NavigationOverlay.Page);
+        public static NavigationProperties Default { get; } = new NavigationProperties(LayerBehavior.Default, HistoryBehavior.Default);
 
         /// <summary>
-        /// The default <see cref="NavigationMode"/> for setting up a shell page (navigation UI).
+        /// The default <see cref="NavigationProperties"/> for setting up a shell page (navigation UI).
         /// </summary>
-        public static NavigationMode Shell { get; } = new NavigationMode(NavigationOverlay.Override, true);
+        public static NavigationProperties Shell { get; } = new NavigationProperties(LayerBehavior.Shell, HistoryBehavior.Block);
 
         #endregion
 
         /// <summary>
-        /// The <see cref="NavigationOverlay"/> mode that should be used to present the navigated content.
+        /// The <see cref="LayerBehavior"/> mode that should be used to present the navigated content.
         /// </summary>
-        public NavigationOverlay OverlayMode { get; }
+        public LayerBehavior LayerMode { get; }
 
         /// <summary>
-        /// If set to 'true', this indicates that the content being navigated to is transient (e.g. a login screen, one-time notification dialog, etc.) and should generally not be included in the <see cref="INavigationStack"/>.
+        /// The <see cref="HistoryBehavior"/> mode that should be used by the <see cref="INavigationHistory"/> to handle the navigation stack.
         /// </summary>
-        public bool IgnoreHistory { get; }
+        public HistoryBehavior HistoryMode { get; }
 
         /// <summary>
-        /// Defines a new <see cref="NavigationMode"/>.
+        /// Defines a new <see cref="NavigationProperties"/>.
         /// </summary>
-        /// <param name="overlayMode">The <see cref="NavigationOverlay"/> mode that should be used to present the navigated content.</param>
-        /// <param name="ignoreHistory">If set to 'true', this indicates that the content being navigated to is transient (e.g. a login screen, one-time notification dialog, etc.) and should generally not be included in the <see cref="INavigationStack"/>.</param>
-        public NavigationMode(NavigationOverlay overlayMode, bool ignoreHistory = false)
+        /// <param name="overlayMode">The <see cref="LayerBehavior"/> mode that should be used to present the navigated content.</param>
+        /// <param name="historyMode">The <see cref="HistoryBehavior"/> mode that should be used by the <see cref="INavigationHistory"/> to handle the navigation stack.</param>
+        public NavigationProperties(LayerBehavior overlayMode, HistoryBehavior historyMode)
         {
-            OverlayMode = overlayMode;
-            IgnoreHistory = ignoreHistory;
+            LayerMode = overlayMode;
+            HistoryMode = historyMode;
         }
 
         #region Operators
@@ -152,33 +150,33 @@ namespace BassClefStudio.AppModel.Navigation
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            return obj is NavigationMode mode && Equals(mode);
+            return obj is NavigationProperties mode && Equals(mode);
         }
 
         /// <inheritdoc/>
-        public bool Equals(NavigationMode other)
+        public bool Equals(NavigationProperties other)
         {
-            return OverlayMode == other.OverlayMode &&
-                   IgnoreHistory == other.IgnoreHistory;
+            return LayerMode == other.LayerMode &&
+                   HistoryMode == other.HistoryMode;
         }
 
         /// <inheritdoc/>
         public override int GetHashCode()
         {
             int hashCode = 360113769;
-            hashCode = hashCode * -1521134295 + OverlayMode.GetHashCode();
-            hashCode = hashCode * -1521134295 + IgnoreHistory.GetHashCode();
+            hashCode = hashCode * -1521134295 + LayerMode.GetHashCode();
+            hashCode = hashCode * -1521134295 + HistoryMode.GetHashCode();
             return hashCode;
         }
 
         /// <inheritdoc/>
-        public static bool operator ==(NavigationMode left, NavigationMode right)
+        public static bool operator ==(NavigationProperties left, NavigationProperties right)
         {
             return left.Equals(right);
         }
 
         /// <inheritdoc/>
-        public static bool operator !=(NavigationMode left, NavigationMode right)
+        public static bool operator !=(NavigationProperties left, NavigationProperties right)
         {
             return !(left == right);
         }
@@ -187,25 +185,40 @@ namespace BassClefStudio.AppModel.Navigation
     }
 
     /// <summary>
-    /// The type of overlay that should be produced when the new content is navigated to.
+    /// Describes how the <see cref="INavigationLayer"/>s of navigation history should behave during/after navigation.
     /// </summary>
-    public enum NavigationOverlay
+    public enum LayerBehavior
     {
         /// <summary>
-        /// Requests the default page container display the navigated content.
+        /// No new layer is created before or after navigation. Default for page navigation and other operations.
         /// </summary>
-        Page = 0,
+        Default = 0,
         /// <summary>
-        /// Fully replaces the existing content with the navigated content. Mainly used for setting shell (navigation) content.
+        /// A new layer is created to contain the navigated content, which will appear in front of existing content in a modal display/dialog.
         /// </summary>
-        Override = 1,
+        Modal = 1,
         /// <summary>
-        /// Displays the navigated content on top of the existing content (in a dialog or modal control).
+        /// A new navigation layer is created after navigation, and additional navigation will occur within the currently navigated content. Ideal for 'shell' pages with navigation headers and sticky content.
         /// </summary>
-        Modal = 2,
+        Shell = 2
+    }
+
+    /// <summary>
+    /// Describes how <see cref="ITraversable"/>s should handle this content in their navigation stacks.
+    /// </summary>
+    public enum HistoryBehavior
+    { 
         /// <summary>
-        /// Creates a new, movable window with the navigated content.
+        /// The navigation request is added to the back navigation stack, and can be returned to.
         /// </summary>
-        Window = 3
+        Default = 0,
+        /// <summary>
+        /// This is transient content within a navigation layer, and back navigation should skip over (ignore) this navigation request.
+        /// </summary>
+        Skip = 1,
+        /// <summary>
+        /// The navigation to this content hides all previous navigation history on this layer. Previous content cannot be returned to. Ideal for initial, fixed content like headers and navigation.
+        /// </summary>
+        Block = 2
     }
 }

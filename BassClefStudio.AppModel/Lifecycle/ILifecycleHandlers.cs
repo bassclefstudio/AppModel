@@ -31,33 +31,16 @@ namespace BassClefStudio.AppModel.Lifecycle
     }
 
     /// <summary>
-    /// Represents a service that can manage system requests to return to a previous state (i.e. a software or hardware back button, for example).
+    /// Represents a service that can manage an <see cref="App"/>'s foreground activation.
     /// </summary>
-    public interface IBackHandler : ILifecycleHandler
+    public interface IActivationHandler : ILifecycleHandler
     {
         /// <summary>
-        /// A method that is called whenever system back navigation is requested.
+        /// Gets the <see cref="Type"/> of view-model needed to handle the provided <see cref="IActivatedEventArgs"/>.
         /// </summary>
-        /// <returns>A <see cref="bool"/> value indicating whether any action was performed successfully.</returns>
-        bool GoBack();
-    }
-
-    /// <summary>
-    /// Represents a view-model that can manage an <see cref="App"/>'s foreground activation.
-    /// </summary>
-    public interface IActivationHandler : ILifecycleHandler, IViewModel
-    {
-        /// <summary>
-        /// Returns a <see cref="bool"/> indicating whether this <see cref="IActivationHandler"/> can handle the given <see cref="IActivatedEventArgs"/>.
-        /// </summary>
-        /// <param name="args">The <see cref="IActivatedEventArgs"/> arguments to handle.</param>
-        bool CanHandle(IActivatedEventArgs args);
-
-        /// <summary>
-        /// A method that is called on the <see cref="IActivationHandler"/> view-model whenever the <see cref="App"/> is activated in a supported way (see <see cref="CanHandle(IActivatedEventArgs)"/>).
-        /// </summary>
-        /// <param name="args">The <see cref="IActivatedEventArgs"/> arguments passed to the view-model on activation.</param>
-        void Activate(IActivatedEventArgs args);
+        /// <param name="args">The <see cref="IActivatedEventArgs"/> arguments passed to the <see cref="App"/> when it was launched.</param>
+        /// <returns>The <see cref="Type"/> of the view-model that can handle these arguments, or 'null' if none is found.</returns>
+        Type GetViewModel(IActivatedEventArgs args);
     }
 
     /// <summary>

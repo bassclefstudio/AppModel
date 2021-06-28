@@ -45,12 +45,12 @@ namespace BassClefStudio.AppModel.Lifecycle
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException("An application name must be set.");
+                throw new ArgumentException("An application name must be set.", nameof(name));
             }
 
             if (version == null)
             {
-                throw new ArgumentException("An application version must be present");
+                throw new ArgumentException("An application version must be present", nameof(version));
             }
 
             PackageInfo = new PackageInfo() { ApplicationName = name, Version = version };
@@ -94,37 +94,18 @@ namespace BassClefStudio.AppModel.Lifecycle
                 .SingleInstance();
             //// Register default navigation components.
             builder.RegisterAssemblyTypes(typeof(App).Assembly)
-                .AssignableTo<INavigationService>()
+                .AssignableTo<INavigationHistory>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
             builder.RegisterAssemblyTypes(typeof(App).Assembly)
-                .AssignableTo<INavigationStack>()
-                .AsImplementedInterfaces()
-                .SingleInstance();
+                .AssignableTo<INavigationLayer>()
+                .AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(typeof(App).Assembly)
-                .AssignableTo<INavigationActiveHandler>()
-                .AsImplementedInterfaces()
-                .SingleInstance();
-            //// Register external navigation components.
-            builder.RegisterAssemblyTypes(assemblies)
                 .AssignableTo<INavigationService>()
-                .AsImplementedInterfaces()
-                .SingleInstance();
-            builder.RegisterAssemblyTypes(assemblies)
-                .AssignableTo<INavigationStack>()
-                .AsImplementedInterfaces()
-                .SingleInstance();
-            builder.RegisterAssemblyTypes(assemblies)
-                .AssignableTo<INavigationActiveHandler>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
             //// Register default commanding components.
             builder.RegisterAssemblyTypes(typeof(App).Assembly)
-                .AssignableTo<ICommandRouter>()
-                .AsImplementedInterfaces()
-                .SingleInstance();
-            //// Register external commanding components.
-            builder.RegisterAssemblyTypes(assemblies)
                 .AssignableTo<ICommandRouter>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
@@ -198,11 +179,11 @@ namespace BassClefStudio.AppModel.Lifecycle
         }
 
         /// <summary>
-        /// Gracefully requests back navigation from the default registered <see cref="IBackHandler"/>.
+        /// Gracefully requests back navigation from the default registered <see cref="INavigationService"/>.
         /// </summary>
         public void GoBack()
         {
-            var backHandler = Services.Resolve<IBackHandler>();
+            var backHandler = Services.Resolve<INavigationService>();
             backHandler.GoBack();
         }
 
@@ -271,23 +252,21 @@ namespace BassClefStudio.AppModel.Lifecycle
 
         private void ActivateForeground(IActivatedEventArgs args)
         {
-            INavigationService navigationService = Services.Resolve<INavigationService>();
+            INavigationService navigationController = Services.Resolve<INavigationService>();
             
             IViewProvider viewProvider = Services.Resolve<IViewProvider>();
             viewProvider.StartUI();
 
-            var shellHandler = Services.ResolveOptional<IShellHandler>();
-            if (shellHandler != null)
+            if (Services.IsRegistered<IShellHandler>())
             {
-                navigationService.Navigate(shellHandler, NavigationMode.Shell);
+                navigationController.Navigate<IShellHandler>(NavigationProperties.Shell);
             }
 
-            var activationHandlers = Services.Resolve<IEnumerable<IActivationHandler>>();
-            var activateViewModel = activationHandlers.FirstOrDefault(h => h.CanHandle(args));
+            var activationHandler = Services.Resolve<IActivationHandler>();
+            var activateViewModel = activationHandler.GetViewModel(args);
             if (activateViewModel != null)
             {
-                activateViewModel.Activate(args);
-                navigationService.Navigate(activateViewModel);
+                navigationController.Navigate(activateViewModel, args);
             }
             else
             {
@@ -359,6 +338,41 @@ namespace BassClefStudio.AppModel.Lifecycle
         {
             builder.RegisterAssemblyTypes(assemblies)
                 .AssignableTo<IBackgroundTask>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+        }
+
+        /// <summary>
+        /// Registers any external <see cref="INavigationHistory"/>, <see cref="INavigationLayer"/>, and <see cref="INavigationService"/> services to the DI container, replacing the default ones provided by the system.
+        /// </summary>
+        /// <param name="builder">The <see cref="ContainerBuilder"/> to add services to.</param>
+        /// <param name="assemblies">The <see cref="Assembly"/> objects to search for navigation services.</param>
+        public static void RegisterExternalNavigation(this ContainerBuilder builder, params Assembly[] assemblies)
+        {
+            //// Register external navigation components.
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<INavigationHistory>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<INavigationLayer>()
+                .AsImplementedInterfaces();
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<INavigationService>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+        }
+
+        /// <summary>
+        /// Registers any external <see cref="ICommandRouter"/> services to the DI container, replacing the default ones provided by the system.
+        /// </summary>
+        /// <param name="builder">The <see cref="ContainerBuilder"/> to add services to.</param>
+        /// <param name="assemblies">The <see cref="Assembly"/> objects to search for <see cref="ICommandRouter"/>s.</param>
+        public static void RegisterExternalCommands(this ContainerBuilder builder, params Assembly[] assemblies)
+        {
+            //// Register external commanding components.
+            builder.RegisterAssemblyTypes(assemblies)
+                .AssignableTo<ICommandRouter>()
                 .AsImplementedInterfaces()
                 .SingleInstance();
         }

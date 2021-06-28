@@ -52,14 +52,12 @@ namespace BassClefStudio.AppModel.Tests
         public void CheckDefaultServices()
         {
             DefaultApp.Initialize(AppPlatform);
+            CheckSingleResolved<INavigationHistory>("Default navigation history");
             CheckSingleResolved<INavigationService>("Default navigation service");
-            CheckSingleResolved<INavigationStack>("Default navigation stack");
-            CheckSingleResolved<INavigationActiveHandler>("Default active handler");
             CheckSingleResolved<ICommandRouter>("Default command router");
             var package = CheckSingleResolved<IPackageInfo>("TestingApp package info");
             Assert.AreEqual(DefaultApp.PackageInfo, package, "Returned package info is not equivalent to the app's package info.");
             CheckResolved<ILifetimeScope>("DI container");
-            CheckResolved<IBackHandler>("System back handler");
         }
 
         [TestMethod]

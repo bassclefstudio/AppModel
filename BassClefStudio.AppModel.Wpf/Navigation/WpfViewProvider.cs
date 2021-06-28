@@ -15,95 +15,99 @@ namespace BassClefStudio.AppModel.Navigation
     /// </summary>
     public class WpfViewProvider : ViewProvider<UIElement>, IViewProvider
     {
-        private ContentControl currentFrame;
         /// <summary>
-        /// The current frame for navigation content.
+        /// A list of all <see cref="ContentControl"/> view layers in the application.
         /// </summary>
-        public ContentControl CurrentFrame
-        {
-            get => currentFrame;
-            set
-            {
-                if (currentFrame != value)
-                {
-                    currentFrame = value;
-                }
-            }
-        }
+        private List<ContentControl> UILayers { get; }
+        /// <summary>
+        /// Gets the top layer from <see cref="UILayers"/>.
+        /// </summary>
+        private ContentControl CurrentElement => UILayers[UILayers.Count - 1];
 
+        private INavigationHistory History { get; }
         /// <summary>
         /// Creates a new <see cref="WpfViewProvider"/>.
         /// </summary>
-        public WpfViewProvider()
-        { }
+        public WpfViewProvider(INavigationHistory history)
+        {
+            History = history;
+        }
 
         /// <inheritdoc/>
         public override void StartUI()
         {
             var myWindow = new Window();
             Application.Current.MainWindow = myWindow;
-            CurrentFrame = myWindow;
+            UILayers.Add(myWindow);
             myWindow.Show();
         }
 
-        private Window currentDialog = null;
-        private bool dialogDisplaying = false;
-
         /// <inheritdoc/>
-        protected override void SetViewInternal(UIElement element, NavigationMode mode)
+        protected override void SetViewInternal(NavigationRequest request, UIElement view)
         {
-            if(currentDialog != null)
+            if (request.IsCloseRequest)
             {
-                dialogDisplaying = false;
-                currentDialog.Close();
-                currentDialog = null;
-            }
-
-            if (mode.OverlayMode == NavigationOverlay.Override)
-            {
-                Application.Current.MainWindow.Content = element;
-            }
-            else if (mode.OverlayMode == NavigationOverlay.Page)
-            {
-                CurrentFrame.Content = element;
-            }
-            else if (mode.OverlayMode == NavigationOverlay.Modal)
-            {
-                var window = new Window()
+                if (UILayers.Count > 1)
                 {
-                    Content = element,
-                    WindowStyle = WindowStyle.None,
-                    ShowInTaskbar = false,
-                    MinHeight = 200,
-                    MinWidth = 300,
-                    SizeToContent = SizeToContent.WidthAndHeight,
-                    ResizeMode = ResizeMode.NoResize,
-                    WindowStartupLocation = WindowStartupLocation.CenterOwner
-                };
+                    if (CurrentElement is Window dialog)
+                    {
+                        dialog.Close();
+                    }
 
-                dialogDisplaying = true;
-                currentDialog = window;
-                window.Closing += DialogClosing;
-                window.ShowDialog();
-            }
-            else if (mode.OverlayMode == NavigationOverlay.Window)
-            {
-                var window = new Window()
+                    UILayers.RemoveAt(UILayers.Count - 1);
+                }
+                else
                 {
-                    Content = element,
-                };
-
-                window.Show();
+                    throw new InvalidOperationException("Cannot remove root content layer in close operation.");
+                }
             }
             else
             {
-                throw new ArgumentException($"UWP apps currently do not have support for the given OverlayMode {mode.OverlayMode}.");
+                if (request.Properties.LayerMode == LayerBehavior.Modal)
+                {
+                    var dialog = new Window()
+                    {
+                        Content = view,
+                        WindowStyle = WindowStyle.None,
+                        ShowInTaskbar = false,
+                        MinHeight = 200,
+                        MinWidth = 300,
+                        SizeToContent = SizeToContent.WidthAndHeight,
+                        ResizeMode = ResizeMode.NoResize,
+                        WindowStartupLocation = WindowStartupLocation.CenterOwner
+                    };
+
+                    UILayers.Add(dialog);
+                    dialog.Closing += DialogClosing;
+                    dialog.ShowDialog();
+                }
+                else if (request.Properties.LayerMode == LayerBehavior.Default)
+                {
+                    CurrentElement.Content = view;
+                }
+                else if (request.Properties.LayerMode == LayerBehavior.Shell)
+                {
+                    if (view is ILayerContainer container)
+                    {
+                        CurrentElement.Content = container;
+                        UILayers.Add(container.Container);
+                    }
+                    else
+                    {
+                        throw new ArgumentException("WPF apps require all new navigation layers be created in ILayerContainers.", nameof(view));
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException($"WPF apps currently do not have support for the given LayerMode {request.Properties.LayerMode}.", nameof(request));
+                }
             }
         }
 
         private void DialogClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            e.Cancel = dialogDisplaying;
+            //// No need to execute the request, because the platform has executed it for us.
+            History.GoBack();
         }
     }
 }

@@ -105,17 +105,11 @@ namespace BassClefStudio.AppModel.Helpers
         protected INavigationService NavigationService { get; }
 
         /// <summary>
-        /// The injected <see cref="INavigationStack"/>.
-        /// </summary>
-        protected INavigationStack NavigationStack { get; }
-
-        /// <summary>
         /// Creates a new <see cref="ShellViewModel"/>.
         /// </summary>
-        public ShellViewModel(INavigationService navService, INavigationStack navStack)
+        public ShellViewModel(INavigationService navStack)
         {
-            NavigationService = navService;
-            NavigationStack = navStack;
+            NavigationService = navStack;
 
             NavigationItems = new ObservableCollection<NavigationItem>(GetInitialItems());
             
@@ -123,14 +117,14 @@ namespace BassClefStudio.AppModel.Helpers
             navigate.OfType<object, NavigationItem>().BindResult(Navigate);
             navigate.Where(o => !(o is NavigationItem)).BindResult(b => Navigate(SettingsItem));
 
-            BackEnabled = NavigationStack.AsStream().Property(s => s.CanGoBack);
+            BackEnabled = NavigationService.AsStream().Property(s => s.History.CanGoBack);
             
             var back = new StreamCommand(ShellViewModel.BackCommand, BackEnabled);
-            back.OfType<object, bool>().BindResult(b => NavigationService.GoBack(NavigationStack));
+            back.OfType<object, bool>().BindResult(b => NavigationService.GoBack());
 
             Commands = new ICommand[] { navigate, back };
 
-            NavigationStack.RequestStream.BindResult(r =>
+            NavigationService.History.RequestStream.BindResult(r =>
                 SetSelected(NavigationItems.FirstOrDefault(i => i.Request == r)));
         }
 

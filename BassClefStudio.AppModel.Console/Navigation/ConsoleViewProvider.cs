@@ -32,9 +32,9 @@ namespace BassClefStudio.AppModel.Navigation
         }
 
         /// <inheritdoc/>
-        protected override void SetViewInternal(IConsoleView view, NavigationMode mode)
+        protected override void SetViewInternal(NavigationRequest request, IConsoleView view)
         {
-            if (mode.OverlayMode == NavigationOverlay.Page)
+            if (request.Properties.LayerMode == LayerBehavior.Default)
             {
                 SynchronousTask syncTask = new SynchronousTask(
                         () => view.ShowView());
@@ -42,7 +42,7 @@ namespace BassClefStudio.AppModel.Navigation
             }
             else
             {
-                throw new ArgumentException($"Console apps currently do not have support for the given OverlayMode {mode.OverlayMode}.");
+                throw new ArgumentException($"Console apps currently do not have support for navigation layers.", nameof(request));
             }
         }
     }
