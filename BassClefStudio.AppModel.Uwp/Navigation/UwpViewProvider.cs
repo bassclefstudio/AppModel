@@ -64,7 +64,10 @@ namespace BassClefStudio.AppModel.Navigation
                 {
                     if(CurrentElement is ContentDialog dialog)
                     {
-                        dialog.Hide();
+                        SynchronousTask hideTask = new SynchronousTask(
+                        () => Dispatchers.RunOnUIThreadAsync(
+                            () => dialog.Hide()));
+                        hideTask.RunTask();
                     }
 
                     UILayers.RemoveAt(UILayers.Count - 1);
