@@ -31,9 +31,9 @@ namespace BassClefStudio.AppModel.Navigation
         { }
 
         /// <inheritdoc/>
-        protected override void SetViewInternal(BlazorView view, NavigationMode mode)
+        protected override void SetViewInternal(NavigationRequest request, BlazorView view)
         {
-            if (mode.OverlayMode == NavigationOverlay.Page)
+            if (request.Properties.LayerMode == LayerBehavior.Default)
             {
                 Console.WriteLine($"Navigate {view.ViewPath}.");
                 ViewProvider.CurrentView = view;
@@ -41,7 +41,7 @@ namespace BassClefStudio.AppModel.Navigation
             }
             else
             {
-                throw new ArgumentException($"Blazor apps currently do not have support for the given OverlayMode {mode.OverlayMode}.");
+                throw new ArgumentException($"Blazor apps currently do not have support for navigation layers.", nameof(request));
             }
         }
     }

@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="6.2.0" />
-    <PackageReference Include="BassClefStudio.NET.Core" Version="2.0.4" />
+    <PackageReference Include="BassClefStudio.NET.Core" Version="2.1.0" />
     <PackageReference Include="BassClefStudio.NET.Serialization" Version="2.3.0" />
     <PackageReference Include="BassClefStudio.NET.Sync" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />

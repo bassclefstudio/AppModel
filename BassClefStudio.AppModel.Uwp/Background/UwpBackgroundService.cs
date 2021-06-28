@@ -85,7 +85,7 @@ namespace BassClefStudio.AppModel.Background
             }
             else
             {
-                throw new ArgumentException($"BackgroundTaskTrigger of unknown type {trigger.GetType().Name}");
+                throw new ArgumentException($"BackgroundTaskTrigger of unknown type {trigger.GetType().Name}", nameof(trigger));
             }
         }
     }

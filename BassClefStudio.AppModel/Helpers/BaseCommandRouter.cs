@@ -7,24 +7,24 @@ using System.Text;
 namespace BassClefStudio.AppModel.Helpers
 {
     /// <summary>
-    /// Represents a basic <see cref="ICommandRouter"/> that populates the available <see cref="ICommand"/>s using the <see cref="INavigationActiveHandler"/> service.
+    /// Represents a default <see cref="ICommandRouter"/> that populates the available <see cref="ICommand"/>s using <see cref="INavigationHistory"/>.
     /// </summary>
     public class BaseCommandRouter : ICommandRouter
     {
         /// <summary>
-        /// The injected <see cref="INavigationActiveHandler"/> managing currently active <see cref="IViewModel"/>s.
+        /// The injected <see cref="INavigationHistory"/> managing currently active <see cref="IViewModel"/>s.
         /// </summary>
-        public INavigationActiveHandler NavigationActiveHandler { get; }
+        public INavigationHistory NavigationHistory { get; }
 
         /// <summary>
         /// Creates a new <see cref="BaseCommandRouter"/>.
         /// </summary>
-        public BaseCommandRouter(INavigationActiveHandler navigationActiveHandler)
+        public BaseCommandRouter(INavigationHistory navigationHistory)
         {
-            NavigationActiveHandler = navigationActiveHandler;
+            NavigationHistory = navigationHistory;
         }
 
         /// <inheritdoc/>
-        public ICommand GetCommand(CommandInfo command) => NavigationActiveHandler.ActiveViewModels.GetCommand(command);
+        public ICommand GetCommand(CommandInfo command) => NavigationHistory.GetActiveViewModels().GetCommand(command);
     }
 }

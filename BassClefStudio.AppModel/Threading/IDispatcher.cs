@@ -86,7 +86,7 @@ namespace BassClefStudio.AppModel.Threading
         {
             if (dispatchers == null || !dispatchers.Any())
             {
-                throw new ArgumentException("The collection must contain at least one available IDispatcher.", "dispatchers");
+                throw new ArgumentException("The collection must contain at least one available IDispatcher.", nameof(dispatchers));
             }
 
             var background = dispatchers.FirstOrDefault(d => d.DispatcherType.HasFlag(type));
@@ -96,7 +96,7 @@ namespace BassClefStudio.AppModel.Threading
             }
             else
             {
-                throw new ArgumentException($"No IDispatchers of the specified type {type} were avaliable in the provided collection", "dispatchers");
+                throw new ArgumentException($"No IDispatchers of the specified type {type} were avaliable in the provided collection", nameof(dispatchers));
             }
         }
 

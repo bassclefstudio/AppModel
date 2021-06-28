@@ -10,7 +10,7 @@ using Windows.UI.Xaml;
 namespace BassClefStudio.AppModel.Helpers
 {
     /// <summary>
-    /// An <see cref="IAction"/> that can be declared in XAML to trigger a <see cref="CommandInfo"/> command using the default <see cref="CommandRouter"/> router.
+    /// An <see cref="IAction"/> that can be declared in XAML to trigger a <see cref="CommandInfo"/> command using the default <see cref="Commands.CommandRouter"/> router.
     /// </summary>
     public class CallCommandAction : DependencyObject, IAction
     {
@@ -45,7 +45,7 @@ namespace BassClefStudio.AppModel.Helpers
         {
             if(Command.HasValue)
             {
-                CommandRouter.Execute(this.Command.Value, this.Parameter);
+                Commands.CommandRouter.Execute(this.Command.Value, this.Parameter);
                 return true;
             }
             else

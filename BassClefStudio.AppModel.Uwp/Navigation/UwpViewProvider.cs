@@ -14,29 +14,25 @@ namespace BassClefStudio.AppModel.Navigation
     /// </summary>
     public class UwpViewProvider : ViewProvider<UIElement>, IViewProvider
     {
-        private ContentControl currentFrame;
         /// <summary>
-        /// The current frame for navigation content.
+        /// A list of all <see cref="ContentControl"/> view layers in the application.
         /// </summary>
-        public ContentControl CurrentFrame
-        { 
-            get => currentFrame;
-            set
-            {
-                if(currentFrame != value)
-                {
-                    currentFrame = value;
-                }
-            }
-        }
+        private List<ContentControl> UILayers { get; }
+        /// <summary>
+        /// Gets the top layer from <see cref="UILayers"/>.
+        /// </summary>
+        private ContentControl CurrentElement => UILayers[UILayers.Count - 1];
 
+        private INavigationHistory History { get; }
         private IEnumerable<IDispatcher> Dispatchers { get; }
         /// <summary>
         /// Creates a new <see cref="UwpViewProvider"/>.
         /// </summary>
-        public UwpViewProvider(IEnumerable<IDispatcher> dispatchers)
+        public UwpViewProvider(IEnumerable<IDispatcher> dispatchers, INavigationHistory history)
         {
+            UILayers = new List<ContentControl>();
             Dispatchers = dispatchers;
+            History = history;
         }
 
         /// <inheritdoc/>
@@ -53,57 +49,75 @@ namespace BassClefStudio.AppModel.Navigation
                 Window.Current.Content = rootFrame;
             }
 
-            CurrentFrame = rootFrame;
+            UILayers.Add(rootFrame);
 
             //// Ensure the current window is active before setting up back navigation.
             Window.Current.Activate();
         }
 
-        private ContentDialog currentDialog;
-
         /// <inheritdoc/>
-        protected override void SetViewInternal(UIElement element, NavigationMode mode)
+        protected override void SetViewInternal(NavigationRequest request, UIElement view)
         {
-            if(currentDialog != null)
+            if (request.IsCloseRequest)
             {
-                currentDialog.Hide();
-                currentDialog = null;
-            }
-
-            if(mode.OverlayMode == NavigationOverlay.Override)
-            {
-                if(Window.Current.Content is ContentControl rootContent)
+                if (UILayers.Count > 1)
                 {
-                    rootContent.Content = element;
+                    if(CurrentElement is ContentDialog dialog)
+                    {
+                        dialog.Hide();
+                    }
+
+                    UILayers.RemoveAt(UILayers.Count - 1);
                 }
                 else
                 {
-                    throw new InvalidOperationException("Attempted to set root window content, but the Window.Current.Content of the window was not a ContentControl.");
+                    throw new InvalidOperationException("Cannot remove root content layer in close operation.");
                 }
-            }
-            else if (mode.OverlayMode == NavigationOverlay.Page)
-            {
-                CurrentFrame.Content = element;
-            }
-            else if(mode.OverlayMode == NavigationOverlay.Modal)
-            {
-                ContentDialog dialog = new ContentDialog()
-                {
-                    Title = null,
-                    CloseButtonText = null,
-                    Content = element
-                };
-                currentDialog = dialog;
-
-                SynchronousTask showTask = new SynchronousTask(
-                    () => Dispatchers.RunOnUIThreadAsync(
-                        () => ShowDialogTask(dialog)));
-                showTask.RunTask();
             }
             else
             {
-                throw new ArgumentException($"UWP apps currently do not have support for the given OverlayMode {mode.OverlayMode}.");
+                if (request.Properties.LayerMode == LayerBehavior.Modal)
+                {
+                    ContentDialog dialog = new ContentDialog()
+                    {
+                        Title = null,
+                        Content = view
+                    };
+                    UILayers.Add(dialog);
+                    dialog.CloseButtonClick += DialogClosed;
+
+                    SynchronousTask showTask = new SynchronousTask(
+                        () => Dispatchers.RunOnUIThreadAsync(
+                            () => ShowDialogTask(dialog)));
+                    showTask.RunTask();
+                }
+                else if (request.Properties.LayerMode == LayerBehavior.Default)
+                {
+                    CurrentElement.Content = view;
+                }
+                else if(request.Properties.LayerMode == LayerBehavior.Shell)
+                {
+                    if(view is ILayerContainer container)
+                    {
+                        CurrentElement.Content = container;
+                        UILayers.Add(container.Container);
+                    }
+                    else
+                    {
+                        throw new ArgumentException("UWP apps require all new navigation layers be created in ILayerContainers.", nameof(view));
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException($"UWP apps currently do not have support for the given LayerMode {request.Properties.LayerMode}.", nameof(request));
+                }
             }
+        }
+
+        private void DialogClosed(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        {
+            //// No need to execute the request, because the platform has executed it for us.
+            History.GoBack();
         }
 
         private async Task<ContentDialogResult> ShowDialogTask(ContentDialog dialog)
