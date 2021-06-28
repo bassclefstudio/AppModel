@@ -48,6 +48,10 @@ namespace BassClefStudio.AppModel.Navigation
             {
                 SetViewInternal(request, tView);
             }
+            else if (view == null)
+            {
+                SetViewInternal(request, default(T));
+            }
             else
             {
                 throw new ArgumentException($"This ViewProvider does not support setting views of type {view?.GetType()}.", nameof(view));
