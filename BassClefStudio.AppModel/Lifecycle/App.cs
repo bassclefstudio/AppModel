@@ -310,6 +310,7 @@ namespace BassClefStudio.AppModel.Lifecycle
         {
             builder.RegisterAssemblyTypes(assemblies)
                 .AssignableTo<IView>()
+                .PropertiesAutowired()
                 .AsImplementedInterfaces();
         }
 

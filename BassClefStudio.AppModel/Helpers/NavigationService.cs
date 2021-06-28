@@ -56,11 +56,11 @@ namespace BassClefStudio.AppModel.Helpers
             {
                 //// Resolves values from the request.
                 IViewModel viewModel = (IViewModel)LifetimeScope.Resolve(request.ViewModelType);
-                Type viewType = typeof(IView<>).MakeGenericType(request.ViewModelType);
-                IView view = (IView)LifetimeScope.Resolve(viewType);
+                Type viewModelRealizedType = viewModel.GetType();
+                Type viewType = typeof(IView<>).MakeGenericType(viewModelRealizedType);
+                IView view = (IView)LifetimeScope.Resolve(viewType, new TypedParameter(viewModelRealizedType, viewModel));
 
                 //// Sets the view.
-                viewType.GetProperty("ViewModel").SetValue(view, viewModel);
                 ViewProvider.SetView(request, view);
 
                 //// Reports navigated content to history.
