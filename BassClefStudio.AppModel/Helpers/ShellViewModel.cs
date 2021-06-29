@@ -117,7 +117,8 @@ namespace BassClefStudio.AppModel.Helpers
             navigate.OfType<object, NavigationItem>().BindResult(Navigate);
             navigate.Where(o => !(o is NavigationItem)).BindResult(b => Navigate(SettingsItem));
 
-            BackEnabled = NavigationService.AsStream().Property(s => s.History.CanGoBack);
+            BackEnabled = NavigationService.History.RequestStream
+                .Select(r => NavigationService.History.CanGoBack);
             
             var back = new StreamCommand(ShellViewModel.BackCommand, BackEnabled);
             back.OfType<object, bool>().BindResult(b => NavigationService.GoBack());

@@ -43,14 +43,17 @@ namespace BassClefStudio.AppModel.Helpers
         #region Methods
 
         /// <inheritdoc/>
-        public void Navigate(NavigationRequest request)
+        public void Navigate(NavigationRequest request, bool includeHistory = true)
         {
             if (request.IsCloseRequest)
             {
                 //// Send close request to IViewProvider.
                 ViewProvider.SetView(request, null);
-                //// Reports request to history.
-                History.HandleNavigation(request, null);
+                if (includeHistory)
+                {
+                    //// Reports request to history.
+                    History.HandleNavigation(request, null);
+                }
             }
             else
             {
@@ -63,8 +66,11 @@ namespace BassClefStudio.AppModel.Helpers
                 //// Sets the view.
                 ViewProvider.SetView(request, view);
 
-                //// Reports navigated content to history.
-                History.HandleNavigation(request, viewModel);
+                if (includeHistory)
+                {
+                    //// Reports navigated content to history.
+                    History.HandleNavigation(request, viewModel);
+                }
 
                 //// Initializes the view-model and view.
                 view.Initialize();
