@@ -123,7 +123,6 @@
   <ItemGroup>
     <Compile Include="Background\UwpBackgroundService.cs" />
     <Compile Include="Background\UwpDeferral.cs" />
-    <Compile Include="Helpers\CallCommandAction.cs" />
     <Compile Include="Helpers\CompositeConverter.cs" />
     <Compile Include="Helpers\ObservableControl.cs" />
     <Compile Include="Helpers\TypeTemplateSelector.cs" />
