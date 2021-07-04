@@ -6,14 +6,15 @@ using System.Text;
 namespace BassClefStudio.AppModel.Commands
 {
     /// <summary>
-    /// Represents a basic <see cref="ICommand"/> which uses <see cref="SourceStream{T}"/> for executing some action when the command is triggered.
+    /// Represents a basic <see cref="ICommand{T}"/> which uses <see cref="SourceStream{T}"/> for executing some action when the command is triggered.
     /// </summary>
-    public class StreamCommand : ICommand
+    /// <typeparam name="T">The type of inputs this <see cref="ICommand{T}"/> accepts.</typeparam>
+    public class StreamCommand<T> : ICommand<T>
     {
         /// <summary>
-        /// A <see cref="SourceStream{T}"/> which can be used to trigger the action defined by this <see cref="StreamCommand"/>.
+        /// A <see cref="SourceStream{T}"/> which can be used to trigger the action defined by this <see cref="StreamCommand{T}"/>.
         /// </summary>
-        public SourceStream<object> TriggerStream { get; }
+        public SourceStream<T> TriggerStream { get; }
 
         /// <inheritdoc/>
         public IStream<bool> EnabledStream { get; }
@@ -22,20 +23,22 @@ namespace BassClefStudio.AppModel.Commands
         public bool Started { get; }
 
         /// <inheritdoc/>
-        public CommandInfo Info { get; }
+        CommandInfo ICommand.Info => Info;
+        /// <inheritdoc/>
+        public CommandInfo<T> Info { get; }
 
         /// <inheritdoc/>
-        public StreamBinding<object> ValueEmitted { get; }
+        public StreamBinding<T> ValueEmitted { get; }
 
         /// <summary>
-        /// Creates a new <see cref="StreamCommand"/>.
+        /// Creates a new <see cref="StreamCommand{T}"/>.
         /// </summary>
-        /// <param name="info">A <see cref="CommandInfo"/> object which contains documentation and identifying info for the action this <see cref="ICommand"/> provides.</param>
-        /// <param name="enableStream">An <see cref="IStream{T}"/> that emits <see cref="bool"/> values indicating whether this <see cref="StreamCommand"/> should be enabled or not.</param>
-        public StreamCommand(CommandInfo info, IStream<bool> enableStream = null)
+        /// <param name="info">A <see cref="CommandInfo"/> object which contains documentation and identifying info for the action this <see cref="ICommand{T}"/> provides.</param>
+        /// <param name="enableStream">An <see cref="IStream{T}"/> that emits <see cref="bool"/> values indicating whether this <see cref="StreamCommand{T}"/> should be enabled or not.</param>
+        public StreamCommand(CommandInfo<T> info, IStream<bool> enableStream = null)
         {
             Info = info;
-            TriggerStream = new SourceStream<object>();
+            TriggerStream = new SourceStream<T>();
             ValueEmitted = TriggerStream.ValueEmitted;
             EnabledStream = enableStream ?? true.AsStream();
         }
@@ -48,7 +51,7 @@ namespace BassClefStudio.AppModel.Commands
         }
 
         /// <inheritdoc/>
-        public void Execute(object input = null)
+        public void Execute(T input = default(T))
         {
             TriggerStream.EmitValue(input);
         }

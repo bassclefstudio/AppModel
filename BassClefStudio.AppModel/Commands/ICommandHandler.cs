@@ -30,47 +30,69 @@ namespace BassClefStudio.AppModel.Commands
     public static class CommandHandlerExtensions
     {
         /// <summary>
+        /// Gets the <see cref="ICommand{T}"/> matching the <see cref="CommandInfo{T}"/>.
+        /// </summary>
+        /// <param name="handlers">The <see cref="ICommandHandler"/>s containing the collection of available commands.</param>
+        /// <param name="info">The <see cref="CommandInfo{T}"/> info to match.</param>
+        public static ICommand<T> GetCommand<T>(this IEnumerable<ICommandHandler> handlers, CommandInfo<T> info)
+            => GetCommand(handlers.SelectMany(h => h.Commands), info);
+        /// <summary>
+        /// Gets the <see cref="ICommand{T}"/> matching the <see cref="CommandInfo{T}"/>.
+        /// </summary>
+        /// <param name="handler">The <see cref="ICommandHandler"/> containing the collection of available commands.</param>
+        /// <param name="info">The <see cref="CommandInfo{T}"/> info to match.</param>
+        public static ICommand<T> GetCommand<T>(this ICommandHandler handler, CommandInfo<T> info) 
+            => GetCommand(handler.Commands, info);
+        /// <summary>
+        /// Gets the <see cref="ICommand{T}"/> matching the <see cref="CommandInfo{T}"/>.
+        /// </summary>
+        /// <param name="commands">The collection of available commands.</param>
+        /// <param name="info">The <see cref="CommandInfo{T}"/> info to match.</param>
+        public static ICommand<T> GetCommand<T>(this IEnumerable<ICommand> commands, CommandInfo<T> info) 
+            => commands.OfType<ICommand<T>>().FirstOrDefault(c => c.Info == info);
+
+        /// <summary>
         /// Gets the <see cref="ICommand"/> matching the <see cref="CommandInfo"/>.
         /// </summary>
         /// <param name="handlers">The <see cref="ICommandHandler"/>s containing the collection of available commands.</param>
         /// <param name="info">The <see cref="CommandInfo"/> info to match.</param>
-        public static ICommand GetCommand(this IEnumerable<ICommandHandler> handlers, CommandInfo info) => GetCommand(handlers.SelectMany(h => h.Commands), info);
+        public static ICommand GetCommand(this IEnumerable<ICommandHandler> handlers, CommandInfo info)
+            => GetCommand(handlers.SelectMany(h => h.Commands), info);
         /// <summary>
         /// Gets the <see cref="ICommand"/> matching the <see cref="CommandInfo"/>.
         /// </summary>
         /// <param name="handler">The <see cref="ICommandHandler"/> containing the collection of available commands.</param>
         /// <param name="info">The <see cref="CommandInfo"/> info to match.</param>
-        public static ICommand GetCommand(this ICommandHandler handler, CommandInfo info) => GetCommand(handler.Commands, info);
+        public static ICommand GetCommand(this ICommandHandler handler, CommandInfo info)
+            => GetCommand(handler.Commands, info);
         /// <summary>
         /// Gets the <see cref="ICommand"/> matching the <see cref="CommandInfo"/>.
         /// </summary>
         /// <param name="commands">The collection of available commands.</param>
         /// <param name="info">The <see cref="CommandInfo"/> info to match.</param>
         public static ICommand GetCommand(this IEnumerable<ICommand> commands, CommandInfo info)
-        {
-            return commands.FirstOrDefault(c => c.Info == info);
-        }
+            => commands.OfType<ICommand>().FirstOrDefault(c => c.Info == info);
 
         /// <summary>
         /// Gets the <see cref="ICommand"/> matching the <see cref="string"/> ID.
         /// </summary>
         /// <param name="handlers">The <see cref="ICommandHandler"/>s containing the collection of available commands.</param>
         /// <param name="id">The <see cref="string"/> desired ID of the command.</param>
-        public static ICommand GetCommand(this IEnumerable<ICommandHandler> handlers, string id) => GetCommand(handlers.SelectMany(h => h.Commands), id);
+        public static ICommand GetCommand(this IEnumerable<ICommandHandler> handlers, string id) 
+            => GetCommand(handlers.SelectMany(h => h.Commands), id);
         /// <summary>
         /// Gets the <see cref="ICommand"/> matching the <see cref="string"/> ID.
         /// </summary>
         /// <param name="handler">The <see cref="ICommandHandler"/> containing the collection of available commands.</param>
         /// <param name="id">The <see cref="string"/> desired ID of the command.</param>
-        public static ICommand GetCommand(this ICommandHandler handler, string id) => GetCommand(handler.Commands, id);
+        public static ICommand GetCommand(this ICommandHandler handler, string id) 
+            => GetCommand(handler.Commands, id);
         /// <summary>
         /// Gets the <see cref="ICommand"/> matching the <see cref="string"/> ID.
         /// </summary>
         /// <param name="commands">The collection of available commands.</param>
         /// <param name="id">The <see cref="string"/> desired ID of the command.</param>
-        public static ICommand GetCommand(this IEnumerable<ICommand> commands, string id)
-        {
-            return commands.FirstOrDefault(c => c.Info.Id == id);
-        }
+        public static ICommand GetCommand(this IEnumerable<ICommand> commands, string id) 
+            => commands.FirstOrDefault(c => c.Info.Id == id);
     }
 }
