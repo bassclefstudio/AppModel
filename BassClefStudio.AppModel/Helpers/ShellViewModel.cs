@@ -69,32 +69,7 @@ namespace BassClefStudio.AppModel.Helpers
         /// <summary>
         /// The currently selected <see cref="NavigationItem"/>.
         /// </summary>
-        public NavigationItem SelectedItem 
-        {
-            get => selected;
-            set
-            {
-                if (selected != value)
-                {
-                    Set(ref selected, value);
-                    if (selected != null)
-                    {
-                        Navigate();
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Sets the value of <see cref="SelectedItem"/> without triggering navigation.
-        /// </summary>
-        private void SetSelected(NavigationItem item)
-        {
-            if (selected != item)
-            {
-                Set(ref selected, item, nameof(SelectedItem));
-            }
-        }
+        public NavigationItem SelectedItem { get => selected; set => Set(ref selected, value); }
 
         #endregion
         #region Initialize
@@ -127,7 +102,7 @@ namespace BassClefStudio.AppModel.Helpers
             
             NavigationService.History.RequestStream
                 .Select(r => NavigationService.History.GetActiveViewModelType())
-                .BindResult(t => SetSelected(NavigationItems.FirstOrDefault(i => i.Request.ViewModelType == t)));
+                .BindResult(t => SelectedItem = (NavigationItems.FirstOrDefault(i => i.Request.ViewModelType == t)));
         }
 
         /// <inheritdoc/>
@@ -137,19 +112,12 @@ namespace BassClefStudio.AppModel.Helpers
         #region Actions
 
         /// <summary>
-        /// Navigates the <see cref="App"/> to the specified page (sets the <see cref="SelectedItem"/> property).
+        /// Navigates the <see cref="App"/> to the specified page.
         /// </summary>
         public void Navigate(NavigationItem item)
         {
             SelectedItem = item;
-        }
-
-        /// <summary>
-        /// Navigates the <see cref="App"/> to the selected page.
-        /// </summary>
-        public void Navigate()
-        {
-            NavigationService.Navigate(SelectedItem.Request);
+            NavigationService.Navigate(item.Request);
         }
 
         #endregion

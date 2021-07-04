@@ -1,0 +1,39 @@
+name: Generate Debug Packages
+
+on:
+  push:
+    branches:
+    - release-candidate
+    paths:
+    - '**.csproj'
+    - '**.nuspec'
+  workflow_dispatch:
+
+jobs:
+  pack:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.0.2
+    - name: Add GitHub Packages for Nuget
+      run: |
+        nuget sources add -Source https://nuget.pkg.github.com/bassclefstudio/index.json -Name "GPR" -Username bassclefstudio -Password ${{ secrets.GITHUB_TOKEN }} -StorePasswordInClearText
+    - name: MSBuild
+      run: msbuild BassClefStudio.AppModel.sln -t:build -p:Configuration=Debug -p:Platform="Any CPU" -m -restore
+    - name: Nuget Pack
+      run: |
+        dotnet pack .\BassClefStudio.AppModel\BassClefStudio.AppModel.csproj --no-build --configuration Debug
+        dotnet pack .\BassClefStudio.AppModel.Base\BassClefStudio.AppModel.Base.csproj --no-build --configuration Debug
+        dotnet pack .\BassClefStudio.AppModel.Console\BassClefStudio.AppModel.Console.csproj --no-build --configuration Debug
+        dotnet pack .\BassClefStudio.AppModel.Wpf\BassClefStudio.AppModel.Wpf.csproj --no-build --configuration Debug
+        dotnet pack .\BassClefStudio.AppModel.Blazor\BassClefStudio.AppModel.Blazor.csproj --no-build --configuration Debug
+        nuget pack .\BassClefStudio.AppModel.Uwp\BassClefStudio.AppModel.Uwp.csproj -properties Configuration=Debug
+    - name: Nuget Push
+      run: |
+        nuget push "*.nupkg" -Source "GPR" -SkipDuplicate -NoSymbols
+        dotnet nuget push ".\BassClefStudio.AppModel\bin\Debug\*.nupkg" --source "GPR" --skip-duplicate --no-symbols true -k ${{ secrets.GITHUB_TOKEN }}
+        dotnet nuget push ".\BassClefStudio.AppModel.Blazor\bin\Debug\*.nupkg" --source "GPR" --skip-duplicate --no-symbols true -k ${{ secrets.GITHUB_TOKEN }}
+        dotnet nuget push ".\BassClefStudio.AppModel.Base\bin\Debug\*.nupkg" --source "GPR" --skip-duplicate --no-symbols true -k ${{ secrets.GITHUB_TOKEN }}
+        dotnet nuget push ".\BassClefStudio.AppModel.Console\bin\Debug\*.nupkg" --source "GPR" --skip-duplicate --no-symbols true -k ${{ secrets.GITHUB_TOKEN }}
+        dotnet nuget push ".\BassClefStudio.AppModel.Wpf\bin\Debug\*.nupkg" --source "GPR" --skip-duplicate --no-symbols true -k ${{ secrets.GITHUB_TOKEN }}
