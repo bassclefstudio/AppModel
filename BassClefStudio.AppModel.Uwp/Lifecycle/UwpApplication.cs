@@ -86,11 +86,13 @@ namespace BassClefStudio.AppModel.Lifecycle
         /// <inheritdoc/>
         protected override void OnLaunched(Windows.ApplicationModel.Activation.LaunchActivatedEventArgs args)
         {
+            UwpDispatcher.Activated = true;
             ActivateApp(new LaunchActivatedEventArgs(args.Arguments));
         }
 
         protected override void OnFileActivated(FileActivatedEventArgs args)
         {
+            UwpDispatcher.Activated = true;
             ActivateApp(new StorageActivatedEventArgs(args.Files.FirstOrDefault().ToMvvm()));
         }
 
@@ -99,10 +101,12 @@ namespace BassClefStudio.AppModel.Lifecycle
         {
             if (args is ILaunchActivatedEventArgs launch)
             {
+                UwpDispatcher.Activated = true;
                 ActivateApp(new LaunchActivatedEventArgs(launch.Arguments));
             }
             else if(args is IFileActivatedEventArgs fileArgs)
             {
+                UwpDispatcher.Activated = true;
                 ActivateApp(new StorageActivatedEventArgs(fileArgs.Files.FirstOrDefault().ToMvvm()));
             }
             else
