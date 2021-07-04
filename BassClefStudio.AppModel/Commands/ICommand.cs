@@ -20,6 +20,11 @@ namespace BassClefStudio.AppModel.Commands
         /// A <see cref="CommandInfo"/> object which contains documentation and identifying info for the action this <see cref="ICommand"/> provides.
         /// </summary>
         CommandInfo Info { get; }
+
+        /// <summary>
+        /// Calls the <see cref="ICommand"/> and executes its associated action.
+        /// </summary>
+        void Execute();
     }
 
     /// <summary>

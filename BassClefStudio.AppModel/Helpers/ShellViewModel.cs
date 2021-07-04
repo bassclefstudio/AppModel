@@ -33,7 +33,7 @@ namespace BassClefStudio.AppModel.Helpers
         /// <summary>
         /// A command for triggering available back navigation.
         /// </summary>
-        public static CommandInfo<bool> BackCommand { get; } = new CommandInfo<bool>()
+        public static CommandInfo BackCommand { get; } = new CommandInfo()
         {
             Id = "Shell/Back",
             FriendlyName = "Go back",
@@ -96,7 +96,7 @@ namespace BassClefStudio.AppModel.Helpers
             BackEnabled = NavigationService.History.RequestStream
                 .Select(r => NavigationService.History.CanGoBack);
             
-            var back = new StreamCommand<bool>(ShellViewModel.BackCommand, BackEnabled);
+            var back = new StreamCommand(ShellViewModel.BackCommand, BackEnabled);
             back.BindResult(b => NavigationService.GoBack());
 
             Commands = new List<ICommand>() { navigate, back };
