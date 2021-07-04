@@ -1,4 +1,4 @@
-name: MSBuild Build and Pack
+name: Generate Release Packages
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  pack:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2

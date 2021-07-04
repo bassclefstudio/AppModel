@@ -84,7 +84,9 @@ namespace BassClefStudio.AppModel.Navigation
                     ContentDialog dialog = new ContentDialog()
                     {
                         Title = null,
-                        Content = view
+                        Content = view,
+                        Padding = new Thickness(0),
+                        Margin = new Thickness(0)
                     };
                     UILayers.Add(dialog);
                     dialog.CloseButtonClick += DialogClosed;

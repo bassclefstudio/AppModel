@@ -92,7 +92,9 @@ namespace BassClefStudio.AppModel.Helpers
         {
             if (CurrentLayer.CanGoForward)
             {
-                return CurrentLayer.GoForward();
+                var req = CurrentLayer.GoForward();
+                requestStream.EmitValue(req);
+                return req;
             }
             else
             {

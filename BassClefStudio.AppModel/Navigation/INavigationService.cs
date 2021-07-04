@@ -19,7 +19,9 @@ namespace BassClefStudio.AppModel.Navigation
         /// <summary>
         /// Navigates to an <see cref="IViewModel"/> using the given <see cref="NavigationRequest"/>.
         /// </summary>
-        void Navigate(NavigationRequest request);
+        /// <param name="request">The <see cref="NavigationRequest"/> describing how to navigate to the new view-model.</param>
+        /// <param name="includeHistory">A <see cref="bool"/> indicating whether it's necessary for the <see cref="INavigationService"/> to pass this request on to the attached <see cref="History"/> stack (generally only set to 'false' if the <see cref="INavigationHistory"/> already recorded the request).</param>
+        void Navigate(NavigationRequest request, bool includeHistory = true);
     }
 
     /// <summary>
@@ -82,7 +84,7 @@ namespace BassClefStudio.AppModel.Navigation
         /// <exception cref="InvalidOperationException">The <see cref="INavigationService"/> cannot currently go back (see <see cref="ITraversable.CanGoBack"/>).</exception>
         public static void GoBack(this INavigationService navigationService)
         {
-            navigationService.Navigate(navigationService.History.GoBack());
+            navigationService.Navigate(navigationService.History.GoBack(), false);
         }
 
         /// <summary>
@@ -92,7 +94,7 @@ namespace BassClefStudio.AppModel.Navigation
         /// <exception cref="InvalidOperationException">The <see cref="INavigationService"/> cannot currently go forward (see <see cref="ITraversable.CanGoForward"/>).</exception>
         public static void GoForward(this INavigationService navigationService)
         {
-            navigationService.Navigate(navigationService.History.GoForward());
+            navigationService.Navigate(navigationService.History.GoForward(), false);
         }
 
         #endregion

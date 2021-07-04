@@ -22,11 +22,12 @@ namespace BassClefStudio.AppModel.Helpers
         /// <summary>
         /// A command for selecting <see cref="NavigationItem"/>s to navigate to.
         /// </summary>
-        public static CommandInfo NavigateCommand { get; } = new CommandInfo()
+        public static CommandInfo<NavigationItem> NavigateCommand { get; } = new CommandInfo<NavigationItem>()
         {
             Id = "Shell/Navigate",
             FriendlyName = "Navigate",
-            Description = "Navigate to the specified page."
+            Description = "Navigate to the specified page.",
+            InputDescription = "The NavigationItem of the location to navigate to."
         };
 
         /// <summary>
@@ -69,32 +70,7 @@ namespace BassClefStudio.AppModel.Helpers
         /// <summary>
         /// The currently selected <see cref="NavigationItem"/>.
         /// </summary>
-        public NavigationItem SelectedItem 
-        {
-            get => selected;
-            set
-            {
-                if (selected != value)
-                {
-                    Set(ref selected, value);
-                    if (selected != null)
-                    {
-                        Navigate();
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Sets the value of <see cref="SelectedItem"/> without triggering navigation.
-        /// </summary>
-        private void SetSelected(NavigationItem item)
-        {
-            if (selected != item)
-            {
-                Set(ref selected, item, nameof(SelectedItem));
-            }
-        }
+        public NavigationItem SelectedItem { get => selected; set => Set(ref selected, value); }
 
         #endregion
         #region Initialize
@@ -113,20 +89,20 @@ namespace BassClefStudio.AppModel.Helpers
 
             NavigationItems = new ObservableCollection<NavigationItem>(GetInitialItems());
             
-            var navigate = new StreamCommand(ShellViewModel.NavigateCommand);
-            navigate.OfType<object, NavigationItem>().BindResult(Navigate);
-            navigate.Where(o => !(o is NavigationItem)).BindResult(b => Navigate(SettingsItem));
+            var navigate = new StreamCommand<NavigationItem>(ShellViewModel.NavigateCommand);
+            navigate.BindResult(Navigate);
 
-            BackEnabled = NavigationService.AsStream().Property(s => s.History.CanGoBack);
+            BackEnabled = NavigationService.History.RequestStream
+                .Select(r => NavigationService.History.CanGoBack);
             
             var back = new StreamCommand(ShellViewModel.BackCommand, BackEnabled);
-            back.OfType<object, bool>().BindResult(b => NavigationService.GoBack());
+            back.BindResult(b => NavigationService.GoBack());
 
             Commands = new List<ICommand>() { navigate, back };
             
             NavigationService.History.RequestStream
                 .Select(r => NavigationService.History.GetActiveViewModelType())
-                .BindResult(t => SetSelected(NavigationItems.FirstOrDefault(i => i.Request.ViewModelType == t)));
+                .BindResult(t => SelectedItem = (NavigationItems.FirstOrDefault(i => i.Request.ViewModelType == t)));
         }
 
         /// <inheritdoc/>
@@ -136,19 +112,12 @@ namespace BassClefStudio.AppModel.Helpers
         #region Actions
 
         /// <summary>
-        /// Navigates the <see cref="App"/> to the specified page (sets the <see cref="SelectedItem"/> property).
+        /// Navigates the <see cref="App"/> to the specified page.
         /// </summary>
         public void Navigate(NavigationItem item)
         {
             SelectedItem = item;
-        }
-
-        /// <summary>
-        /// Navigates the <see cref="App"/> to the selected page.
-        /// </summary>
-        public void Navigate()
-        {
-            NavigationService.Navigate(SelectedItem.Request);
+            NavigationService.Navigate(item.Request);
         }
 
         #endregion
