@@ -45,7 +45,10 @@ namespace BassClefStudio.AppModel.Commands
         /// </summary>
         /// <param name="command">The <see cref="CommandInfo"/> command to execute.</param>
         /// <param name="parameter">An optional input to pass to the command.</param>
-        public static void Execute<T>(CommandInfo<T> command, T parameter = default(T)) => Instance.Execute(new CommandRequest<T>() { Command = command, Parameter = parameter });
+        public static void Execute<T>(CommandInfo<T> command, T parameter = default(T)) => Instance.Execute<T>(new CommandRequest<T>() { Command = command, Parameter = parameter });
+
+        /// <inheritdoc cref="CommandRouterExtensions.Execute(ICommandRouter, CommandInfo)"/>
+        public static void Execute(CommandInfo command) => Instance.Execute(command);
 
         /// <inheritdoc cref="CommandRouterExtensions.GetEnabled(ICommandRouter, CommandInfo)"/>
         public static IStream<bool> GetEnabled(CommandInfo command) => Instance.GetEnabled(command);
@@ -71,13 +74,23 @@ namespace BassClefStudio.AppModel.Commands
     public static class CommandRouterExtensions
     {
         /// <summary>
-        /// Uses the <see cref="ICommandRouter"/> to route a given <see cref="CommandRequest{T}"/> to the corresponding <see cref="ICommand"/>.
+        /// Uses the <see cref="ICommandRouter"/> to route a given <see cref="CommandRequest{T}"/> to the corresponding <see cref="ICommand{T}"/>.
         /// </summary>
         /// <param name="router">The <see cref="ICommandRouter"/> to use to retrieve <see cref="ICommand"/> instances.</param>
         /// <param name="request">A <see cref="CommandRequest{T}"/> sent by the app that needs to be handled.</param>
         public static void Execute<T>(this ICommandRouter router, CommandRequest<T> request)
         {
             router.GetCommand(request.Command).Execute(request.Parameter);
+        }
+
+        /// <summary>
+        /// Uses the <see cref="ICommandRouter"/> to route a given <see cref="CommandInfo"/> to the corresponding <see cref="ICommand"/>.
+        /// </summary>
+        /// <param name="router">The <see cref="ICommandRouter"/> to use to retrieve <see cref="ICommand"/> instances.</param>
+        /// <param name="command">The <see cref="CommandInfo"/> description of the command sent by the app that needs to be handled.</param>
+        public static void Execute(this ICommandRouter router, CommandInfo command)
+        {
+            router.GetCommand(command).Execute();
         }
 
         /// <summary>
