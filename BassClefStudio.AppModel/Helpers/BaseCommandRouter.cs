@@ -32,6 +32,17 @@ namespace BassClefStudio.AppModel.Helpers
         }
 
         /// <inheritdoc/>
-        public ICommand GetCommand(CommandInfo command) => NavigationHistory.GetActiveViewModels().AsEnumerable<ICommandHandler>().Concat(CommandProviders).GetCommand(command);
+        public ICommand<T> GetCommand<T>(CommandInfo<T> command) 
+            => NavigationHistory.GetActiveViewModels()
+            .AsEnumerable<ICommandHandler>()
+            .Concat(CommandProviders)
+            .GetCommand(command);
+
+        /// <inheritdoc/>
+        public ICommand GetCommand(CommandInfo command) 
+            => NavigationHistory.GetActiveViewModels()
+            .AsEnumerable<ICommandHandler>()
+            .Concat(CommandProviders)
+            .GetCommand(command);
     }
 }

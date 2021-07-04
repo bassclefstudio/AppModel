@@ -22,17 +22,18 @@ namespace BassClefStudio.AppModel.Helpers
         /// <summary>
         /// A command for selecting <see cref="NavigationItem"/>s to navigate to.
         /// </summary>
-        public static CommandInfo NavigateCommand { get; } = new CommandInfo()
+        public static CommandInfo<NavigationItem> NavigateCommand { get; } = new CommandInfo<NavigationItem>()
         {
             Id = "Shell/Navigate",
             FriendlyName = "Navigate",
-            Description = "Navigate to the specified page."
+            Description = "Navigate to the specified page.",
+            InputDescription = "The NavigationItem of the location to navigate to."
         };
 
         /// <summary>
         /// A command for triggering available back navigation.
         /// </summary>
-        public static CommandInfo BackCommand { get; } = new CommandInfo()
+        public static CommandInfo<bool> BackCommand { get; } = new CommandInfo<bool>()
         {
             Id = "Shell/Back",
             FriendlyName = "Go back",
@@ -88,15 +89,15 @@ namespace BassClefStudio.AppModel.Helpers
 
             NavigationItems = new ObservableCollection<NavigationItem>(GetInitialItems());
             
-            var navigate = new StreamCommand(ShellViewModel.NavigateCommand);
-            navigate.OfType<object, NavigationItem>().BindResult(Navigate);
+            var navigate = new StreamCommand<NavigationItem>(ShellViewModel.NavigateCommand);
+            navigate.BindResult(Navigate);
             navigate.Where(o => !(o is NavigationItem)).BindResult(b => Navigate(SettingsItem));
 
             BackEnabled = NavigationService.History.RequestStream
                 .Select(r => NavigationService.History.CanGoBack);
             
-            var back = new StreamCommand(ShellViewModel.BackCommand, BackEnabled);
-            back.OfType<object, bool>().BindResult(b => NavigationService.GoBack());
+            var back = new StreamCommand<bool>(ShellViewModel.BackCommand, BackEnabled);
+            back.BindResult(b => NavigationService.GoBack());
 
             Commands = new List<ICommand>() { navigate, back };
             

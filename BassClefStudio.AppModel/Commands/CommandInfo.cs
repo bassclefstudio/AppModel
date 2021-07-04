@@ -8,7 +8,7 @@ namespace BassClefStudio.AppModel.Commands
     /// <summary>
     /// Basic information about a specific <see cref="ICommand"/> the the UI can initiate.
     /// </summary>
-    public struct CommandInfo : IIdentifiable<string>, IEquatable<CommandInfo>
+    public class CommandInfo : IIdentifiable<string>
     {
         /// <inheritdoc/>
         public string Id { get; set; }
@@ -40,9 +40,7 @@ namespace BassClefStudio.AppModel.Commands
         /// <inheritdoc/>
         public bool Equals(CommandInfo other)
         {
-            return Id == other.Id &&
-                   FriendlyName == other.FriendlyName &&
-                   Description == other.Description;
+            return Id == other.Id;
         }
 
         /// <inheritdoc/>
@@ -71,18 +69,30 @@ namespace BassClefStudio.AppModel.Commands
     }
 
     /// <summary>
-    /// Represents a single request sent to an <see cref="ICommand"/> from a view or control.
+    /// Represents a <see cref="CommandInfo"/> with a strongly-typed input value.
     /// </summary>
-    public struct CommandRequest
+    /// <typeparam name="T"></typeparam>
+    public class CommandInfo<T> : CommandInfo
     {
         /// <summary>
-        /// The <see cref="CommandInfo"/> of the command to trigger.
+        /// A user-friendly <see cref="string"/> description of the command's input.
         /// </summary>
-        public CommandInfo Command { get; set; }
+        public string InputDescription { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a single request sent to an <see cref="ICommand{T}"/> from a view or control.
+    /// </summary>
+    public struct CommandRequest<T>
+    {
+        /// <summary>
+        /// The <see cref="CommandInfo{T}"/> of the command to trigger.
+        /// </summary>
+        public CommandInfo<T> Command { get; set; }
 
         /// <summary>
         /// An optional parameter with which to execute the command.
         /// </summary>
-        public object Parameter { get; set; }
+        public T Parameter { get; set; }
     }
 }
