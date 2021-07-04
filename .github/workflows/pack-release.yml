@@ -1,4 +1,4 @@
-name: MSBuild Build and Pack
+name: Generate Release Packages
 
 on:
   push:

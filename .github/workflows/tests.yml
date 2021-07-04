@@ -1,9 +1,10 @@
-name: .NET 5 Build and Test
+name: Build and Test (Core)
 
 on:
   pull_request:
     branches:
     - main
+    - release-candidate
 
 jobs:
   build:
