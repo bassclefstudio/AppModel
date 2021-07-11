@@ -3,7 +3,7 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <Authors>BassClefStudio</Authors>
-    <Version>2.1.0-preview.1</Version>
+    <version>2.1.0</version>
     <PackageProjectUrl>https://github.com/bassclefstudio/AppModel</PackageProjectUrl>
     <RepositoryUrl>https://github.com/bassclefstudio/AppModel.git</RepositoryUrl>
     <Description>An implementation of BassClefStudio.AppModel, providing services and application classes for running cross-platform MVVM applications on .NET 5 with WPF.</Description>
