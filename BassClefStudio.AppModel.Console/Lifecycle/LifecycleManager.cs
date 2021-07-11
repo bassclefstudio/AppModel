@@ -11,7 +11,7 @@ namespace BassClefStudio.AppModel.Lifecycle
     public class LifecycleManager : IInitializationHandler, ISuspendingHandler
     {
         /// <summary>
-        /// Represents a <see cref="Task"/> that runs and awaits for the lifetime of the <see cref="App"/>. It is created on <see cref="Initialize(App)"/> and completed on <see cref="Suspend(App)"/>.
+        /// Represents a <see cref="Task"/> that runs and awaits for the lifetime of the <see cref="App"/>.
         /// </summary>
         public static Task<bool> ApplicationTask { get; private set; }
 

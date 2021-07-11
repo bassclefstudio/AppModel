@@ -22,24 +22,9 @@ namespace BassClefStudio.AppModel.Helpers
         /// </summary>
         public string Key { get; set; }
 
-        /// <summary>
-        /// A <see cref="bool"/> indicating whether the <see cref="SettingsLink{T}"/> is configured to use an <see cref="BassClefStudio.NET.Serialization.ISerializationService"/> for serialization of the given <typeparamref name="T"/> values.
-        /// </summary>
-        public bool UseSerializer { get; }
-
         internal ISettingsService SettingsService { get; }
         internal IEnumerable<IDispatcher> Dispatchers { get; }
         internal ISerializationService SerializationService { get; }
-        /// <summary>
-        /// Creates a new <see cref="SettingsLink{T}"/> from the required services.
-        /// </summary>
-        public SettingsLink(ISettingsService settingsService, IEnumerable<IDispatcher> dispatchers)
-        {
-            SettingsService = settingsService;
-            Dispatchers = dispatchers;
-            UseSerializer = false;
-        }
-
         /// <summary>
         /// Creates a new <see cref="SettingsLink{T}"/> from the required services and optional <see cref="ISerializationService"/>.
         /// </summary>
@@ -48,7 +33,6 @@ namespace BassClefStudio.AppModel.Helpers
             SettingsService = settingsService;
             Dispatchers = dispatchers;
             SerializationService = serializationService;
-            UseSerializer = SerializationService.IsSerializable<T>();
         }
 
         /// <inheritdoc/>
@@ -56,17 +40,9 @@ namespace BassClefStudio.AppModel.Helpers
         {
             try
             {
-                if (UseSerializer)
-                {
-                    string json = SerializationService.Serialize(item.Item);
-                    await SettingsService.SetValueAsync(Key, json);
-                    return true;
-                }
-                else
-                {
-                    await SettingsService.SetValueAsync(Key, item.Item);
-                    return true;
-                }
+                string json = SerializationService.Serialize(item.Item);
+                await SettingsService.SetValueAsync(Key, json);
+                return true;
             }
             catch (Exception ex)
             {
@@ -83,22 +59,14 @@ namespace BassClefStudio.AppModel.Helpers
         {
             try
             {
-                if (UseSerializer)
+                string json = await SettingsService.GetValueAsync<string>(Key);
+                if (string.IsNullOrWhiteSpace(json))
                 {
-                    string json = await SettingsService.GetValueAsync<string>(Key);
-                    if (string.IsNullOrWhiteSpace(json))
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        item.Item = SerializationService.Deserialize<T>(json);
-                        return true;
-                    }
+                    return false;
                 }
                 else
                 {
-                    item.Item = await SettingsService.GetValueAsync<T>(Key);
+                    item.Item = SerializationService.Deserialize<T>(json);
                     return true;
                 }
             }
