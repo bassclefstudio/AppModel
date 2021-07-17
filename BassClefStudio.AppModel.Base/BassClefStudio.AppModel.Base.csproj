@@ -10,6 +10,7 @@
     <PackageProjectUrl>https://github.com/bassclefstudio/AppModel</PackageProjectUrl>
     <RepositoryUrl>https://github.com/bassclefstudio/AppModel.git</RepositoryUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
